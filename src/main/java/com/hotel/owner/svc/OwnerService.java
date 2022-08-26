@@ -1,8 +1,15 @@
 package com.hotel.owner.svc;
 
-import com.hotel.common.ApiResponseVo;
-import com.hotel.owner.vo.OwnerSignUpParamVo;
+import com.hotel.common.CommonResponseVo;
+import com.hotel.owner.vo.OwnerVo;
 
 public interface OwnerService {
-    ApiResponseVo OwnerSignUp(OwnerSignUpParamVo ownerSignUpParamVo);
+    CommonResponseVo OwnerSignUp(OwnerVo.OwnerSignUpRequest ownerVo);
+
+    CommonResponseVo OwnerEditInfo(OwnerVo.OwnerInfo ownerInfoVo);
+
+    OwnerVo.OwnerInfoResponse ViewOwnerInfo();
+
+    CommonResponseVo OwnerWithdraw(OwnerVo.OwnerWithdrawRequest ownerWithdrawRequest);
+
 }
