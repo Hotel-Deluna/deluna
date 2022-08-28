@@ -80,7 +80,7 @@ public class MemberInfoVo {
 		List<MemberReservationListInfo> list;
 
 	}
-	
+
 	@Data
 	@AllArgsConstructor
 	@NoArgsConstructor
@@ -88,7 +88,7 @@ public class MemberInfoVo {
 	public static class MemberReservationListRequest {
 		@Schema(description = "회원번호", required = true, example = "000001")
 		String user_num;
-		
+
 		@Schema(description = "예약 상태 코드", required = true, example = "0:전체, 1:예약확정, 2:예약취소, 3:사용완료")
 		String reservation_status;
 	}
@@ -210,5 +210,5 @@ public class MemberInfoVo {
 		String reason;
 
 	}
-	
+
 }

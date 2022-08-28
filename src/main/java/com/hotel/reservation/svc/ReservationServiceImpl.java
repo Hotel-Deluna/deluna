@@ -143,7 +143,7 @@ public class ReservationServiceImpl implements ReservationService {
 		data1.setResrvation_phone("01012345678");
 		data1.setResrvation_name("홍길동");
 		data1.setName("호텔 델루나");
-		data1.setRoom_detail_name("디럭스룸");		
+		data1.setRoom_detail_name("디럭스룸");
 		data1.setResrvation_peple(2);
 		data1.setResrvation_price("300000");
 		data1.setSt_date("2022-08-28 14:00:00");

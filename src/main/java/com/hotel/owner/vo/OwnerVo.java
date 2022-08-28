@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 public class OwnerVo {
 
     @Data
@@ -15,11 +17,12 @@ public class OwnerVo {
     @NoArgsConstructor
     @Schema(description = "Response")
     public static class OwnerInfoResponse extends CommonResponseVo {
-        @Schema(description = "데이터")
+        @Schema(description = "사업자 정보 데이터")
         OwnerVo.OwnerInfo data;
     }
 
     @Data
+    @NoArgsConstructor
     @AllArgsConstructor
     @Schema(description = "사업자 회원가입 파라미터")
     public static class OwnerSignUpRequest{
@@ -39,8 +42,8 @@ public class OwnerVo {
     @Schema(description = "사업자번호", required = true, example = "1234567890")
     String business_num;
 
-    @Schema(description = "개업일", required = true, example = "20220810")
-    String opening_day;
+    @Schema(description = "개업일", required = true, example = "2022/08/10")
+    Date opening_day;
 
     }
 
@@ -63,19 +66,17 @@ public class OwnerVo {
         String business_num;
 
         @Schema(description = "개업일", required = true, example = "2022/08/25")
-        String opening_day;
+        Date opening_day;
 
     }
 
     @Data
     @AllArgsConstructor
+    @NoArgsConstructor
     @Schema(description = "사업자 탈퇴 사유")
     public static class OwnerWithdrawRequest {
         @Schema(description = "사업자 탈퇴 사유",  required = true, example = "매출없음")
         String reason;
-
-        @JsonIgnore
-        String ignores;
     }
 
 }

@@ -96,7 +96,7 @@ public class MemberServiceImpl implements MemberService {
 			return result;
 		}
 		result.setMessage("이메일 전송 완료(변경 페이지 url 송부 및 인증번호 발송)");
-		
+
 		return result;
 	}
 
@@ -112,7 +112,31 @@ public class MemberServiceImpl implements MemberService {
 		}
 		result.setMessage("비밀번호 변경이 완료되었습니다.");
 
-		return result;
-	}
+        return result;
+    }
+
+    @Override
+    public MemberVo.FindIdResponse FindId(MemberVo.FindIdRequest findIdRequest) {
+        MemberVo.FindIdResponse result = new MemberVo.FindIdResponse();
+        MemberVo.IdInfo idInfo = new MemberVo.IdInfo();
+        // 첫 4글자 제외한 나머지 글자 블러처리 (@ 전까지)
+        idInfo.setEmail("abcd**@hotel.com");
+
+        result.setMessage("아이디 조회 완료");
+        result.setData(idInfo);
+
+        return result;
+    }
+
+    @Override
+    public CommonResponseVo EditPassword(MemberVo.EditPasswordRequest editPasswordRequest) {
+        CommonResponseVo result = new CommonResponseVo();
+        // 기존비밀번호 암호화 이후 DB 비밀번호와 비교
+        // 만약 일치하지 않으면 일치하지 않는다는 에러값 리턴
+
+        result.setMessage("비밀번호 변경 완료");
+
+        return result;
+    }
 
 }
