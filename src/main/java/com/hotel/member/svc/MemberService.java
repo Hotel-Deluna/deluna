@@ -20,8 +20,6 @@ public interface MemberService {
 
     MemberVo.MemberInfoResponse ViewMemberInfo();
 
-	  CommonResponseVo UpdatePasswd(MemberUpdatePwdRequest updatePwdRequest);
-    
     MemberVo.FindIdResponse FindId(MemberVo.FindIdRequest findIdRequest);
     
     CommonResponseVo EditPassword(MemberVo.EditPasswordRequest editPasswordRequest);
