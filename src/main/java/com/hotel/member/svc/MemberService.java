@@ -2,6 +2,8 @@ package com.hotel.member.svc;
 
 import com.hotel.common.CommonResponseVo;
 import com.hotel.member.vo.MemberVo;
+import com.hotel.member.vo.MemberVo.MemberFindPwdRequest;
+import com.hotel.member.vo.MemberVo.MemberUpdatePwdRequest;
 
 public interface MemberService {
     CommonResponseVo MemberSignUp(MemberVo.RegisterMemberRequest memberVo);
@@ -18,6 +20,10 @@ public interface MemberService {
 
     MemberVo.MemberInfoResponse ViewMemberInfo();
 
-    CommonResponseVo MemberWithdraw(MemberVo.MemberWithdrawRequest memberWithdrawRequest);
+    CommonResponseVo MemberWithdraw(MemberVo.MemberDeleteRequest memberWithdrawRequest);
+
+	CommonResponseVo FindPasswdEmail(MemberFindPwdRequest findPwdRequest);
+
+	CommonResponseVo UpdatePasswd(MemberUpdatePwdRequest updatePwdRequest);
 
 }

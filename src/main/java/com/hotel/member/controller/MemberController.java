@@ -1,12 +1,8 @@
 package com.hotel.member.controller;
 
 import com.hotel.common.CommonResponseVo;
-import com.hotel.company.svc.HotelService;
-import com.hotel.company.vo.HotelInfoVo;
-import com.hotel.company.vo.HotelSearchVo;
 import com.hotel.member.svc.MemberService;
 import com.hotel.member.vo.MemberVo;
-import com.hotel.owner.vo.OwnerVo;
 
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +24,7 @@ public class MemberController {
         return memberService.MemberSignUp(registerMemberRequest);
     }
     
-    @ApiOperation(value="고객 로그인")
+    @ApiOperation(value="공통 로그인")
     @ApiImplicitParams({@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header")})
     @ResponseBody
     @PostMapping("/sign-in")
@@ -68,19 +64,35 @@ public class MemberController {
         return memberService.ViewMemberInfo();
     }
 
-    @ApiOperation(value="사업자 정보수정")
+    @ApiOperation(value="고객 정보수정")
     @ApiImplicitParams({@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header")})
     @ResponseBody
-    @PatchMapping("/edit-info")
+    @PutMapping("/edit-info")
     public CommonResponseVo MemberEditInfo(@RequestBody MemberVo.MemberUpdateInfo memberInfo){
         return memberService.MemberEditInfo(memberInfo);
+    }
+    
+    @ApiOperation(value="공통 비밀번호 찾기")
+    @ApiImplicitParams({@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header")})
+    @ResponseBody
+    @PostMapping("/findPwd")
+    public CommonResponseVo FindPasswdEmail(@RequestBody MemberVo.MemberFindPwdRequest findPwdRequest){
+        return memberService.FindPasswdEmail(findPwdRequest);
+    }
+    
+    @ApiOperation(value="공통 비밀번호 재설정")
+    @ApiImplicitParams({@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header")})
+    @ResponseBody
+    @PatchMapping("/updatePwd")
+    public CommonResponseVo UpdatePasswd(@RequestBody MemberVo.MemberUpdatePwdRequest updatePwdRequest){
+        return memberService.UpdatePasswd(updatePwdRequest);
     }
 
     @ApiOperation(value="고객 회원탈퇴")
     @ApiImplicitParams({@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header")})
     @ResponseBody
     @DeleteMapping(value = "/withdraw", produces = "application/json")
-    public CommonResponseVo MemberWithdraw(@RequestBody MemberVo.MemberWithdrawRequest memberWithdrawReasonVo){
+    public CommonResponseVo MemberWithdraw(@RequestBody MemberVo.MemberDeleteRequest memberWithdrawReasonVo){
         return memberService.MemberWithdraw(memberWithdrawReasonVo);
     }
     

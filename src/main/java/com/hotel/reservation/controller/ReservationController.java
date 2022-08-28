@@ -70,7 +70,7 @@ public class ReservationController {
     @ApiImplicitParams({@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header")})
     @ResponseBody
     @PostMapping(value = "/memberReservationList", produces = "application/json")
-    public Map<String, Object> MemberReservationList(@RequestBody MemberInfoVo.MemberInfoRequest memberInfo){
+    public Map<String, Object> MemberReservationList(@RequestBody MemberInfoVo.MemberReservationListRequest memberInfo){
         return reservationService.MemberReservationList(memberInfo);
     }
     
