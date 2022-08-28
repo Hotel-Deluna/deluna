@@ -1,6 +1,7 @@
 package com.hotel.owner.svc;
 
 import com.hotel.common.CommonResponseVo;
+import com.hotel.common.Util;
 import com.hotel.owner.vo.*;
 import org.springframework.stereotype.Service;
 
@@ -27,16 +28,22 @@ public class OwnerServiceImpl implements OwnerService {
     public OwnerVo.OwnerInfoResponse ViewOwnerInfo() {
 //        ApiResponseVo result = new ApiResponseVo();
         OwnerVo.OwnerInfoResponse result = new OwnerVo.OwnerInfoResponse();
-        OwnerVo.OwnerInfo ownerInfoVo = new OwnerVo.OwnerInfo();
 
-        ownerInfoVo.setEmail("abc@hotel.com");
-        ownerInfoVo.setName("홍길동");
-        ownerInfoVo.setPhone_num("01098765432");
-        ownerInfoVo.setBusiness_num("0123456789");
-        ownerInfoVo.setOpening_day("2022/07/05");
+        try{
+            OwnerVo.OwnerInfo ownerInfoVo = new OwnerVo.OwnerInfo();
 
-        result.setMessage("사업자 정보 조회 완료");
-        result.setData(ownerInfoVo);
+            ownerInfoVo.setEmail("abc@hotel.com");
+            ownerInfoVo.setName("홍길동");
+            ownerInfoVo.setPhone_num("01098765432");
+            ownerInfoVo.setBusiness_num("0123456789");
+            ownerInfoVo.setOpening_day(Util.stringToDate("2022/07/05"));
+
+            result.setMessage("사업자 정보 조회 완료");
+            result.setData(ownerInfoVo);
+        }catch (Exception e){
+
+        }
+
         return result;
     }
 
