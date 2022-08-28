@@ -132,41 +132,32 @@ public class HotelInfoVo {
         @Schema(description = "호텔 구분번호",  required = true, example = "12345")
         Integer hotel_num;
 
-        @Schema(description = "한글 호텔명",  required = false, example = "신라스테이")
-        @Nullable
+        @Schema(description = "한글 호텔명",  required = true, example = "신라스테이")
         String name;
 
-        @Schema(description = "영문 호텔명", required = false, example = "Shilla Stay")
-        @Nullable
+        @Schema(description = "영문 호텔명", required = true, example = "Shilla Stay")
         String eng_name;
 
-        @Schema(description = "호텔 성급", required = false, example = "5")
-        @Nullable
+        @Schema(description = "호텔 성급", required = true, example = "5")
         Integer star;
 
-        @Schema(description = "호텔 전화번호", required = false, example = "0212345678")
-        @Nullable
+        @Schema(description = "호텔 전화번호", required = true, example = "0212345678")
         String phone_num;
 
-        @Schema(description = "호텔 정보", required = false, example = "신라스테이 강남점은...")
-        @Nullable
+        @Schema(description = "호텔 정보", required = true, example = "신라스테이 강남점은...")
         String info;
 
-        @Schema(description = "호텔 규정", required = false, example = "대욕장 이용안내...")
-        @Nullable
+        @Schema(description = "호텔 규정", required = true, example = "대욕장 이용안내...")
         String rule;
 
-        @Schema(description = "태그(부가시설/서비스) 리스트", required = false, example = "[1,2,3]")
-        @Nullable
+        @Schema(description = "태그(부가시설/서비스) 리스트", required = true, example = "[1,2,3]")
         List<Integer> tags;
 
-        @Schema(description = "성수기 리스트", required = false)
-        @Nullable
+        @Schema(description = "성수기 리스트", required = true)
         List<HotelInfoVo.PeakSeason> peak_season_list;
 
-        @Schema(description = "멀티파트파일 이미지 리스트", required = false, example = "[멀티파트 파일 이미지1 , 멀티파트 파일 이미지2]")
-        @Nullable
-        List<MultipartFile> image;
+        @Schema(description = "이미지 리스트 - Object 형식. 이미지가 2개 있었는데 첫번재 이미지가 수정된다면 [멀티파트 파일 이미지1 , https://aws.bucket/..] ", required = true, example = "[멀티파트 파일 이미지1 , https://aws.bucket/..]")
+        List<Object> image;
     }
 
     @Data
@@ -259,16 +250,16 @@ public class HotelInfoVo {
         Integer price;
 
         @Schema(description = "가격정보 - 성수기 평일", required = true, example = "350000")
-        Integer p_weekday_price = 0;
+        Integer p_weekday_price;
 
         @Schema(description = "가격정보 - 성수기 주말", required = true, example = "450000")
-        Integer p_weekend_price= 0;
+        Integer p_weekend_price;
 
         @Schema(description = "가격정보 - 평일", required = true, example = "150000")
-        Integer weekday_price= 0;
+        Integer weekday_price;
 
         @Schema(description = "가격정보 - 주말", required = true, example = "250000")
-        Integer weekend_price= 0;
+        Integer weekend_price;
 
         @Schema(description = "예약가능방 갯수", required = true, example = "3")
         Integer reservable_room_count;
@@ -326,10 +317,10 @@ public class HotelInfoVo {
     @Schema(description = "호텔의 성수기 정보")
     public static class PeakSeason {
 
-        @Schema(description = "성수기 시작일", example = "2022/07/25")
+        @Schema(description = "성수기 시작일")
         Date peak_season_start;
 
-        @Schema(description = "성수기 종료일", example = "2022/09/01")
+        @Schema(description = "성수기 종료일")
         Date peak_season_end;
     }
 
@@ -371,8 +362,8 @@ public class HotelInfoVo {
         @Schema(description = "객실명",  required = true, example = "신라스테이")
         String name;
 
-        @Schema(description = "객실 이미지 리스트", required = true, example = "[https://aws.bucket/1, https://aws.bucket/2]")
-        List<String> image;
+        @Schema(description = "객실 이미지 리스트", required = true, example = "[멀티파트 파일 이미지1, 멀티파트 파일 이미지2]")
+        List<MultipartFile> image;
 
         @Schema(description = "객실 최소인원", required = true, example = "2")
         Integer minimum_people;
@@ -426,8 +417,8 @@ public class HotelInfoVo {
         @Schema(description = "객실명",  required = true, example = "신라스테이")
         String name;
 
-        @Schema(description = "객실 이미지 리스트", required = true, example = "[https://aws.bucket/1, https://aws.bucket/2]")
-        List<String> image;
+        @Schema(description = "이미지 리스트 - Object 형식. ex) 이미지가 2개 있었는데 첫번재 이미지가 수정된다면 [멀티파트 파일 이미지1 , https://aws.bucket/..] ", required = true, example = "[멀티파트 파일 이미지1 , https://aws.bucket/..]")
+        List<Object> image;
 
         @Schema(description = "객실 최소인원", required = true, example = "2")
         Integer minimum_people;
@@ -590,7 +581,6 @@ public class HotelInfoVo {
     public static class DeleteRoomDetailRequest {
         @Schema(description = "호실 구분번호", required = true, example = "12345")
         Integer room_detail_num;
-
     }
 
     @Data

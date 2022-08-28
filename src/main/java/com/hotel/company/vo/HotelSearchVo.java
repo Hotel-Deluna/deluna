@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.List;
 
 public class HotelSearchVo {
@@ -27,7 +28,7 @@ public class HotelSearchVo {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    @Schema(description = "여행지 목록과 해당 여행지의 호텔 갯수")
+    @Schema(description = "사용자 검색어,조건에 해당하는 호텔 리스트")
     public static class SearchListResponse extends CommonResponseVo {
         @Schema(description = "데이터")
         List<HotelSearchList> data;
@@ -36,7 +37,7 @@ public class HotelSearchVo {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    @Schema(description = "사용자 검색어,조건에 해당하는 호텔 리스트")
+    @Schema(description = "여행지 목록과 해당 여행지의 호텔 갯수")
     public static class TouristSpotInfoResponse extends CommonResponseVo {
         @Schema(description = "데이터")
         List<TouristSpotInfo> data;
@@ -57,7 +58,7 @@ public class HotelSearchVo {
     @Schema(description = "여행지 정보")
     public static class TouristSpotInfo {
         @Schema(description = "여행지명",  required = true, example = "서울")
-        String hotel_num;
+        String tourist_spot_name;
 
         @Schema(description = "여행지 이미지",  required = true, example = "https://aws.bucket/")
         String image;
@@ -104,11 +105,11 @@ public class HotelSearchVo {
 
         @ApiParam(value = "예약범위 - 시작일", example = "2022/07/01", required = false)
         @Nullable
-        String reservation_start_date;
+        Date reservation_start_date;
 
         @ApiParam(value = "예약범위 - 종료일", example = "2022/07/03", required = false)
         @Nullable
-        String reservation_end_date;
+        Date reservation_end_date;
 
         @ApiParam(value = "투숙인원", example = "2", required = false)
         @Nullable
@@ -123,7 +124,7 @@ public class HotelSearchVo {
         @Schema(description = "호텔 구분번호",  required = true, example = "12345")
         Integer hotel_num;
 
-        @Schema(description = "호텔 이미지",  required = true, example = "https://aws.bucket/")
+        @Schema(description = "호텔 메인 이미지",  required = true, example = "https://aws.bucket/")
         String image;
 
         @Schema(description = "호텔명",  required = true, example = "신라스테이 서초점")
@@ -144,23 +145,24 @@ public class HotelSearchVo {
     }
 
     @Data
+    @NoArgsConstructor
     @AllArgsConstructor
-    @Schema(description = "호텔 검색 리스트 필터 Request")
+    @Schema(description = "호텔 검색 리스트 필터 파라미터")
     public static class HotelSearchListFilterRequest {
         @Schema(description = "호텔 구분번호 리스트",  required = true, example = "[12345, 45678]")
         List<Integer> hotel_num;
 
-        @Schema(description = "가격범위 - 최소가", example = "10000", required = false)
+        @Schema(description = "가격범위 - 최소가", required = false, example = "10000")
         @Nullable
         Integer minimum_price;
 
-        @Schema(description = "가격범위 - 최대가", example = "200000", required = false)
+        @Schema(description = "가격범위 - 최대가", required = false, example = "200000")
         @Nullable
         Integer maximum_price;
 
-        @Schema(description = "호텔 등급", example = "5", required = false)
+        @Schema(description = "호텔 성급", example = "5", required = false)
         @Nullable
-        String star;
+        Integer star;
 
         @Schema(description = "호텔 태그 구분번호 리스트",  required = false, example = "[1, 3, 5]")
         @Nullable
@@ -170,7 +172,7 @@ public class HotelSearchVo {
         @Nullable
         List<Float> location;
 
-        @Schema(description = "정렬 구분번호 - 0: 호텔등급순 1: 가격높은순 2: 가격낮은순", example = "3", required = true)
+        @Schema(description = "정렬 구분번호 - 0: 호텔등급순 1: 가격높은순 2: 가격낮은순", required = true, example = "3")
         Integer rank_num;
     }
 

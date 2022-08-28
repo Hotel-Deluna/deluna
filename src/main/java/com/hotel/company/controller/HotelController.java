@@ -52,7 +52,7 @@ public class HotelController {
     @ApiOperation(value="여행지 정보 - 여행지 목록과 해당 여행지의 호텔 갯수")
     @ResponseBody
     @GetMapping(value = "/tourist")
-    public HotelSearchVo.SearchBarResponse TouristSpotInfo(){
+    public HotelSearchVo.TouristSpotInfoResponse TouristSpotInfo(){
         return hotelService.TouristSpotInfo();
     }
 
@@ -73,7 +73,7 @@ public class HotelController {
     @ApiOperation(value="검색한 호텔 리스트 필터 - 검색된 호텔을 가격범위, 호텔등급등 조건으로 필터")
     @ResponseBody
     @PostMapping(value = "/search/list/filter")
-    public HotelSearchVo.SearchListResponse SearchHotelListFilter(HotelSearchVo.HotelSearchListFilterRequest hotelSearchListFilterRequest){
+    public HotelSearchVo.SearchListResponse SearchHotelListFilter(@RequestBody HotelSearchVo.HotelSearchListFilterRequest hotelSearchListFilterRequest){
         return hotelService.SearchHotelListFilter(hotelSearchListFilterRequest);
     }
 
@@ -91,7 +91,7 @@ public class HotelController {
         return hotelService.RoomInfo(roomInfoRequest);
     }
 
-    @ApiOperation(value="중복 객실명 조회")
+    @ApiOperation(value="중복 객실명 조회 - 중복이면 true")
     @ResponseBody
     @PostMapping("/room/check-duplicate-name")
     public HotelInfoVo.CheckDuplicateRoomNameResponse CheckDuplicateRoomName(@RequestBody HotelInfoVo.CheckDuplicateRoomNameRequest checkDuplicateRoomNameRequest){
@@ -173,8 +173,8 @@ public class HotelController {
     @ApiImplicitParams({@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header")})
     @ResponseBody
     @PostMapping("/reservation-list")
-    public HotelInfoVo.HotelReservationListResponse HotelReservationList(@RequestBody HotelInfoVo.HotelReservationListRequest deleteRoomDetailRequest){
-        return hotelService.HotelReservationList(deleteRoomDetailRequest);
+    public HotelInfoVo.HotelReservationListResponse HotelReservationList(@RequestBody HotelInfoVo.HotelReservationListRequest hotelReservationListRequest){
+        return hotelService.HotelReservationList(hotelReservationListRequest);
     }
 
 }

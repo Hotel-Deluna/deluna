@@ -22,6 +22,7 @@ public class OwnerVo {
     }
 
     @Data
+    @NoArgsConstructor
     @AllArgsConstructor
     @Schema(description = "사업자 회원가입 파라미터")
     public static class OwnerSignUpRequest{

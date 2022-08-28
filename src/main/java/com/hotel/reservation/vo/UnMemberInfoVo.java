@@ -47,13 +47,13 @@ public class UnMemberInfoVo {
     @Schema(description = "비회원 예약 조회")
     public static class UnMemberReservationInfo {
 
-        @Schema(description = "예약번호", required = true)
+        @Schema(description = "예약번호", required = true, example = "1111111")
         String resrvation_num;
         
-        @Schema(description = "예약자명", required = true)
+        @Schema(description = "예약자명", required = true, example = "홍길동")
         String resrvation_name;
         
-        @Schema(description = "휴대폰번호", required = true)
+        @Schema(description = "휴대폰번호", required = true, example = "01033334444")
         String resrvation_phone;
         
         @Schema(description = "호텔명", required = true, example = "호텔 델루나")

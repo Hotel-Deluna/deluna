@@ -11,7 +11,7 @@ public interface HotelService {
 
     CommonResponseVo RegisterHotel(HotelInfoVo.RegisterHotelRequest registerHotelParamVo);
 
-    HotelSearchVo.SearchBarResponse TouristSpotInfo();
+    HotelSearchVo.TouristSpotInfoResponse TouristSpotInfo();
 
     HotelSearchVo.SearchBarResponse SearchBar(HotelSearchVo.SearchBarRequest searchBarVoSearchBarRequest);
 
@@ -47,5 +47,5 @@ public interface HotelService {
 
     HotelInfoVo.DeleteRoomDetailInfoResponse DeleteRoomDetailInfo(HotelInfoVo.DeleteRoomDetailRequest deleteRoomDetailRequest);
 
-    HotelInfoVo.HotelReservationListResponse HotelReservationList(HotelInfoVo.HotelReservationListRequest deleteRoomDetailRequest);
+    HotelInfoVo.HotelReservationListResponse HotelReservationList(HotelInfoVo.HotelReservationListRequest hotelReservationListRequest);
 }

@@ -8,6 +8,7 @@ import com.hotel.reservation.vo.MemberInfoVo.MemberReservationDeleteInfo;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationDeleteRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationInfo;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListInfo;
+import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberWithdrawRequest;
 import com.hotel.reservation.vo.UnMemberInfoVo;
@@ -130,7 +131,7 @@ public class ReservationServiceImpl implements ReservationService {
 	}
 
 	@Override
-	public Map<String, Object> MemberReservationList(MemberInfoRequest memberInfo) {
+	public Map<String, Object> MemberReservationList(MemberReservationListRequest memberInfo) {
 		MemberInfoVo.MemberReservationListInfo data1 = new MemberInfoVo.MemberReservationListInfo();
 		MemberInfoVo.MemberReservationListInfo data2 = new MemberInfoVo.MemberReservationListInfo();
 		MemberInfoVo.MemberReservationListInfo data3 = new MemberInfoVo.MemberReservationListInfo();
@@ -142,8 +143,9 @@ public class ReservationServiceImpl implements ReservationService {
 		data1.setResrvation_phone("01012345678");
 		data1.setResrvation_name("홍길동");
 		data1.setName("호텔 델루나");
+		data1.setRoom_detail_name("디럭스룸");
 		data1.setResrvation_peple(2);
-		data1.setResrvation_price(new BigDecimal("300000"));
+		data1.setResrvation_price("300000");
 		data1.setSt_date("2022-08-28 14:00:00");
 		data1.setEd_date("2022-08-29 11:00:00");
 		data1.setResrvation_status("0");
@@ -154,7 +156,8 @@ public class ReservationServiceImpl implements ReservationService {
 		data2.setResrvation_name("임꺽정");
 		data2.setName("호텔 신라 명동");
 		data2.setResrvation_peple(3);
-		data2.setResrvation_price(new BigDecimal("300000"));
+		data2.setResrvation_price("200000");
+		data2.setRoom_detail_name("스탠다드룸");
 		data2.setSt_date("2022-08-29 14:00:00");
 		data2.setEd_date("2022-08-30 11:00:00");
 		data2.setResrvation_status("1");
@@ -165,7 +168,8 @@ public class ReservationServiceImpl implements ReservationService {
 		data3.setResrvation_name("이순신");
 		data3.setName("호텔 인터네셔널 삼성");
 		data3.setResrvation_peple(2);
-		data3.setResrvation_price(new BigDecimal("300000"));
+		data3.setResrvation_price("400000");
+		data3.setRoom_detail_name("프리미엄룸");
 		data3.setSt_date("2022-08-30 14:00:00");
 		data3.setEd_date("2022-08-31 11:00:00");
 		data3.setResrvation_status("2");
@@ -176,7 +180,7 @@ public class ReservationServiceImpl implements ReservationService {
 		
 		Map<String, Object> map = new HashMap<>();
 		map.put("result", "OK");
-		map.put("reason", "");
+		map.put("message", "");
 		map.put("data", result);
 		
 		return map;
@@ -195,7 +199,7 @@ public class ReservationServiceImpl implements ReservationService {
 		Map<String, Object> map = new HashMap<>();
 		
 		map.put("result", "OK");
-		map.put("reason", result.getMessage());
+		map.put("massage", result.getMessage());
 		map.put("data", content);
 		
 		return map;

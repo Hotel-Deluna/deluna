@@ -1,14 +1,12 @@
 package com.hotel.company.svc;
 
 import com.hotel.common.CommonResponseVo;
-import com.hotel.common.Util;
+import com.hotel.util.DateUtil;
 import com.hotel.company.vo.*;
 import io.micrometer.core.lang.Nullable;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -68,12 +66,12 @@ public class HotelServiceImpl implements HotelService {
 
             //성수기
             HotelInfoVo.PeakSeason season_a = new HotelInfoVo.PeakSeason();
-            season_a.setPeak_season_start(Util.stringToDateMonth("07/01"));
-            season_a.setPeak_season_end(Util.stringToDateMonth("08/31"));
+            season_a.setPeak_season_start(DateUtil.stringToDate("2022/07/01"));
+            season_a.setPeak_season_end(DateUtil.stringToDate("2022/08/31"));
 
             HotelInfoVo.PeakSeason season_b = new HotelInfoVo.PeakSeason();
-            season_b.setPeak_season_start(Util.stringToDateMonth("11/01"));
-            season_b.setPeak_season_end(Util.stringToDateMonth("01/31"));
+            season_b.setPeak_season_start(DateUtil.stringToDate("2022/11/01"));
+            season_b.setPeak_season_end(DateUtil.stringToDate("2022/01/31"));
 
             // 호텔
             List<String> hotelImageList = new ArrayList<>();
@@ -123,8 +121,33 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
-    public HotelSearchVo.SearchBarResponse TouristSpotInfo() {
-        return null;
+    public HotelSearchVo.TouristSpotInfoResponse TouristSpotInfo() {
+        HotelSearchVo.TouristSpotInfoResponse result = new HotelSearchVo.TouristSpotInfoResponse();
+        HotelSearchVo.TouristSpotInfo touristSpotInfo_a = new HotelSearchVo.TouristSpotInfo();
+        HotelSearchVo.TouristSpotInfo touristSpotInfo_b = new HotelSearchVo.TouristSpotInfo();
+        HotelSearchVo.TouristSpotInfo touristSpotInfo_c = new HotelSearchVo.TouristSpotInfo();
+
+        touristSpotInfo_a.setTourist_spot_name("서울");
+        touristSpotInfo_a.setImage("https://aws.bucket/");
+        touristSpotInfo_a.setHotel_count(2500);
+
+        touristSpotInfo_b.setTourist_spot_name("부산");
+        touristSpotInfo_b.setImage("https://aws.bucket/");
+        touristSpotInfo_b.setHotel_count(1500);
+
+        touristSpotInfo_c.setTourist_spot_name("제주");
+        touristSpotInfo_c.setImage("https://aws.bucket/");
+        touristSpotInfo_c.setHotel_count(500);
+
+        List<HotelSearchVo.TouristSpotInfo> touristSpotInfoList = new ArrayList<>();
+        touristSpotInfoList.add(touristSpotInfo_a);
+        touristSpotInfoList.add(touristSpotInfo_b);
+        touristSpotInfoList.add(touristSpotInfo_c);
+
+        result.setMessage("여행지 정보 조회 완료");
+        result.setData(touristSpotInfoList);
+
+        return result;
     }
 
     @Override
@@ -292,12 +315,12 @@ public class HotelServiceImpl implements HotelService {
 
             //성수기
             HotelInfoVo.PeakSeason season_a = new HotelInfoVo.PeakSeason();
-            season_a.setPeak_season_start(Util.stringToDateMonth("07/01"));
-            season_a.setPeak_season_end(Util.stringToDateMonth("08/31"));
+            season_a.setPeak_season_start(DateUtil.stringToDate("2022/07/01"));
+            season_a.setPeak_season_end(DateUtil.stringToDate("2022/08/31"));
 
             HotelInfoVo.PeakSeason season_b = new HotelInfoVo.PeakSeason();
-            season_b.setPeak_season_start(Util.stringToDateMonth("11/01"));
-            season_b.setPeak_season_end(Util.stringToDateMonth("01/31"));
+            season_b.setPeak_season_start(DateUtil.stringToDate("2022/11/01"));
+            season_b.setPeak_season_end(DateUtil.stringToDate("2022/01/31"));
 
             // 호텔
             List<String> hotelImageList = new ArrayList<>();
@@ -399,9 +422,9 @@ public class HotelServiceImpl implements HotelService {
             room_detail_b.setRoom_detail_num(123);
             room_detail_b.setName("102호");
             room_detail_b.setStatus(1);
-            room_detail_b.setRoom_closed_start(Util.stringToDate("2022/08/01"));
-            room_detail_b.setRoom_closed_end(Util.stringToDate("2022/08/05"));
-            room_detail_b.setDelete_date(Util.stringToDate("2022/08/30"));
+            room_detail_b.setRoom_closed_start(DateUtil.stringToDate("2022/08/01"));
+            room_detail_b.setRoom_closed_end(DateUtil.stringToDate("2022/08/05"));
+            room_detail_b.setDelete_date(DateUtil.stringToDate("2022/08/30"));
 
             roomDetailInfoList.add(room_detail_a);
             roomDetailInfoList.add(room_detail_b);
@@ -469,7 +492,7 @@ public class HotelServiceImpl implements HotelService {
             room_a.setReservable_room_count(5);
             room_a.setAvailable_yn(true);
             room_a.setTags(roomTagList);
-            room_a.setLast_reservation_date(Util.stringToDate("2022/08/01"));
+            room_a.setLast_reservation_date(DateUtil.stringToDate("2022/08/01"));
 
             result.setMessage("객실 삭제추가정보 조회 완료");
             result.setData(room_a);
@@ -534,9 +557,9 @@ public class HotelServiceImpl implements HotelService {
             room_detail_b.setRoom_detail_num(123);
             room_detail_b.setName("102호");
             room_detail_b.setStatus(1);
-            room_detail_b.setRoom_closed_start(Util.stringToDate("2022/08/01"));
-            room_detail_b.setRoom_closed_end(Util.stringToDate("2022/08/05"));
-            room_detail_b.setDelete_date(Util.stringToDate("2022/08/30"));
+            room_detail_b.setRoom_closed_start(DateUtil.stringToDate("2022/08/01"));
+            room_detail_b.setRoom_closed_end(DateUtil.stringToDate("2022/08/05"));
+            room_detail_b.setDelete_date(DateUtil.stringToDate("2022/08/30"));
 
             roomDetailInfoList.add(room_detail_a);
             roomDetailInfoList.add(room_detail_b);
@@ -589,7 +612,7 @@ public class HotelServiceImpl implements HotelService {
             deleteRoomDetailInfo.setRoom_detail_num(123);
             deleteRoomDetailInfo.setName("101호");
             deleteRoomDetailInfo.setStatus(0);
-            deleteRoomDetailInfo.setLast_reservation_date(Util.stringToDate("2022/08/01"));
+            deleteRoomDetailInfo.setLast_reservation_date(DateUtil.stringToDate("2022/08/01"));
 
             result.setData(deleteRoomDetailInfo);
             result.setMessage("호실 삭제 추가정보 조회 완료");
@@ -601,20 +624,21 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
-    public HotelInfoVo.HotelReservationListResponse HotelReservationList(HotelInfoVo.HotelReservationListRequest deleteRoomDetailRequest) {
+    public HotelInfoVo.HotelReservationListResponse HotelReservationList(HotelInfoVo.HotelReservationListRequest hotelReservationListRequest) {
         HotelInfoVo.HotelReservationListResponse result = new HotelInfoVo.HotelReservationListResponse();
+        List<HotelInfoVo.HotelReservation> reservationsList = new ArrayList<>();
 
         try{
             HotelInfoVo.HotelReservation reservation_a = new HotelInfoVo.HotelReservation();
             HotelInfoVo.HotelReservation reservation_b = new HotelInfoVo.HotelReservation();
-            List<HotelInfoVo.HotelReservation> reservationsList = new ArrayList<>();
+
 
             reservation_a.setReservation_num(12345);
             reservation_a.setHotel_name("신라스테이");
             reservation_a.setRoom_name("스탠다드 트윈");
             reservation_a.setCustomer_name("홍길동");
             reservation_a.setCustomer_phone_num("01012345678");
-            reservation_a.setReservation_date(Util.stringToDate("2022/08/01"));
+            reservation_a.setReservation_date(DateUtil.stringToDate("2022/08/01"));
             reservation_a.setReservation_status(0);
 
             reservation_b.setReservation_num(45678);
@@ -622,16 +646,17 @@ public class HotelServiceImpl implements HotelService {
             reservation_b.setRoom_name("디럭스 더블");
             reservation_b.setCustomer_name("홍길동");
             reservation_b.setCustomer_phone_num("01012345678");
-            reservation_b.setReservation_date(Util.stringToDate("2022/08/20"));
+            reservation_b.setReservation_date(DateUtil.stringToDate("2022/08/20"));
             reservation_b.setReservation_status(1);
 
             reservationsList.add(reservation_a);
             reservationsList.add(reservation_b);
 
-            result.setMessage("호텔 예약정보 조회 완료");
         }catch (Exception e){
 
         }
+        result.setMessage("호텔 예약정보 조회 완료");
+        result.setData(reservationsList);
 
         return result;
     }

@@ -1,7 +1,7 @@
 package com.hotel.owner.svc;
 
 import com.hotel.common.CommonResponseVo;
-import com.hotel.common.Util;
+import com.hotel.util.DateUtil;
 import com.hotel.owner.vo.*;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +36,7 @@ public class OwnerServiceImpl implements OwnerService {
             ownerInfoVo.setName("홍길동");
             ownerInfoVo.setPhone_num("01098765432");
             ownerInfoVo.setBusiness_num("0123456789");
-            ownerInfoVo.setOpening_day(Util.stringToDate("2022/07/05"));
+            ownerInfoVo.setOpening_day(DateUtil.stringToDate("2022/07/05"));
 
             result.setMessage("사업자 정보 조회 완료");
             result.setData(ownerInfoVo);
