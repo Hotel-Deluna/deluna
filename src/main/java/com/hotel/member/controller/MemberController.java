@@ -71,6 +71,22 @@ public class MemberController {
     public CommonResponseVo MemberEditInfo(@RequestBody MemberVo.MemberUpdateInfo memberInfo){
         return memberService.MemberEditInfo(memberInfo);
     }
+    
+    @ApiOperation(value="공통 비밀번호 찾기")
+    @ApiImplicitParams({@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header")})
+    @ResponseBody
+    @PostMapping("/findPwd")
+    public CommonResponseVo FindPasswdEmail(@RequestBody MemberVo.MemberFindPwdRequest findPwdRequest){
+        return memberService.FindPasswdEmail(findPwdRequest);
+    }
+    
+    @ApiOperation(value="공통 비밀번호 재설정")
+    @ApiImplicitParams({@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header")})
+    @ResponseBody
+    @PatchMapping("/updatePwd")
+    public CommonResponseVo UpdatePasswd(@RequestBody MemberVo.MemberUpdatePwdRequest updatePwdRequest){
+        return memberService.UpdatePasswd(updatePwdRequest);
+    }
 
     @ApiOperation(value="공통 아이디 찾기")
     @ResponseBody
