@@ -12,18 +12,20 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-//	@Override
-//	protected void configure(HttpSecurity http)throws Exception{
-//		http
-//			.csrf().disable()
-//				.authorizeRequests()
-//				.antMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
-//				.anyRequest().authenticated();
-//	}
-
 	@Override
 	public void configure(WebSecurity web) throws Exception {
-		web.ignoring().antMatchers("/v3/api-docs/", "/swagger-ui.html", "/swagger-ui/");
+		web.ignoring().antMatchers("/static/css/, /static/js/, *.ico");
+
+		// swagger
+		web.ignoring().antMatchers("/v3/api-docs", "/configuration/ui", "/swagger-resources", "/configuration/security",
+				"/swagger-ui.html", "/webjars/", "/swagger/");
+	}
+
+	@Override
+	protected void configure(HttpSecurity http) throws Exception {
+		http.csrf().disable();
+		http.authorizeRequests().antMatchers("/swagger-resources/**").permitAll();
+
 	}
 
 }
