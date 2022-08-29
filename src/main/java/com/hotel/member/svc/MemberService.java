@@ -19,8 +19,6 @@ public interface MemberService {
     CommonResponseVo MemberEditInfo(MemberVo.MemberUpdateInfo memberInfoVo);
 
     MemberVo.MemberInfoResponse ViewMemberInfo();
-
-	  CommonResponseVo UpdatePasswd(MemberUpdatePwdRequest updatePwdRequest);
     
     MemberVo.FindIdResponse FindId(MemberVo.FindIdRequest findIdRequest);
     
