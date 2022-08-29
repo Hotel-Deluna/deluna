@@ -91,7 +91,7 @@ public class HotelController {
         return hotelService.RoomInfo(roomInfoRequest);
     }
 
-    @ApiOperation(value="중복 객실명 조회 - 중복이면 true")
+    @ApiOperation(value="중복 객실명 조회 - 중복이면 true 아니면 false")
     @ResponseBody
     @PostMapping("/room/check-duplicate-name")
     public HotelInfoVo.CheckDuplicateRoomNameResponse CheckDuplicateRoomName(@RequestBody HotelInfoVo.CheckDuplicateRoomNameRequest checkDuplicateRoomNameRequest){
