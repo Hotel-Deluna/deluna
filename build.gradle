@@ -32,6 +32,7 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.batch:spring-batch-test'
 	implementation 'io.springfox:springfox-boot-starter:3.0.0'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 }
 
 jar {
