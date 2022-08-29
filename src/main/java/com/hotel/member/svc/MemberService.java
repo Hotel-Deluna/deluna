@@ -19,7 +19,7 @@ public interface MemberService {
     CommonResponseVo MemberEditInfo(MemberVo.MemberUpdateInfo memberInfoVo);
 
     MemberVo.MemberInfoResponse ViewMemberInfo();
-    
+
     MemberVo.FindIdResponse FindId(MemberVo.FindIdRequest findIdRequest);
     
     CommonResponseVo EditPassword(MemberVo.EditPasswordRequest editPasswordRequest);
