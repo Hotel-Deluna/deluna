@@ -60,7 +60,7 @@ public class MemberVo {
 
 		@Schema(description = "비밀번호", required = true, example = "123456")
 		String password;
-		
+
 		@Schema(description = "role", required = true, example = "고객:0, 사업자:1")
 		String role;
 
@@ -180,17 +180,14 @@ public class MemberVo {
 	@AllArgsConstructor
 	@Schema(description = "고객 탈퇴 사유")
 	public static class MemberDeleteRequest {
-		
+
 		@Schema(description = "고객번호", required = true, example = "000001")
 		String user_num;
-		
+
 		@Schema(description = "고객 탈퇴 사유", required = true, example = "사용안함111")
 		String reason;
-
-		@JsonIgnore
-		String ignores;
 	}
-	
+
 	@Data
 	@AllArgsConstructor
 	@NoArgsConstructor
@@ -209,16 +206,16 @@ public class MemberVo {
 		String phone_auth_num;
 
 	}
-	
+
 	@Data
 	@AllArgsConstructor
 	@NoArgsConstructor
 	@Schema(description = "공통 비밀번호 재설정 파라미터")
 	public static class MemberUpdatePwdRequest {
-		
+
 		@Schema(description = "role", required = true, example = "고객:0, 사업자:1")
 		String role;
-		
+
 		@Schema(description = "비밀번호", required = true, example = "비밀번호 입력")
 		String password;
 
@@ -226,5 +223,49 @@ public class MemberVo {
 		String email_auth_num;
 	}
 
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
+	@Schema(description = "아이디찾기 응답값")
+	public static class FindIdResponse extends CommonResponseVo {
+		@Schema(description = "데이터")
+		IdInfo data;
+	}
+
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
+	@Schema(description = "아이디찾기 파라미터")
+	public static class FindIdRequest {
+		@Schema(description = "일반회원, 사업자 구분값 - 0: 일반회원 1: 사업자",  required = true, example = "1")
+		Integer role;
+
+		@Schema(description = "이름",  required = true, example = "홍길동")
+		String name;
+
+		@Schema(description = "핸드폰 번호",  required = true, example = "01012345678")
+		String phone_num;
+	}
+
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
+	@ApiModel(description = "아이디(이메일) 정보")
+	public static class IdInfo {
+		@Schema(description = "이메일", required = true, example = "abc@hotel.com")
+		String email;
+	}
+
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
+	@Schema(description = "비밀번호 변경 파라미터")
+	public static class EditPasswordRequest {
+		@Schema(description = "기존 비밀번호",  required = true, example = "Abc123456!!")
+		String original_password;
+
+		@Schema(description = "변경할 비밀번호",  required = true, example = "!!123456abC")
+		String edit_password;
+	}
 
 }
