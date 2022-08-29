@@ -67,7 +67,7 @@ public class MemberController {
     @ApiOperation(value="고객 정보수정")
     @ApiImplicitParams({@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header")})
     @ResponseBody
-    @PutMapping("/edit-info")
+    @PatchMapping("/edit-info")
     public CommonResponseVo MemberEditInfo(@RequestBody MemberVo.MemberUpdateInfo memberInfo){
         return memberService.MemberEditInfo(memberInfo);
     }
