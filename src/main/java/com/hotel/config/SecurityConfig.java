@@ -1,31 +1,83 @@
 package com.hotel.config;
 
+import com.hotel.jwt.JwtAuthenticationEntryPoint;
+import com.hotel.jwt.JwtAuthenticationFilter;
+import com.hotel.jwt.TokenProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @SuppressWarnings("deprecation")
 @EnableWebSecurity
-@Configuration
+@RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+	private final TokenProvider tokenProvider;
 
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 		web.ignoring().antMatchers("/static/css/, /static/js/, *.ico");
 
 		// swagger
-		web.ignoring().antMatchers("/v3/api-docs", "/configuration/ui", "/swagger-resources", "/configuration/security",
+		web.ignoring()
+				.antMatchers("/v3/api-docs", "/configuration/ui", "/swagger-resources", "/configuration/security",
 				"/swagger-ui.html", "/webjars/", "/swagger/");
 	}
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf().disable();
-		http.authorizeRequests().antMatchers("/swagger-resources/**").permitAll();
+		// 시큐리티는 기본적으로 세션을 사용 여기서는 세션을 사용하지 않기 때문에 세션 설정을 Stateless 로 설정
+		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+		http
+				.cors().configurationSource(corsConfigurationSource()) // CORS 설정 적용
+				.and()
+					.httpBasic().disable() // httpBasic disable
+					.csrf().disable() // CSRF Disable
+				.exceptionHandling()
+				.authenticationEntryPoint(jwtAuthenticationEntryPoint) // exception Handling
+				.and()
 
+					.authorizeRequests()
+					.antMatchers("/owner/**").permitAll()
+					.antMatchers("/user/**").permitAll()
+					.antMatchers("/hotel/**").permitAll()
+					.antMatchers("/reservation/**").permitAll()
+					.antMatchers("/common/**").permitAll()
+					.antMatchers("/swagger-resources/**").permitAll()
+					.antMatchers("/member/sign-up", "member/sign-in").permitAll()
+					.antMatchers("/owner/sign-up").permitAll()
+
+				// JwtSecurityConfig 클래스에서 선언된 필터 적용
+				.and()
+					.apply(new JwtSecurityConfig(tokenProvider));
+
+	}
+
+	// CORS 설정
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.addAllowedOriginPattern(CorsConfiguration.ALL);
+		configuration.setAllowedMethods(List.of(CorsConfiguration.ALL));
+		configuration.setAllowedHeaders(Arrays.asList("Authorization", "content-type", "x-auth-token"));
+
+		configuration.setAllowCredentials(true);
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration.applyPermitDefaultValues()); // 전역적용. 나중에 수정필요
+		return source;
 	}
 
 }

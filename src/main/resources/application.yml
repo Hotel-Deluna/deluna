@@ -11,3 +11,7 @@ spring:
 #    password: admin
 
 # AWS Key 파일, JWT개인키등 - 서버에 config로 관리하고 여기엔 해당 위치만 표기
+
+jwt:
+  #JWT secret key Base64 인코딩
+  secret: Y29kZXN0YXRlcy1iaXRodW1iLW1zYS10ZWFtLW1lbWJlci1zcHJpbmctYm9vdC13ZWJmbHV4LWp3dC1zZWNyZXQ
