@@ -367,7 +367,7 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
-    public CommonResponseVo EditHotel(HotelInfoVo.RegisterHotelRequest editHotelRequest) {
+    public CommonResponseVo EditHotel(HotelInfoVo.EditInfoHotelRequest editHotelRequest) {
         // 호텔정보 수정 정보 DB 업데이트
         CommonResponseVo result = new CommonResponseVo();
         result.setMessage("호텔 정보 수정 완료");

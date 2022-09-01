@@ -23,7 +23,7 @@ public interface HotelService {
 
     CommonResponseVo DeleteHotel(HotelInfoVo.DeleteHotelRequest deleteHotelRequest);
 
-    CommonResponseVo EditHotel(HotelInfoVo.RegisterHotelRequest editHotelRequest);
+    CommonResponseVo EditHotel(HotelInfoVo.EditInfoHotelRequest editHotelRequest);
 
     CommonResponseVo RegisterRoom(HotelInfoVo.RegisterRoomRequest registerRoomRequest);
 

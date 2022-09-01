@@ -6,7 +6,10 @@ import com.hotel.company.vo.HotelInfoVo;
 import com.hotel.company.vo.HotelSearchVo;
 import io.micrometer.core.lang.Nullable;
 import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,8 +23,8 @@ public class HotelController {
     @ApiOperation(value="호텔 등록")
     @ApiImplicitParams({@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header")})
     @ResponseBody
-    @PostMapping(value = "/register")
-    public CommonResponseVo RegisterHotel(@RequestBody HotelInfoVo.RegisterHotelRequest registerHotelRequest){
+    @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public CommonResponseVo RegisterHotel(@ModelAttribute HotelInfoVo.RegisterHotelRequest registerHotelRequest){
         return hotelService.RegisterHotel(registerHotelRequest);
     }
 
@@ -36,16 +39,16 @@ public class HotelController {
     @ApiOperation(value="호텔 정보 수정")
     @ApiImplicitParams({@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header")})
     @ResponseBody
-    @PatchMapping("/edit")
-    public CommonResponseVo EditHotel(@RequestBody HotelInfoVo.RegisterHotelRequest editHotelRequest){
-        return hotelService.EditHotel(editHotelRequest);
+    @PatchMapping(value = "/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public CommonResponseVo EditHotel(@ModelAttribute HotelInfoVo.EditInfoHotelRequest editInfoHotelRequest){
+        return hotelService.EditHotel(editInfoHotelRequest);
     }
 
     @ApiOperation(value="사업자가 소유한 호텔 리스트")
     @ApiImplicitParams({@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header")})
     @ResponseBody
     @PostMapping(value = "/owner-hotel-list")
-    public HotelInfoVo.OwnerHotelListResponse OwnerHotelList(@Nullable HotelInfoVo.OwnerHotelListRequest ownerHotelListRequest){
+    public HotelInfoVo.OwnerHotelListResponse OwnerHotelList(@RequestBody HotelInfoVo.OwnerHotelListRequest ownerHotelListRequest){
         return hotelService.OwnerHotelList(ownerHotelListRequest);
     }
 
@@ -101,16 +104,16 @@ public class HotelController {
     @ApiOperation(value="객실등록")
     @ApiImplicitParams({@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header")})
     @ResponseBody
-    @PostMapping("/room/register")
-    public CommonResponseVo RegisterRoom(@RequestBody HotelInfoVo.RegisterRoomRequest registerRoomRequest){
+    @PostMapping(value = "/room/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public CommonResponseVo RegisterRoom(@ModelAttribute HotelInfoVo.RegisterRoomRequest registerRoomRequest){
         return hotelService.RegisterRoom(registerRoomRequest);
     }
 
     @ApiOperation(value="객실수정")
     @ApiImplicitParams({@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header")})
     @ResponseBody
-    @PatchMapping("/room/edit")
-    public CommonResponseVo EditRoom(@RequestBody HotelInfoVo.EditRoomRequest registerRoomRequest){
+    @PatchMapping(value = "/room/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public CommonResponseVo EditRoom(@ModelAttribute HotelInfoVo.EditRoomRequest registerRoomRequest){
         return hotelService.EditRoom(registerRoomRequest);
     }
 

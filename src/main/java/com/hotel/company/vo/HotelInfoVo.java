@@ -2,6 +2,8 @@ package com.hotel.company.vo;
 
 import com.hotel.common.CommonResponseVo;
 import io.micrometer.core.lang.Nullable;
+import io.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -71,43 +73,46 @@ public class HotelInfoVo {
     @NoArgsConstructor
     @Schema(description = "호텔등록 파라미터")
     public static class RegisterHotelRequest {
-        @Schema(description = "한글 호텔명",  required = true, example = "신라스테이")
+        @ApiParam(value = "한글 호텔명",  required = true, example = "신라스테이")
         String name;
 
-        @Schema(description = "영문 호텔명", required = true, example = "Shilla Stay")
+        @ApiParam(value = "영문 호텔명", required = true, example = "Shilla Stay")
         String eng_name;
 
-        @Schema(description = "호텔 성급", required = true, example = "5")
+        @ApiParam(value = "호텔 성급", required = true, example = "5")
         Integer star;
 
-        @Schema(description = "호텔 전화번호", required = true, example = "0212345678")
+        @ApiParam(value = "호텔 전화번호", required = true, example = "0212345678")
         String phone_num;
 
-        @Schema(description = "주소 - 지번주소기준", required = true, example = "서울시 강남구")
+        @ApiParam(value = "주소 - 지번주소기준", required = true, example = "서울시 강남구")
         String address;
 
-        @Schema(description = "위도, 경도 값. 0번째 배열 : x, 1번째 배열 : y",  required = true, example = "[123.546, 10.48]")
+        @ApiParam(value = "위도, 경도 값. 0번째 배열 : x, 1번째 배열 : y",  required = true, example = "[123.546, 10.48]")
         List<Float> location;
 
-        @Schema(description = "카카오 API의 지역 구분정보(region_1depth_name) - 특별시,도 정보", required = true, example = "서울시")
+        @ApiParam(value = "카카오 API의 지역 구분정보(region_1depth_name) - 특별시,도 정보", required = true, example = "서울시")
         String region_1depth_name;
 
-        @Schema(description = "카카오 API의 지역 구분정보(region_2depth_name) - 시,구 정보", required = true, example = "강남구")
+        @ApiParam(value = "카카오 API의 지역 구분정보(region_2depth_name) - 시,구 정보", required = true, example = "강남구")
         String region_2depth_name;
 
-        @Schema(description = "호텔 규정", required = false, example = "대욕장 이용안내...")
+        @ApiParam(value = "호텔 정보", required = true, example = "신라스테이 강남점은...")
+        String info;
+
+        @ApiParam(value = "호텔 규정", required = false, example = "대욕장 이용안내...")
         @Nullable
         String rule;
 
-        @Schema(description = "태그(부가시설/서비스) 리스트", required = false, example = "[1,2,3]")
+        @ApiParam(value = "태그(부가시설/서비스) 리스트", required = false, example = "[1,2,3]")
         @Nullable
         List<Integer> tags;
 
-        @Schema(description = "성수기 리스트", required = false)
+        @ApiParam(value = "성수기 리스트", required = false)
         @Nullable
         List<PeakSeason> peak_season_list;
 
-        @Schema(description = "멀티파트파일 이미지 리스트", required = false, example = "[멀티파트 파일 이미지1 , 멀티파트 파일 이미지2]")
+        @ApiParam(value = "멀티파트파일 이미지 리스트", required = false, example = "[멀티파트 파일 이미지1 , 멀티파트 파일 이미지2]")
         @Nullable
         List<MultipartFile> image;
     }
@@ -129,34 +134,34 @@ public class HotelInfoVo {
     @AllArgsConstructor
     @Schema(description = "호텔정보 수정 파라미터")
     public static class EditInfoHotelRequest {
-        @Schema(description = "호텔 구분번호",  required = true, example = "12345")
+        @ApiParam(value = "호텔 구분번호",  required = true, example = "12345")
         Integer hotel_num;
 
-        @Schema(description = "한글 호텔명",  required = true, example = "신라스테이")
+        @ApiParam(value = "한글 호텔명",  required = true, example = "신라스테이")
         String name;
 
-        @Schema(description = "영문 호텔명", required = true, example = "Shilla Stay")
+        @ApiParam(value = "영문 호텔명", required = true, example = "Shilla Stay")
         String eng_name;
 
-        @Schema(description = "호텔 성급", required = true, example = "5")
+        @ApiParam(value = "호텔 성급", required = true, example = "5")
         Integer star;
 
-        @Schema(description = "호텔 전화번호", required = true, example = "0212345678")
+        @ApiParam(value = "호텔 전화번호", required = true, example = "0212345678")
         String phone_num;
 
-        @Schema(description = "호텔 정보", required = true, example = "신라스테이 강남점은...")
+        @ApiParam(value = "호텔 정보", required = true, example = "신라스테이 강남점은...")
         String info;
 
-        @Schema(description = "호텔 규정", required = true, example = "대욕장 이용안내...")
+        @ApiParam(value = "호텔 규정", required = true, example = "대욕장 이용안내...")
         String rule;
 
-        @Schema(description = "태그(부가시설/서비스) 리스트", required = true, example = "[1,2,3]")
+        @ApiParam(value = "태그(부가시설/서비스) 리스트", required = true, example = "[1,2,3]")
         List<Integer> tags;
 
-        @Schema(description = "성수기 리스트", required = true)
-        List<HotelInfoVo.PeakSeason> peak_season_list;
+        @ApiParam(value = "성수기 리스트", required = true)
+        List<PeakSeason> peak_season_list;
 
-        @Schema(description = "이미지 리스트 - Object 형식. 이미지가 2개 있었는데 첫번재 이미지가 수정된다면 [멀티파트 파일 이미지1 , https://aws.bucket/..] ", required = true, example = "[멀티파트 파일 이미지1 , https://aws.bucket/..]")
+        @ApiParam(value = "이미지 리스트 - Object 형식. 특정 순서 이미지가 변경되면 해당 배열 aws 주소를 멀티파트 파일로 교체. ex) 이미지가 2개 있었는데 첫번재 이미지가 수정된다면 [멀티파트 파일 이미지1 , https://aws.bucket/..] ", required = true, example = "[멀티파트 파일 이미지1 , https://aws.bucket/..]")
         List<Object> image;
     }
 
@@ -359,49 +364,49 @@ public class HotelInfoVo {
     @NoArgsConstructor
     @Schema(description = "객실 등록 파라미터")
     public static class RegisterRoomRequest {
-        @Schema(description = "객실명",  required = true, example = "신라스테이")
+        @ApiParam(value = "객실명",  required = true, example = "신라스테이")
         String name;
 
-        @Schema(description = "객실 이미지 리스트", required = true, example = "[멀티파트 파일 이미지1, 멀티파트 파일 이미지2]")
+        @ApiParam(value = "객실 이미지 리스트", required = true, example = "[멀티파트 파일 이미지1, 멀티파트 파일 이미지2]")
         List<MultipartFile> image;
 
-        @Schema(description = "객실 최소인원", required = true, example = "2")
+        @ApiParam(value = "객실 최소인원", required = true, example = "2")
         Integer minimum_people;
 
-        @Schema(description = "객실 최대인원", required = true, example = "3")
+        @ApiParam(value = "객실 최대인원", required = true, example = "3")
         Integer maximum_people;
 
-        @Schema(description = "더블배드 갯수", required = true, example = "1")
+        @ApiParam(value = "더블배드 갯수", required = true, example = "1")
         Integer double_bed_count;
 
-        @Schema(description = "싱글배드 갯수", required = true, example = "1")
+        @ApiParam(value = "싱글배드 갯수", required = true, example = "1")
         Integer single_bed_count;
 
-        @Schema(description = "체크인 시간", required = true, example = "11:00")
+        @ApiParam(value = "체크인 시간", required = true, example = "11:00")
         String check_in_time;
 
-        @Schema(description = "체크아웃 시간", required = true, example = "15:00")
+        @ApiParam(value = "체크아웃 시간", required = true, example = "15:00")
         String check_out_time;
 
-        @Schema(description = "가격정보 - 성수기 평일", required = true, example = "350000")
+        @ApiParam(value = "가격정보 - 성수기 평일", required = true, example = "350000")
         Integer p_weekday_price;
 
-        @Schema(description = "가격정보 - 성수기 주말", required = true, example = "450000")
+        @ApiParam(value = "가격정보 - 성수기 주말", required = true, example = "450000")
         Integer p_weekend_price;
 
-        @Schema(description = "가격정보 - 평일", required = true, example = "150000")
+        @ApiParam(value = "가격정보 - 평일", required = true, example = "150000")
         Integer weekday_price;
 
-        @Schema(description = "가격정보 - 주말", required = true, example = "250000")
+        @ApiParam(value = "가격정보 - 주말", required = true, example = "250000")
         Integer weekend_price;
 
-        @Schema(description = "객실 태그", required = true)
+        @ApiParam(value = "객실 태그", required = true)
         List<Integer> tags;
 
-        @Schema(description = "호실 정보", required = true)
+        @ApiParam(value = "호실 정보", required = true)
         List<RegisterRoomDetailRequest> room_detail_list;
 
-        @Schema(description = "공휴일 가격 상태 - 공휴일을 성수기 가격취급할건지 결정. 0: 비성수기 주말가격, 1: 성수기 주말가격",  required = true, example = "1")
+        @ApiParam(value = "공휴일 가격 상태 - 공휴일을 성수기 가격취급할건지 결정. 0: 비성수기 주말가격, 1: 성수기 주말가격",  required = true, example = "1")
         Integer holiday_price_status;
 
     }
@@ -411,49 +416,49 @@ public class HotelInfoVo {
     @NoArgsConstructor
     @Schema(description = "객실 수정 파라미터")
     public static class EditRoomRequest {
-        @Schema(description = "객실번호",  required = true, example = "123456")
+        @ApiParam(value = "객실번호",  required = true, example = "123456")
         Integer room_num;
 
-        @Schema(description = "객실명",  required = true, example = "신라스테이")
+        @ApiParam(value = "객실명",  required = true, example = "신라스테이")
         String name;
 
-        @Schema(description = "이미지 리스트 - Object 형식. ex) 이미지가 2개 있었는데 첫번재 이미지가 수정된다면 [멀티파트 파일 이미지1 , https://aws.bucket/..] ", required = true, example = "[멀티파트 파일 이미지1 , https://aws.bucket/..]")
+        @ApiParam(value = "이미지 리스트 - Object 형식. 특정 순서 이미지가 변경되면 해당 배열 aws 주소를 멀티파트 파일로 교체. ex) 이미지가 2개 있었는데 첫번재 이미지가 수정된다면 [멀티파트 파일 이미지1 , https://aws.bucket/..] ", required = true, example = "[멀티파트 파일 이미지1 , https://aws.bucket/..]")
         List<Object> image;
 
-        @Schema(description = "객실 최소인원", required = true, example = "2")
+        @ApiParam(value = "객실 최소인원", required = true, example = "2")
         Integer minimum_people;
 
-        @Schema(description = "객실 최대인원", required = true, example = "3")
+        @ApiParam(value = "객실 최대인원", required = true, example = "3")
         Integer maximum_people;
 
-        @Schema(description = "더블배드 갯수", required = true, example = "1")
+        @ApiParam(value = "더블배드 갯수", required = true, example = "1")
         Integer double_bed_count;
 
-        @Schema(description = "싱글배드 갯수", required = true, example = "1")
+        @ApiParam(value = "싱글배드 갯수", required = true, example = "1")
         Integer single_bed_count;
 
-        @Schema(description = "체크인 시간", required = true, example = "11:00")
+        @ApiParam(value = "체크인 시간", required = true, example = "11:00")
         String check_in_time;
 
-        @Schema(description = "체크아웃 시간", required = true, example = "15:00")
+        @ApiParam(value = "체크아웃 시간", required = true, example = "15:00")
         String check_out_time;
 
-        @Schema(description = "가격정보 - 성수기 평일", required = true, example = "350000")
+        @ApiParam(value = "가격정보 - 성수기 평일", required = true, example = "350000")
         Integer p_weekday_price;
 
-        @Schema(description = "가격정보 - 성수기 주말", required = true, example = "450000")
+        @ApiParam(value = "가격정보 - 성수기 주말", required = true, example = "450000")
         Integer p_weekend_price;
 
-        @Schema(description = "가격정보 - 평일", required = true, example = "150000")
+        @ApiParam(value = "가격정보 - 평일", required = true, example = "150000")
         Integer weekday_price;
 
-        @Schema(description = "가격정보 - 주말", required = true, example = "250000")
+        @ApiParam(value = "가격정보 - 주말", required = true, example = "250000")
         Integer weekend_price;
 
-        @Schema(description = "객실 태그", required = true, example = "[1,3,5]")
+        @ApiParam(value = "객실 태그", required = true, example = "[1,3,5]")
         List<Integer> tags;
 
-        @Schema(description = "공휴일 가격 상태 - 공휴일을 성수기 가격취급할건지 결정. 0: 비성수기 주말가격, 1: 성수기 주말가격",  required = true, example = "1")
+        @ApiParam(value = "공휴일 가격 상태 - 공휴일을 성수기 가격취급할건지 결정. 0: 비성수기 주말가격, 1: 성수기 주말가격",  required = true, example = "1")
         Integer holiday_price_status;
 
     }
