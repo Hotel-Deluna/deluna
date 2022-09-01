@@ -23,5 +23,4 @@ public class JwtToken {
         private String refreshToken;
     }
 
-
 }

@@ -40,4 +40,11 @@ public class CommonController {
         return commonService.EmailDuplicateCheck(emailDuplicateCheckRequest);
     }
 
+//    @ApiOperation(value="호텔 태그 - 중복이면 true. 아니면 false 리턴")
+//    @ResponseBody
+//    @PostMapping("/email/duplicate-check")
+//    public CommonVo.EmailDuplicateCheckResponse EmailDuplicateCheck(@RequestBody CommonVo.EmailDuplicateCheckRequest emailDuplicateCheckRequest){
+//        return commonService.EmailDuplicateCheck(emailDuplicateCheckRequest);
+//    }
+
 }
