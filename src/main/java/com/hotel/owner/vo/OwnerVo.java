@@ -45,6 +45,12 @@ public class OwnerVo {
     @Schema(description = "개업일", required = true, example = "2022/08/10")
     Date opening_day;
 
+    @JsonIgnore
+    String insert_user;
+
+    @JsonIgnore
+    String update_user;
+
     }
 
     @Data
@@ -67,6 +73,9 @@ public class OwnerVo {
 
         @Schema(description = "개업일", required = true, example = "2022/08/25")
         Date opening_day;
+
+        @JsonIgnore
+        String update_user;
 
     }
 
