@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.hotel.owner.dto.OwnerMapper">
+
+    <insert id="ownerSignUp">
+        INSERT INTO d_business_member (email, password, name, phone_num, business_num, opening_day, is_delete, dt_insert, dt_update, insert_user, update_user)
+        VALUE (#{email}, #{password}, #{name}, #{phone_num}, #{business_num}, #{opening_day}, 'N', NOW(), NOW(), #{insert_user}, #{update_user})
+    </insert>
+
+    <select id="getOwnerTableAutoIncrementNext" resultType="string">
+        SELECT Auto_increment
+        FROM information_schema.tables
+        WHERE table_schema = 'kys'
+          AND table_name = 'd_business_member'
+    </select>
+
+    <select id="checkDuplicationOwner" resultType="string">
+        SELECT business_num
+        FROM d_business_member
+        WHERE business_num = #{business_num}
+    </select>
+
+</mapper>

@@ -3,14 +3,23 @@ package com.hotel.company.svc;
 import com.hotel.common.CommonResponseVo;
 import com.hotel.util.DateUtil;
 import com.hotel.company.vo.*;
+import com.hotel.util.ImageUtil;
 import io.micrometer.core.lang.Nullable;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
+@Transactional
 public class HotelServiceImpl implements HotelService {
+
+    @Autowired
+    ImageUtil imageUtil;
 
     @Override
     public HotelInfoVo.OwnerHotelListResponse OwnerHotelList(@Nullable HotelInfoVo.OwnerHotelListRequest ownerHotelListRequest) {
@@ -116,6 +125,13 @@ public class HotelServiceImpl implements HotelService {
         CommonResponseVo result = new CommonResponseVo();
         // registerHotelParamVo 호텔정보 + 성수기 + 호텔태그 + 이미지 정보 DB 저장
 
+        try{
+            // Image Resizing & S3 Upload
+            List<String> imageUrlList = imageUtil.uploadImage(registerHotelRequest.getImage());
+
+        }catch (Exception e){
+
+        }
         result.setMessage("호텔 등록 완료");
         return result;
     }

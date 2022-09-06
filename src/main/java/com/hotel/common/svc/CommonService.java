@@ -9,4 +9,20 @@ public interface CommonService {
     CommonVo.VerifyPhoneAuthResponse VerifyPhoneAuth(CommonVo.VerifyPhoneAuthRequest verifyPhoneAuthRequest);
 
     CommonVo.EmailDuplicateCheckResponse EmailDuplicateCheck(CommonVo.EmailDuplicateCheckRequest emailDuplicateCheckRequest);
+
+    CommonVo.CommonCodeResponse HotelTagCode();
+
+    CommonVo.CommonCodeResponse UserRoleCode();
+
+    CommonVo.CommonCodeResponse RoomTagCode();
+
+    CommonVo.CommonCodeResponse MemberDeleteReasonCode();
+
+    CommonVo.CommonCodeResponse OwnerDeleteReasonCode();
+
+    CommonVo.CommonCodeResponse RegionCode();
+
+    CommonVo.CommonCodeResponse TouristSpotCode();
+
+    String EncryptConfig(String text);
 }

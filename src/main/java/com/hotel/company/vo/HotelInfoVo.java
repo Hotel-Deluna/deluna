@@ -1,11 +1,17 @@
 package com.hotel.company.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.hotel.common.CommonResponseVo;
 import io.micrometer.core.lang.Nullable;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -161,8 +167,8 @@ public class HotelInfoVo {
         @ApiParam(value = "성수기 리스트", required = true)
         List<PeakSeason> peak_season_list;
 
-        @ApiParam(value = "이미지 리스트 - Object 형식. 특정 순서 이미지가 변경되면 해당 배열 aws 주소를 멀티파트 파일로 교체. ex) 이미지가 2개 있었는데 첫번재 이미지가 수정된다면 [멀티파트 파일 이미지1 , https://aws.bucket/..] ", required = true, example = "[멀티파트 파일 이미지1 , https://aws.bucket/..]")
-        List<Object> image;
+        @ApiParam(value = "이미지 리스트 - 이미지 멀티파트 파일 리스트", required = true, example = "[멀티파트 파일 이미지1 , 멀티파트 파일 이미지2]")
+        List<MultipartFile> image;
     }
 
     @Data
@@ -322,10 +328,10 @@ public class HotelInfoVo {
     @Schema(description = "호텔의 성수기 정보")
     public static class PeakSeason {
 
-        @Schema(description = "성수기 시작일")
+        @Schema(description = "성수기 시작일", required = false)
         Date peak_season_start;
 
-        @Schema(description = "성수기 종료일")
+        @Schema(description = "성수기 종료일", required = false)
         Date peak_season_end;
     }
 
@@ -406,7 +412,7 @@ public class HotelInfoVo {
         @ApiParam(value = "호실 정보", required = true)
         List<RegisterRoomDetailRequest> room_detail_list;
 
-        @ApiParam(value = "공휴일 가격 상태 - 공휴일을 성수기 가격취급할건지 결정. 0: 비성수기 주말가격, 1: 성수기 주말가격",  required = true, example = "1")
+        @ApiParam(value = "공휴일 가격 상태 - 공휴일을 성수기 가격취급할건지 결정. 1: 비성수기 주말가격, 2: 성수기 주말가격",  required = true, example = "1")
         Integer holiday_price_status;
 
     }
@@ -422,8 +428,8 @@ public class HotelInfoVo {
         @ApiParam(value = "객실명",  required = true, example = "신라스테이")
         String name;
 
-        @ApiParam(value = "이미지 리스트 - Object 형식. 특정 순서 이미지가 변경되면 해당 배열 aws 주소를 멀티파트 파일로 교체. ex) 이미지가 2개 있었는데 첫번재 이미지가 수정된다면 [멀티파트 파일 이미지1 , https://aws.bucket/..] ", required = true, example = "[멀티파트 파일 이미지1 , https://aws.bucket/..]")
-        List<Object> image;
+        @ApiParam(value = "이미지 리스트 - 이미지 멀티파트 파일 리스트", required = true, example = "[멀티파트 파일 이미지1 , 멀티파트 파일 이미지2]")
+        List<MultipartFile> image;
 
         @ApiParam(value = "객실 최소인원", required = true, example = "2")
         Integer minimum_people;
@@ -458,7 +464,7 @@ public class HotelInfoVo {
         @ApiParam(value = "객실 태그", required = true, example = "[1,3,5]")
         List<Integer> tags;
 
-        @ApiParam(value = "공휴일 가격 상태 - 공휴일을 성수기 가격취급할건지 결정. 0: 비성수기 주말가격, 1: 성수기 주말가격",  required = true, example = "1")
+        @ApiParam(value = "공휴일 가격 상태 - 공휴일을 성수기 가격취급할건지 결정. 1: 비성수기 주말가격, 2: 성수기 주말가격",  required = true, example = "1")
         Integer holiday_price_status;
 
     }
@@ -500,7 +506,7 @@ public class HotelInfoVo {
         @Schema(description = "호실 삭제 예정일", required = false, example = "2022/08/31")
         Date delete_date;
 
-        @Schema(description = "호실 상태값 - 0: 예약가능 1: 예약불가능 ", required = true, example = "1")
+        @Schema(description = "호실 상태값 - 1: 예약가능 2: 예약불가능 ", required = true, example = "1")
         Integer status;
 
     }
@@ -648,7 +654,7 @@ public class HotelInfoVo {
         @Schema(description = "예약일",  required = true, example = "2022/08/01")
         Date reservation_date;
 
-        @Schema(description = "예약상태 - 0: 예약확정 1: 예약취소 2: 이용완료",  required = true, example = "0")
+        @Schema(description = "예약상태 - 1: 예약확정 2: 예약취소 3: 이용완료",  required = true, example = "1")
         Integer reservation_status;
     }
 }

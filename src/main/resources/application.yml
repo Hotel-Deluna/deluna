@@ -4,14 +4,72 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+  # DB - Local
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:3306/kys
+    username: ENC(hNKmYYLZUCIkN4/kEaKp7rb8yoZWIQUFjut9dEWyCvo=)
+    password: ENC(jTyBpgXbLmrb1D3bakP67omwnhtsPfEyxk84vmkDrSU=)
+  # DB - Remote
 #  datasource:
-#    driver-class-name: org.h2.Driver
-#    url: jdbc:h2:mem:localhost;DB_CLOSE_ON_EXIT=FALSE
-#    username: admin
-#    password: admin
+#    driver-class-name: org.mariadb.jdbc.Driver
+#    url: jdbc:mariadb://monsu1016.cafe24.com:3306/monsu1016
+#    username: ENC(hTvEc8wCVbpuR2gelRtEmKtMPN5VbMK6BG1IbjUdvac=)
+#    password: ENC(q3tmWRDNMFJ12vmUA3MHcytX4aAvnt0YU5La07p8YEQ=)
 
-# AWS Key 파일, JWT개인키등 - 서버에 config로 관리하고 여기엔 해당 위치만 표기
+  # Mail
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ENC(hxtdwzVVO2GbpX5nzhycOmCIjCfpnG3AcwvX8HcRy8A=)
+    password: ENC(eFnAd4cgxq0CRmMvF/7uaI+e6z0+rwjxVHmE11p923mpOenuXd/cgFCOYvZOEuvn)
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
-jwt:
-  #JWT secret key Base64 인코딩
-  secret: Y29kZXN0YXRlcy1iaXRodW1iLW1zYS10ZWFtLW1lbWJlci1zcHJpbmctYm9vdC13ZWJmbHV4LWp3dC1zZWNyZXQ
+# AES256
+aes:
+  256:
+    key: ENC(lduooRWkx54duqZmqMCogoJmP6pM2Y0MtcadlciaHt0ogThqsZpb37CJVooRdh5Gtuhu4utGxE4iuXFEDWRtiQ==)
+# 설정 파일 암호화
+jasypt:
+  encryptor:
+    password: ${JASYPT_PASSWORD}
+    bean: encryptorBean
+# SMS
+naver:
+  sms:
+    accessKey: ENC(N1wnMxSrPsJnkhSNVENdftCvhjh6eqrowqm+8K773ex27una3u3qgn3sB8wbfIL2)
+    serviceId: ENC(n3ZXGXEb4KOy4K5c/xEidI+3kr5b3FSRIomTKpG3gP3EoLUOkdDqLa4CVV2IZeBMsJp7D6ZzGvzaLD1LW0gbqg==)
+    secretKey: ENC(HIemIJkHSyhAQGhpRK60pGlkU3wzsPYLNbiUl3HGqpEWCqibfAD77zfkD5WJeGhBuw5rmc0DUB0wnPrh0yZcwQ==)
+    senderPhoneNum: ENC(pFswg5Q5S/GdDGS4KUcoeduZePnJNqZ1JO/nhr20UV0=)
+mybatis:
+  type-aliases-package: com.hotel.common
+  mapper-locations: mapper/**/*.xml
+
+JWT:
+  secret: ENC(SBVbnP1YtEtNmsjlW+JWRNibzOYC6rG7H7wqLALkNyxlm7kFNXGgPiilj97PJprs7DYvTZIAGF6WSO0XWgCx2NFsNYztEPhdLK/gmtdcRRCiKEnNNXtFWHQlp0JEtH+E8pfsv+AQvRFEP52ub8PIrA==)
+
+# AWS
+cloud:
+  aws:
+    credentials:
+      accessKey: ENC(FNioiuKUfUo+p9QSp9qTC4m9Bh5vlJmYnQnfeDkpkECF1DWUy2WUaw/vullb1jXj)
+      secretKey: ENC(4ERcn13kTYgs5ryinx/tBFH2PC3SwXVaNf0u9jCLy7CGCQ9I90uT+XGY6XJwa0ObLpJnuNBttFDq9VE7+3dTMA==)
+    s3:
+      bucket: ENC(Tfqo6bCNGYfuUke9AbaYeKC5YL5oAyf8FvHPtunEug3jnhFynooBOLaJAp91+3uH)
+    region:
+      static: ap-northeast-2
+      auto: false
+    stack:
+      auto: false
+
+logging:
+  level:
+    com:
+      amazonaws:
+        util:
+          EC2MetadataUtils: error
