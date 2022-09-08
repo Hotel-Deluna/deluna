@@ -13,6 +13,10 @@ import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+/**
+ * AES256 암호화, 복호화 처리
+ */
+
 @Component
 public class AES256Util {
 

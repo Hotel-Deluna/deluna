@@ -1,9 +1,7 @@
 package com.hotel.util;
 
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.*;
 import lombok.RequiredArgsConstructor;
 import marvin.image.MarvinImage;
 import org.marvinproject.image.transform.scale.Scale;
@@ -28,9 +26,17 @@ public class ImageUtil {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
+    @Value("${cloud.aws.region.static}")
+    private String region;
+
     @Autowired
     AmazonS3Client amazonS3Client;
 
+    /**
+     * AWS 파일 업로드
+     * @param multipartFile
+     * @return
+     */
     public List<String> uploadImage(List<MultipartFile> multipartFile) {
         List<String> fileNameList = new ArrayList<>();
 
@@ -61,6 +67,25 @@ public class ImageUtil {
         return fileNameList;
     }
 
+    /**
+     * AWS 파일 삭제
+     * @param imageList
+     */
+    public void deleteImage(List<String> imageList) {
+        try{
+            imageList.forEach(fileName -> {
+                DeleteObjectRequest request = new DeleteObjectRequest(bucket, fileName);
+                amazonS3Client.deleteObject(request);
+            });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public String getImageUrl(String fileName) {
+        return "https://"+bucket+".s3."+region+".amazonaws.com/"+fileName;
+    }
+
     private String createFileName(String fileName) {
         return UUID.randomUUID().toString().concat(getFileExtension(fileName));
     }
@@ -75,6 +100,14 @@ public class ImageUtil {
         return name;
     }
 
+    /**
+     * 이미지 리사이징
+     * @param fileName
+     * @param fileFormatName
+     * @param originalImage
+     * @param targetWidth
+     * @return
+     */
     MultipartFile resizeImage(String fileName, String fileFormatName, MultipartFile originalImage, int targetWidth) {
         try {
             // MultipartFile -> BufferedImage Convert

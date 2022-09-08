@@ -3,7 +3,6 @@ package com.hotel.common.vo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.stereotype.Component;
 
 public class CommonEnum {
 
@@ -132,6 +131,55 @@ public class CommonEnum {
         GANGNEUNG(4, "강릉"),
         SOKCHO(5, "속초"),
         YEOSU(6, "여수")
+        ;
+
+        Integer code;
+        String name;
+
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    public enum TableName{
+        D_BUSINESS_DELETE("d_business_delete"),
+        D_BUSINESS_MEMBER("d_business_member"),
+        D_EMAIL_AUTH("d_email_auth"),
+        D_HOLIDAY_INFO("d_holiday_info"),
+        D_HOTEL("d_hotel"),
+        D_HOTEL_DELETE("d_hotel_delete"),
+        D_HOTEL_REFERENCE_TAG("d_hotel_reference_tag"),
+        D_HOTEL_TAG("d_hotel_tag"),
+        D_IMAGE("d_image"),
+        D_MEMBER("d_member"),
+        D_MEMBER_DELETE("d_member_delete"),
+        D_PAYMENT("d_payment"),
+        D_PAYMENT_DETAIL("d_payment_detail"),
+        D_PEAK_SEASON("d_peak_season"),
+        D_PEAK_SEASON_DELETE("d_peak_season_delete"),
+        D_PHONE_AUTH("d_phone_auth"),
+        D_RESERVATION("d_reservation"),
+        D_RESERVATION_DELETE("d_reservation_delete"),
+        D_ROOM("d_room"),
+        D_ROOM_DELETE("d_room_delete"),
+        D_ROOM_DETAIL("d_room_detail"),
+        D_ROOM_DETAIL_DELETE("d_room_detail_delete"),
+        D_ROOM_REFERENCE_TAG("d_room_reference_tag"),
+        D_ROOM_TAG("d_room_tag"),
+        D_TOURIST_SPOT("d_tourist_spot")
+        ;
+
+        String name;
+
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    public enum ImageType{
+        HOTEL(1, "호텔"),
+        ROOM(2, "객실"),
+        TOURIST_SPOT(3, "여행지")
         ;
 
         Integer code;

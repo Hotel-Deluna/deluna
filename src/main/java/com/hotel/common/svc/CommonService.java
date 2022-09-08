@@ -25,4 +25,6 @@ public interface CommonService {
     CommonVo.CommonCodeResponse TouristSpotCode();
 
     String EncryptConfig(String text);
+
+    String DecryptConfig(String text);
 }

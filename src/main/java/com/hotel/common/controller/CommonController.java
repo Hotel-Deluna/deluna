@@ -92,4 +92,11 @@ public class CommonController {
         return commonService.EncryptConfig(text);
     }
 
+    @ApiOperation(value="설정파일 복호화 - 내부 API")
+    @ResponseBody
+    @GetMapping("/decrypt/config")
+    public String DecryptConfig(String text){
+        return commonService.DecryptConfig(text);
+    }
+
 }

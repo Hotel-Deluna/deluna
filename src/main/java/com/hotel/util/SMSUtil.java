@@ -3,7 +3,6 @@ package com.hotel.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hotel.util.vo.UtilVo;
 import org.apache.tomcat.util.codec.binary.Base64;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -33,6 +32,13 @@ public class SMSUtil {
     @Value("${naver.sms.secretKey}")
     String secretKey;
 
+    /**
+     * SMS 전송
+     * @param recipientPhoneNumber : 받는사람 전화번호
+     * @param content : 내용
+     * @return
+     * @throws Exception
+     */
     public UtilVo.SmsResponse sendSMS(String recipientPhoneNumber, String content) throws Exception{
         Long time = System.currentTimeMillis();
 

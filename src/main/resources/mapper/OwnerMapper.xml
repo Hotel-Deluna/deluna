@@ -4,19 +4,47 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 
 <mapper namespace="com.hotel.owner.dto.OwnerMapper">
-
+    <!-- 사업자 회원가입 -->
     <insert id="ownerSignUp">
         INSERT INTO d_business_member (email, password, name, phone_num, business_num, opening_day, is_delete, dt_insert, dt_update, insert_user, update_user)
         VALUE (#{email}, #{password}, #{name}, #{phone_num}, #{business_num}, #{opening_day}, 'N', NOW(), NOW(), #{insert_user}, #{update_user})
     </insert>
 
-    <select id="getOwnerTableAutoIncrementNext" resultType="string">
-        SELECT Auto_increment
-        FROM information_schema.tables
-        WHERE table_schema = 'kys'
-          AND table_name = 'd_business_member'
+    <!-- 사업자 회원정보 수정 -->
+    <update id="OwnerEditInfo">
+        UPDATE d_business_member
+        SET email = #{email},
+            name = #{name},
+            phone_num = #{phone_num},
+            business_num = #{business_num},
+            opening_day = #{opening_day},
+            update_user = #{update_user},
+            dt_update = NOW()
+        WHERE business_user_num = #{business_user_num}
+    </update>
+
+    <!-- 사업자 회원정보 조회 -->
+    <select id="selectOwnerInfo" resultType="com.hotel.owner.vo.OwnerVo$OwnerInfo">
+        SELECT email, name, phone_num, business_num, opening_day
+        FROM d_business_member
+        WHERE business_user_num = #{business_user_num}
     </select>
 
+    <!-- 사업자 탈퇴처리 -->
+    <update id="ownerWithdraw">
+        UPDATE d_business_member
+        SET is_delete = 'Y',
+            dt_update = NOW()
+        WHERE business_user_num = #{business_user_num}
+    </update>
+
+    <!-- 사업자 탈퇴사유 insert -->
+    <insert id="insertOwnerWithdrawReason">
+        INSERT INTO d_business_delete (business_user_num, content, insert_user, dt_insert)
+            VALUE (#{business_user_num}, #{reason}, #{insert_user}, NOW())
+    </insert>
+
+    <!-- 사업자 중복조회 -->
     <select id="checkDuplicationOwner" resultType="string">
         SELECT business_num
         FROM d_business_member

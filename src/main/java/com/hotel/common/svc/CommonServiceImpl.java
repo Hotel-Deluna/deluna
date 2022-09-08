@@ -41,7 +41,6 @@ public class CommonServiceImpl implements CommonService {
     @Autowired
     MailUtil mailUtil;
 
-
     @Override
     public CommonResponseVo RequestPhoneAuth(CommonVo.PhoneAuthRequest phoneAuthRequest) {
         CommonResponseVo result = new CommonResponseVo();
@@ -57,22 +56,21 @@ public class CommonServiceImpl implements CommonService {
             // AuthUtil CreateAuthNum으로 인증번호 생성. DB에 해당 인증번호 이미 존재하는지 체크 후 진행. 있다면 인증번호 생성 재시도
             // 휴대폰은 휴대폰번호 + 인증번호로 확인가능하므로 인증번호 DB존재 체크가 불필요할수 있음. 하지만 이메일은 필요함
             // 인증번호 DB 저장하고 해당 휴대폰번호로 문자 전송. 문자전송기능은 유틸 패키지에서 관리.
-            // SMS 전송이 한달 50건만 무료라 일단은 주석처리
 
-//            if (insertResult > 0){
-//                smsResponse = smsUtil.sendSMS(phone_num, SmsMessage);
-//                if("202".equals(smsResponse.getStatusCode())){
-//                    result.setMessage("휴대폰 인증번호 전송 완료");
-//                }
-//                else {
-//                    result.setResult("ERROR");
-//                    result.setMessage("전송오류");
-//                }
-//            }
-//            else {
-//                result.setResult("ERROR");
-//                result.setMessage("DB 에러");
-//            }
+            if (insertResult > 0){
+                smsResponse = smsUtil.sendSMS(phone_num, SmsMessage);
+                if("202".equals(smsResponse.getStatusCode())){
+                    result.setMessage("휴대폰 인증번호 전송 완료");
+                }
+                else {
+                    result.setResult("ERROR");
+                    result.setMessage("전송오류");
+                }
+            }
+            else {
+                result.setResult("ERROR");
+                result.setMessage("DB 에러");
+            }
 
         }catch (Exception e){
             e.printStackTrace();
@@ -101,7 +99,7 @@ public class CommonServiceImpl implements CommonService {
             }
 
         }catch (Exception e){
-
+            e.printStackTrace();
         }
 
 
@@ -232,9 +230,21 @@ public class CommonServiceImpl implements CommonService {
         encryptor.setProvider(new BouncyCastleProvider());
         encryptor.setPoolSize(1);
         encryptor.setPassword(encryptKey);
-        encryptor.setAlgorithm("PBEWithSHA256And128BitAES-CBC-BC");
+        encryptor.setAlgorithm("PBEWithMD5AndDES");
 
         String encryptedText = encryptor.encrypt(text); // 암호화
         return "ENC("+encryptedText+")";
+    }
+
+    @Override
+    public String DecryptConfig(String text) {
+        PooledPBEStringEncryptor encryptor = new PooledPBEStringEncryptor();
+        encryptor.setProvider(new BouncyCastleProvider());
+        encryptor.setPoolSize(1);
+        encryptor.setPassword(encryptKey);
+        encryptor.setAlgorithm("PBEWithMD5AndDES");
+
+        String decrypt = encryptor.decrypt(text); // 복호화
+        return decrypt;
     }
 }
