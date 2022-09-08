@@ -25,6 +25,34 @@ public class DateUtil {
     }
 
     /**
+     *  Date 을 String형식으로 변환 - yyyy/MM/dd
+     * @param date
+     * @return Date
+     * @throws ParseException
+     */
+    public static String DateToString(Date date) throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
+        // 한국 표준시로 변경
+        formatter.setTimeZone(TimeZone.getTimeZone("KST"));
+
+        return formatter.format(date);
+    }
+
+    /**
+     *  Date 을 String형식으로 변환. 사업자 등록확인시 공공데이터 처리용 - yyyyMMdd
+     * @param date
+     * @return Date
+     * @throws ParseException
+     */
+    public static String DateToStringForAPI(Date date) throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+        // 한국 표준시로 변경
+        formatter.setTimeZone(TimeZone.getTimeZone("KST"));
+
+        return formatter.format(date);
+    }
+
+    /**
      *
      * @param requestDate
      * @return Long Type 시간차 초단위로 제공

@@ -16,6 +16,10 @@ public class MailUtil {
     @Autowired
     JavaMailSender javaMailSender;
 
+    /**
+     * 메일전송
+     * @param mailRequest : 받는사람 메일주소, 제목, 내용
+     */
     public void sendMail(UtilVo.MailRequest mailRequest){
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
 

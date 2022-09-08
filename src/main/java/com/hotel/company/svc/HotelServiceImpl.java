@@ -1,6 +1,11 @@
 package com.hotel.company.svc;
 
 import com.hotel.common.CommonResponseVo;
+import com.hotel.common.vo.CommonEnum;
+import com.hotel.company.dto.HotelDto;
+import com.hotel.company.dto.HotelMapper;
+import com.hotel.util.AES256Util;
+import com.hotel.util.DBUtil;
 import com.hotel.util.DateUtil;
 import com.hotel.company.vo.*;
 import com.hotel.util.ImageUtil;
@@ -20,6 +25,15 @@ public class HotelServiceImpl implements HotelService {
 
     @Autowired
     ImageUtil imageUtil;
+
+    @Autowired
+    DBUtil dbUtil;
+
+    @Autowired
+    AES256Util aes256Util;
+
+    @Autowired
+    HotelMapper hotelMapper;
 
     @Override
     public HotelInfoVo.OwnerHotelListResponse OwnerHotelList(@Nullable HotelInfoVo.OwnerHotelListRequest ownerHotelListRequest) {
@@ -123,14 +137,61 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public CommonResponseVo RegisterHotel(HotelInfoVo.RegisterHotelRequest registerHotelRequest) {
         CommonResponseVo result = new CommonResponseVo();
-        // registerHotelParamVo 호텔정보 + 성수기 + 호텔태그 + 이미지 정보 DB 저장
 
         try{
-            // Image Resizing & S3 Upload
-            List<String> imageUrlList = imageUtil.uploadImage(registerHotelRequest.getImage());
+            // registerHotelParamVo 호텔정보 + 성수기 + 호텔태그 + 이미지 정보 DB 저장
+            String userRole = String.valueOf(CommonEnum.UserRole.OWNER.getCode());
+            String hotelPK = dbUtil.getAutoIncrementNext(CommonEnum.TableName.D_BUSINESS_MEMBER.getName());
+
+            // 사업자번호 - JWT 파싱 임시조치로 하드코딩
+            //TODO JWT 완성되면 변경
+            int business_user_num = 3;
+
+            String user_pk = userRole + hotelPK; // 유저 구분 코드 + pk
+
+            // 호텔등록 파라미터에서 사업자번호, 위도, 경도, 공휴일 가격상태 생성자, 변경자 정보 추가
+            registerHotelRequest.setBusiness_user_num(business_user_num);
+            registerHotelRequest.setPhone_num(aes256Util.encrypt(registerHotelRequest.getPhone_num())); // 전화번호 암호화
+            registerHotelRequest.setLatitude(registerHotelRequest.getLocation().get(0));
+            registerHotelRequest.setLongitude(registerHotelRequest.getLocation().get(1));
+            registerHotelRequest.setHoliday_price_status(1); // 기본셋팅 - 비성수기 주말가격 객실수정에서 변경가능
+            registerHotelRequest.setInsert_user(user_pk);
+            registerHotelRequest.setUpdate_user(user_pk);
+            hotelMapper.insertHotelInfo(registerHotelRequest);
+
+            // Image Resizing & S3 Upload & DB insert
+            if(registerHotelRequest.getImage() != null){
+                List<String> imageUrlList = imageUtil.uploadImage(registerHotelRequest.getImage());
+                for(int i=0; i < imageUrlList.size(); i++){
+                    String imageName = imageUrlList.get(i);
+                    String bucket_url = imageUtil.getImageUrl(imageName);
+                    HotelDto.ImageTable imageTable = new HotelDto.ImageTable();
+                    imageTable.setSelect_type(CommonEnum.ImageType.HOTEL.getCode());
+                    imageTable.setPrimary_key(Integer.parseInt(hotelPK));
+                    imageTable.setPicture_name(imageName);
+                    imageTable.setBucket_url(bucket_url);
+                    imageTable.setPicture_sequence(i+1); // 사진순서 1부터 시작
+                    imageTable.setInsert_user(user_pk);
+                    imageTable.setUpdate_user(user_pk);
+                    hotelMapper.insertHotelImage(imageTable);
+                }
+            }
+
+            // 성수기정보 저장
+            if(registerHotelRequest.getPeak_season_list() != null){
+                registerHotelRequest.getPeak_season_list().forEach(peakSeason ->  {
+                    HotelDto.PeekSeasonTable peekSeasonTable = new HotelDto.PeekSeasonTable();
+                    peekSeasonTable.setPeak_season_std(peakSeason.getPeak_season_start());
+                    peekSeasonTable.setPeak_season_end(peakSeason.getPeak_season_end());
+                    peekSeasonTable.setHotel_num(Integer.parseInt(hotelPK));
+                    peekSeasonTable.setInsert_user(user_pk);
+                    peekSeasonTable.setUpdate_user(user_pk);
+                    hotelMapper.insertPeekSeason(peekSeasonTable);
+                });
+            }
 
         }catch (Exception e){
-
+            e.printStackTrace();
         }
         result.setMessage("호텔 등록 완료");
         return result;
@@ -351,7 +412,7 @@ public class HotelServiceImpl implements HotelService {
             hotelTagList.add(4);
             hotelTagList.add(5);
 
-            hotelDetailInfo.setHotel_num(123);
+            hotelDetailInfo.setHotel_num(hotelDetailInfoRequest.getHotel_num());
             hotelDetailInfo.setName("신라스테이");
             hotelDetailInfo.setEng_name("Shilla Stay");
             hotelDetailInfo.setAddress("서울특별시 강남구");

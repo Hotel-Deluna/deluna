@@ -1,5 +1,6 @@
 package com.hotel.owner.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hotel.common.CommonResponseVo;
 import io.swagger.annotations.ApiModel;
@@ -42,8 +43,15 @@ public class OwnerVo {
     @Schema(description = "사업자번호", required = true, example = "1234567890")
     String business_num;
 
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
     @Schema(description = "개업일", required = true, example = "2022/08/10")
     Date opening_day;
+
+    @JsonIgnore
+    String is_delete;
+
+    @JsonIgnore
+    Date dt_update;
 
     @JsonIgnore
     String insert_user;
@@ -75,6 +83,9 @@ public class OwnerVo {
         Date opening_day;
 
         @JsonIgnore
+        Integer business_user_num;
+
+        @JsonIgnore
         String update_user;
 
     }
@@ -84,8 +95,41 @@ public class OwnerVo {
     @NoArgsConstructor
     @Schema(description = "사업자 탈퇴 사유")
     public static class OwnerWithdrawRequest {
-        @Schema(description = "사업자 탈퇴 사유",  required = true, example = "매출없음")
-        String reason;
+        @Schema(description = "사업자 탈퇴 사유 코드",  required = true, example = "매출없음")
+        Integer reason;
+
+        @JsonIgnore
+        Integer business_user_num;
+
+        @JsonIgnore
+        String insert_user;
+
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "사업자 번호 진위여부 조회 파라미터")
+    public static class OwnerVerifyRequest {
+        @Schema(description = "사업자 이름", required = true, example = "홍길동")
+        String name;
+
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
+        @Schema(description = "개업일", required = true, example = "2022/08/10")
+        Date opening_day;
+
+        @Schema(description = "사업자번호", required = true, example = "0123456789")
+        String business_num;
+
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "사업자 번호 진위여부 조회 응답값")
+    public static class OwnerVerifyResponse extends CommonResponseVo {
+        @Schema(description = "사업자 정보 데이터")
+        Boolean data;
     }
 
 }

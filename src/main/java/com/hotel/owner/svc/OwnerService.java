@@ -12,4 +12,5 @@ public interface OwnerService {
 
     CommonResponseVo OwnerWithdraw(OwnerVo.OwnerWithdrawRequest ownerWithdrawRequest);
 
+    OwnerVo.OwnerVerifyResponse OwnerVerify(OwnerVo.OwnerVerifyRequest ownerVerifyRequest);
 }

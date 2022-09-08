@@ -1,6 +1,7 @@
 package com.hotel.company.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
@@ -121,6 +122,31 @@ public class HotelInfoVo {
         @ApiParam(value = "멀티파트파일 이미지 리스트", required = false, example = "[멀티파트 파일 이미지1 , 멀티파트 파일 이미지2]")
         @Nullable
         List<MultipartFile> image;
+
+        // 호텔 등록시 insert에 필요한 정보
+        @JsonIgnore
+        @ApiParam(value = "사업자 번호",  required = false)
+        Integer business_user_num;
+
+        @JsonIgnore
+        @ApiParam(value = "위도 값",  required = false)
+        Float latitude;
+
+        @JsonIgnore
+        @ApiParam(value = "경도 값",  required = false)
+        Float longitude;
+
+        @JsonIgnore
+        @ApiParam(value = "공휴일 가격 상태", required = false)
+        Integer holiday_price_status;
+
+        @JsonIgnore
+        @ApiParam(value = "생성자",  required = false)
+        String insert_user;
+
+        @JsonIgnore
+        @ApiParam(value = "변경자",  required = false)
+        String update_user;
     }
 
     @Data
@@ -328,11 +354,14 @@ public class HotelInfoVo {
     @Schema(description = "호텔의 성수기 정보")
     public static class PeakSeason {
 
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
         @Schema(description = "성수기 시작일", required = false)
         Date peak_season_start;
 
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
         @Schema(description = "성수기 종료일", required = false)
         Date peak_season_end;
+
     }
 
     @Data
@@ -477,9 +506,11 @@ public class HotelInfoVo {
         @Schema(description = "호실명", required = true, example = "101호")
         String name;
 
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
         @Schema(description = "호실 사용금지 시작일", required = false, example = "2022/08/01")
         Date room_closed_start;
 
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
         @Schema(description = "호실 사용금지 해제일", required = false, example = "2022/08/03")
         Date room_closed_end;
 
@@ -549,9 +580,11 @@ public class HotelInfoVo {
         @Schema(description = "호실명", required = true, example = "101호")
         String name;
 
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
         @Schema(description = "호실 사용금지 시작일", required = false, example = "2022/08/01")
         Date room_closed_start;
 
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
         @Schema(description = "호실 사용금지 해제일", required = false, example = "2022/08/03")
         Date room_closed_end;
 
@@ -568,9 +601,11 @@ public class HotelInfoVo {
         @Schema(description = "호실명", required = true, example = "101호")
         String name;
 
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
         @Schema(description = "호실 사용금지 시작일", required = false, example = "2022/08/01")
         String room_closed_start;
 
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
         @Schema(description = "호실 사용금지 해제일", required = false, example = "2022/08/03")
         String room_closed_end;
 

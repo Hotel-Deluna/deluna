@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.hotel.company.dto.HotelMapper">
+
+    <!-- 호텔 등록 -->
+    <insert id="insertHotelInfo">
+        INSERT INTO d_hotel (business_user_num, phone_num, address, latitude, longitude, name, eng_name, hotel_info, hotel_rule, hotel_star,
+                             holiday_price_status, region_code, region_address, is_delete, dt_insert, dt_update, insert_user, update_user)
+            VALUE (#{business_user_num}, #{phone_num}, #{address}, #{latitude}, #{longitude}, #{name}, #{eng_name}, #{info}, #{rule},
+                   #{star}, #{holiday_price_status}, #{region_1depth_name}, #{region_2depth_name},
+                   'N', NOW(), NOW(), #{insert_user}, #{update_user})
+    </insert>
+
+    <!-- 호텔 이미지 등록 -->
+    <insert id="insertHotelImage">
+        INSERT INTO d_image (select_type, primary_key, picture_name, bucket_url, picture_sequence, dt_insert, dt_update, insert_user, update_user)
+            VALUE (#{select_type}, #{primary_key}, #{picture_name}, #{bucket_url}, #{picture_sequence}, NOW(), NOW(), #{insert_user}, #{update_user})
+    </insert>
+
+    <!-- 성수기 등록 -->
+    <insert id="insertPeekSeason">
+        INSERT INTO d_peak_season (hotel_num, peak_season_std, peak_season_end, is_delete, dt_insert, dt_update, insert_user, update_user)
+        VALUE (#{hotel_num}, #{peak_season_std}, #{peak_season_end}, 'N', NOW(), NOW(), #{insert_user}, #{update_user})
+    </insert>
+
+
+</mapper>

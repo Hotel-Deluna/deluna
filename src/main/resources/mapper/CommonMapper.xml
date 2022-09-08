@@ -4,6 +4,13 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 
 <mapper namespace="com.hotel.common.dto.CommonMapper">
+    <!-- 해당 테이블에서 다음에 생성될 PK숫자 조회 -->
+    <select id="getAutoIncrementNext" resultType="string">
+        SELECT Auto_increment
+        FROM information_schema.tables
+        WHERE table_schema = #{schema_name}
+          AND table_name = #{table_name}
+    </select>
 
     <select id="verifyPhoneAuth" resultType="date">
         SELECT dt_insert
