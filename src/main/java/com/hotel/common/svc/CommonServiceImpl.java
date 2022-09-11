@@ -235,16 +235,4 @@ public class CommonServiceImpl implements CommonService {
         String encryptedText = encryptor.encrypt(text); // 암호화
         return "ENC("+encryptedText+")";
     }
-
-    @Override
-    public String DecryptConfig(String text) {
-        PooledPBEStringEncryptor encryptor = new PooledPBEStringEncryptor();
-        encryptor.setProvider(new BouncyCastleProvider());
-        encryptor.setPoolSize(1);
-        encryptor.setPassword(encryptKey);
-        encryptor.setAlgorithm("PBEWithMD5AndDES");
-
-        String decrypt = encryptor.decrypt(text); // 복호화
-        return decrypt;
-    }
 }

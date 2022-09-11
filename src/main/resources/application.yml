@@ -5,12 +5,12 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
   # DB - Local
-  #  datasource:
-  #    driver-class-name: org.mariadb.jdbc.Driver
-  #    url: jdbc:mariadb://localhost:3306/kys
-  #    username: ENC(hNKmYYLZUCIkN4/kEaKp7rb8yoZWIQUFjut9dEWyCvo=)
-  #    password: ENC(jTyBpgXbLmrb1D3bakP67omwnhtsPfEyxk84vmkDrSU=)
-  #    schema-name: kys
+#  datasource:
+#    driver-class-name: org.mariadb.jdbc.Driver
+#    url: jdbc:mariadb://localhost:3306/kys
+#    username: ENC(MzVYb4ZviEJWdLvVFw0CSA==)
+#    password: ENC(5S02fsms4i0sL9H7seXhGA==)
+#    schema-name: kys
   # DB - Remote
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver

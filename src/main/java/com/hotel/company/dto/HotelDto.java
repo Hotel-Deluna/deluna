@@ -1,5 +1,6 @@
 package com.hotel.company.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hotel.common.dto.CommonDto;
 import com.hotel.company.vo.HotelInfoVo;
@@ -83,6 +84,9 @@ public class HotelDto {
         @ApiParam(value = "호텔번호", required = true)
         Integer hotel_num;
 
+        @ApiParam(value = "성수기 번호", required = true)
+        Integer peak_num;
+
     }
 
     @Data
@@ -123,6 +127,5 @@ public class HotelDto {
         @ApiParam(value = "사진순서", required = true)
         Integer picture_sequence;
     }
-
 
 }

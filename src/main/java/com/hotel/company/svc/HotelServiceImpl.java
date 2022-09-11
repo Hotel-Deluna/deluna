@@ -14,13 +14,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@Transactional
 public class HotelServiceImpl implements HotelService {
 
     @Autowired
@@ -141,13 +145,13 @@ public class HotelServiceImpl implements HotelService {
         try{
             // registerHotelParamVo 호텔정보 + 성수기 + 호텔태그 + 이미지 정보 DB 저장
             String userRole = String.valueOf(CommonEnum.UserRole.OWNER.getCode());
-            String hotelPK = dbUtil.getAutoIncrementNext(CommonEnum.TableName.D_BUSINESS_MEMBER.getName());
+            int hotelNum = dbUtil.getAutoIncrementNext(CommonEnum.TableName.D_BUSINESS_MEMBER.getName());
 
             // 사업자번호 - JWT 파싱 임시조치로 하드코딩
-            //TODO JWT 완성되면 변경
+            // TODO JWT 완성되면 변경
             int business_user_num = 3;
 
-            String user_pk = userRole + hotelPK; // 유저 구분 코드 + pk
+            String userPk = userRole + business_user_num; // 유저 구분 코드 + pk
 
             // 호텔등록 파라미터에서 사업자번호, 위도, 경도, 공휴일 가격상태 생성자, 변경자 정보 추가
             registerHotelRequest.setBusiness_user_num(business_user_num);
@@ -155,25 +159,16 @@ public class HotelServiceImpl implements HotelService {
             registerHotelRequest.setLatitude(registerHotelRequest.getLocation().get(0));
             registerHotelRequest.setLongitude(registerHotelRequest.getLocation().get(1));
             registerHotelRequest.setHoliday_price_status(1); // 기본셋팅 - 비성수기 주말가격 객실수정에서 변경가능
-            registerHotelRequest.setInsert_user(user_pk);
-            registerHotelRequest.setUpdate_user(user_pk);
+            registerHotelRequest.setInsert_user(userPk);
+            registerHotelRequest.setUpdate_user(userPk);
             hotelMapper.insertHotelInfo(registerHotelRequest);
 
             // Image Resizing & S3 Upload & DB insert
             if(registerHotelRequest.getImage() != null){
-                List<String> imageUrlList = imageUtil.uploadImage(registerHotelRequest.getImage());
-                for(int i=0; i < imageUrlList.size(); i++){
-                    String imageName = imageUrlList.get(i);
-                    String bucket_url = imageUtil.getImageUrl(imageName);
-                    HotelDto.ImageTable imageTable = new HotelDto.ImageTable();
-                    imageTable.setSelect_type(CommonEnum.ImageType.HOTEL.getCode());
-                    imageTable.setPrimary_key(Integer.parseInt(hotelPK));
-                    imageTable.setPicture_name(imageName);
-                    imageTable.setBucket_url(bucket_url);
-                    imageTable.setPicture_sequence(i+1); // 사진순서 1부터 시작
-                    imageTable.setInsert_user(user_pk);
-                    imageTable.setUpdate_user(user_pk);
-                    hotelMapper.insertHotelImage(imageTable);
+                Boolean vo = InsertImage(registerHotelRequest.getImage(),
+                        CommonEnum.ImageType.HOTEL.getCode(), hotelNum,  userPk);
+                if(!vo){
+                    // 공통 에러 - 이미지 등록실패
                 }
             }
 
@@ -183,11 +178,31 @@ public class HotelServiceImpl implements HotelService {
                     HotelDto.PeekSeasonTable peekSeasonTable = new HotelDto.PeekSeasonTable();
                     peekSeasonTable.setPeak_season_std(peakSeason.getPeak_season_start());
                     peekSeasonTable.setPeak_season_end(peakSeason.getPeak_season_end());
-                    peekSeasonTable.setHotel_num(Integer.parseInt(hotelPK));
-                    peekSeasonTable.setInsert_user(user_pk);
-                    peekSeasonTable.setUpdate_user(user_pk);
-                    hotelMapper.insertPeekSeason(peekSeasonTable);
+                    peekSeasonTable.setHotel_num(hotelNum);
+                    peekSeasonTable.setInsert_user(userPk);
+                    peekSeasonTable.setUpdate_user(userPk);
+                    try {
+                        hotelMapper.insertPeekSeason(peekSeasonTable);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 });
+            }
+            // 호텔 태그 저장
+            if(registerHotelRequest.getTags() != null){
+                registerHotelRequest.getTags().forEach(tag -> {
+                    HotelInfoVo.Tags tags = new HotelInfoVo.Tags();
+                    tags.setPk_num(hotelNum);
+                    tags.setTag_num(tag);
+                    tags.setInsert_user(userPk);
+                    tags.setUpdate_user(userPk);
+                    try {
+                        hotelMapper.insertHotelTags(tags);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+
             }
 
         }catch (Exception e){
@@ -443,10 +458,96 @@ public class HotelServiceImpl implements HotelService {
         return result;
     }
 
+    /**
+     * 호텔 정보 수정
+     * @param editHotelRequest
+     * @return
+     */
     @Override
     public CommonResponseVo EditHotel(HotelInfoVo.EditInfoHotelRequest editHotelRequest) {
-        // 호텔정보 수정 정보 DB 업데이트
         CommonResponseVo result = new CommonResponseVo();
+
+        try{
+            // registerHotelParamVo 호텔정보 + 성수기 + 호텔태그 + 이미지 정보 DB 저장
+            String userRole = String.valueOf(CommonEnum.UserRole.OWNER.getCode());
+            Integer hotelNum = editHotelRequest.getHotel_num();
+
+            // 사업자번호 - JWT 파싱 임시조치로 하드코딩
+            // TODO JWT 완성되면 변경
+            int business_user_num = 3;
+
+            String userPk = userRole + business_user_num; // 유저 구분 코드 + pk
+
+            // 호텔정보 수정 파라미터에 사업자번호, 위도, 경도, 변경자 정보 추가
+            editHotelRequest.setBusiness_user_num(business_user_num);
+            editHotelRequest.setPhone_num(aes256Util.encrypt(editHotelRequest.getPhone_num())); // 전화번호 암호화
+            editHotelRequest.setLatitude(editHotelRequest.getLocation().get(0));
+            editHotelRequest.setLongitude(editHotelRequest.getLocation().get(1));
+            editHotelRequest.setUpdate_user(userPk);
+            hotelMapper.updateHotelInfo(editHotelRequest);
+
+            // Image Resizing & S3 Upload & DB insert
+            if(editHotelRequest.getImage() != null){
+                // 현재 DB에 저장된 호텔 이미지 정보 전부 Delete
+                HotelDto.ImageTable deleteImageParam = new HotelDto.ImageTable();
+                deleteImageParam.setPrimary_key(hotelNum);
+                deleteImageParam.setSelect_type(CommonEnum.ImageType.HOTEL.getCode());
+                hotelMapper.deleteHotelImage(deleteImageParam);
+
+                // Image Resizing & S3 Upload & DB insert
+                if(editHotelRequest.getImage() != null){
+                    Boolean vo = InsertImage(editHotelRequest.getImage(),
+                            CommonEnum.ImageType.HOTEL.getCode(), hotelNum,  userPk);
+                    if(!vo){
+                        // 공통 에러 - 이미지 등록실패
+                    }
+                }
+            }
+
+            if(editHotelRequest.getPeak_season_list() != null){
+                // 현재 DB에 저장된 성수기정보 전부 soft Delete
+                hotelMapper.softDeletePeekSeason(hotelNum);
+
+                // 성수기정보 저장
+                editHotelRequest.getPeak_season_list().forEach(peakSeason ->  {
+                    HotelDto.PeekSeasonTable peekSeasonTable = new HotelDto.PeekSeasonTable();
+                    peekSeasonTable.setPeak_season_std(peakSeason.getPeak_season_start());
+                    peekSeasonTable.setPeak_season_end(peakSeason.getPeak_season_end());
+                    peekSeasonTable.setHotel_num(hotelNum);
+                    peekSeasonTable.setInsert_user(userPk);
+                    peekSeasonTable.setUpdate_user(userPk);
+                    try {
+                        hotelMapper.insertPeekSeason(peekSeasonTable);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+
+            if(editHotelRequest.getTags() != null){
+                // 현재 DB에 저장된 호텔 태그 정보 전부 Delete
+                hotelMapper.deleteHotelTags(hotelNum);
+
+                // 호텔 태그 저장
+                editHotelRequest.getTags().forEach(tag -> {
+                    HotelInfoVo.Tags tags = new HotelInfoVo.Tags();
+                    tags.setPk_num(hotelNum);
+                    tags.setTag_num(tag);
+                    tags.setInsert_user(userPk);
+                    tags.setUpdate_user(userPk);
+                    try {
+                        hotelMapper.insertHotelTags(tags);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
         result.setMessage("호텔 정보 수정 완료");
 
         return result;
@@ -454,9 +555,77 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     public CommonResponseVo RegisterRoom(HotelInfoVo.RegisterRoomRequest registerRoomRequest) {
-        // 객실정보 수정 정보 DB 업데이트
         CommonResponseVo result = new CommonResponseVo();
-        result.setMessage("객실 정보 수정 완료");
+
+        try{
+            // registerHotelParamVo 호텔정보 + 성수기 + 호텔태그 + 이미지 정보 DB 저장
+            String userRole = String.valueOf(CommonEnum.UserRole.OWNER.getCode());
+            int roomNum = dbUtil.getAutoIncrementNext(CommonEnum.TableName.D_ROOM.getName());
+
+            // 사업자번호 - JWT 파싱 임시조치로 하드코딩
+            // TODO JWT 완성되면 변경
+            int business_user_num = 3;
+            String userPk = userRole + business_user_num; // 유저 구분 코드 + pk
+
+            // 객실 정보 등록
+            registerRoomRequest.setInsert_user(userPk);
+            registerRoomRequest.setUpdate_user(userPk);
+            hotelMapper.insertRoomInfo(registerRoomRequest);
+
+            // 이미지 등록
+            if(registerRoomRequest.getImage() != null){
+                Boolean vo = InsertImage(registerRoomRequest.getImage(),
+                        CommonEnum.ImageType.ROOM.getCode(), roomNum,  userPk);
+                if(!vo){
+                    // 공통 에러 - 이미지 등록실패
+                }
+            }
+
+            // 객실 태그 등록
+            registerRoomRequest.getTags().forEach(tag -> {
+                HotelInfoVo.Tags tags = new HotelInfoVo.Tags();
+                tags.setPk_num(roomNum);
+                tags.setTag_num(tag);
+                tags.setInsert_user(userPk);
+                tags.setUpdate_user(userPk);
+                try {
+                    hotelMapper.insertRoomTags(tags);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+
+            // 객실 호실 등록
+            if(registerRoomRequest.getRoom_detail_list() != null){
+                registerRoomRequest.getRoom_detail_list().forEach(roomDetail -> {
+                    try {
+                        roomDetail.setRoom_num(roomNum);
+                        // 만약 호실 사용금지 날짜가 존재하면 호실 상태값 = 예약불가 (2) 아니면 예약가능
+                        if(roomDetail.getRoom_closed_start() != null){
+                            roomDetail.setRoom_detail_status(CommonEnum.RoomDetailStatus.UNAVAILABLE.getCode());
+                        }else {
+                            roomDetail.setRoom_detail_status(CommonEnum.RoomDetailStatus.AVAILABLE.getCode());
+                        }
+                        roomDetail.setInsert_user(userPk);
+                        roomDetail.setUpdate_user(userPk);
+                        hotelMapper.insertRoomDetailInfo(roomDetail);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+
+            // 공휴일 가격상태 업데이트 - 호텔 테이블에 컬럼존재
+            hotelMapper.updateHolidayPriceStatus(registerRoomRequest);
+
+        }catch (Exception e){
+            e.printStackTrace();
+            result.setResult("ERROR");
+            result.setMessage("");
+            return result;
+        }
+
+        result.setMessage("객실 등록 완료");
         return result;
     }
 
@@ -736,6 +905,53 @@ public class HotelServiceImpl implements HotelService {
         result.setData(reservationsList);
 
         return result;
+    }
+
+    /**
+     * 해당 리스트에 중복이 있으면 키값을 기준으로 중복제거
+     * @return list
+     */
+
+    private static class DeduplicationUtils {
+
+        public static <T> List<T> deduplication(final List<T> list, Function<? super T, ?> key) {
+            final Set<Object> set = ConcurrentHashMap.newKeySet();
+
+            return list.stream()
+                    .filter(
+                            predicate ->  set.add(key.apply(predicate))
+                    )
+                    .collect(Collectors.toList());
+        }
+    }
+
+    /**
+     * 이미지 AWS 업로드, 이미지 리사이징, 이미지 정보 DB 저장
+     * @return
+     */
+    private Boolean InsertImage(List<MultipartFile> multipartFile, int selectType, int PK, String userPk){
+
+        try{
+            List<String> imageUrlList = imageUtil.uploadImage(multipartFile);
+            for(int i=0; i < imageUrlList.size(); i++){
+                String imageName = imageUrlList.get(i);
+                String bucket_url = imageUtil.getImageUrl(imageName);
+                HotelDto.ImageTable imageTable = new HotelDto.ImageTable();
+                imageTable.setSelect_type(selectType);
+                imageTable.setPrimary_key(PK);
+                imageTable.setPicture_name(imageName);
+                imageTable.setBucket_url(bucket_url);
+                imageTable.setPicture_sequence(i+1); // 사진순서 1부터 시작
+                imageTable.setInsert_user(userPk);
+                imageTable.setUpdate_user(userPk);
+                hotelMapper.insertImage(imageTable);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
     }
 
 }
