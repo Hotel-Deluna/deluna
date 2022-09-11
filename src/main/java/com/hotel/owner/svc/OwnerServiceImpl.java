@@ -54,6 +54,7 @@ public class OwnerServiceImpl implements OwnerService {
     String aesKey;
 
     @Override
+    @Transactional
     public CommonResponseVo OwnerSignUp(OwnerVo.OwnerSignUpRequest ownerVo) {
         CommonResponseVo result = new CommonResponseVo();
 
@@ -87,6 +88,7 @@ public class OwnerServiceImpl implements OwnerService {
     }
 
     @Override
+    @Transactional
     public CommonResponseVo OwnerEditInfo(OwnerVo.OwnerInfo ownerInfoVo) {
         CommonResponseVo result = new CommonResponseVo();
         try{
@@ -157,6 +159,7 @@ public class OwnerServiceImpl implements OwnerService {
     }
 
     @Override
+    @Transactional
     public CommonResponseVo OwnerWithdraw(OwnerVo.OwnerWithdrawRequest ownerWithdrawRequest) {
         CommonResponseVo result = new CommonResponseVo();
         try{
