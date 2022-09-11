@@ -23,7 +23,7 @@ public class DBUtil {
      * @param : 테이블명
      * @return
      */
-    public String getAutoIncrementNext(String tableName) throws Exception{
+    public int getAutoIncrementNext(String tableName) throws Exception{
         Map<String, String> data = new HashMap<>();
         data.put("schema_name",schema_name);
         data.put("table_name",tableName);

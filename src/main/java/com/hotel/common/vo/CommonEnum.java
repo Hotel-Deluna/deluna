@@ -186,4 +186,17 @@ public class CommonEnum {
         String name;
 
     }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    public enum RoomDetailStatus{
+        AVAILABLE(1, "이용가능"),
+        UNAVAILABLE(2, "이용불가"),
+        ;
+
+        Integer code;
+        String name;
+
+    }
 }

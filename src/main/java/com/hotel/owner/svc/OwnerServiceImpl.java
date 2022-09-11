@@ -65,7 +65,7 @@ public class OwnerServiceImpl implements OwnerService {
                 return result;
             }
 
-            String nextNum = dbUtil.getAutoIncrementNext(CommonEnum.TableName.D_BUSINESS_MEMBER.getName()); // 다음 생성될 Auto Increment 숫자 조회
+            int nextNum = dbUtil.getAutoIncrementNext(CommonEnum.TableName.D_BUSINESS_MEMBER.getName()); // 다음 생성될 Auto Increment 숫자 조회
             String ownerCode = String.valueOf(CommonEnum.UserRole.OWNER.getCode()); // 사업자 코드
 
             ownerVo.setPassword(sha512Util.encryptSHA512(ownerVo.getPassword())); //비밀번호 암호화

@@ -28,6 +28,7 @@
         SELECT email, name, phone_num, business_num, opening_day
         FROM d_business_member
         WHERE business_user_num = #{business_user_num}
+          AND is_delete = 'N'
     </select>
 
     <!-- 사업자 탈퇴처리 -->
@@ -49,6 +50,7 @@
         SELECT business_num
         FROM d_business_member
         WHERE business_num = #{business_num}
+          AND is_delete = 'N'
     </select>
 
 </mapper>

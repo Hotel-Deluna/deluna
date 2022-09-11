@@ -5,7 +5,7 @@
 
 <mapper namespace="com.hotel.common.dto.CommonMapper">
     <!-- 해당 테이블에서 다음에 생성될 PK숫자 조회 -->
-    <select id="getAutoIncrementNext" resultType="string">
+    <select id="getAutoIncrementNext" resultType="int">
         SELECT Auto_increment
         FROM information_schema.tables
         WHERE table_schema = #{schema_name}

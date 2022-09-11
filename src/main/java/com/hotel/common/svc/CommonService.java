@@ -26,5 +26,4 @@ public interface CommonService {
 
     String EncryptConfig(String text);
 
-    String DecryptConfig(String text);
 }
