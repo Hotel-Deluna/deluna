@@ -3,7 +3,7 @@ package com.hotel.common.vo;
 import lombok.*;
 
 
-public class JwtToken {
+public class JwtTokenDto {
 
     @Getter
     @NoArgsConstructor

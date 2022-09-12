@@ -1,23 +1,14 @@
 package com.hotel.reservation.vo;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.hotel.common.CommonResponseVo;
-import com.hotel.company.vo.HotelInfoVo;
-import com.hotel.company.vo.HotelInfoVo.OwnerHotel;
-import com.hotel.owner.vo.OwnerVo;
+import java.math.BigDecimal;
+import java.util.List;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-import io.swagger.models.auth.In;
+import com.hotel.common.CommonResponseVo;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
 
 public class MemberInfoVo {
 
@@ -37,7 +28,7 @@ public class MemberInfoVo {
 	public static class MemberReservationInfo {
 
 		@Schema(description = "결제금액", required = true, example = "300000")
-		String resrvation_price;
+		String reservation_price;
 
 	}
 
@@ -105,10 +96,10 @@ public class MemberInfoVo {
 		String room_detail_num;
 
 		@Schema(description = "예약자명", required = true, example = "예약자명")
-		String resrvation_name;
+		String reservation_name;
 
 		@Schema(description = "휴대폰번호", required = true, example = "01012345678")
-		String resrvation_phone;
+		String reservation_phone;
 
 		@Schema(description = "호텔명", required = true, example = "호텔 델루나")
 		String name;
@@ -117,7 +108,7 @@ public class MemberInfoVo {
 		String room_detail_name;
 
 		@Schema(description = "투숙인원", required = true, example = "2")
-		Integer resrvation_peple;
+		Integer reservation_people;
 
 		@Schema(description = "예약 시작일", required = true, example = "2022-08-28 14:20:00")
 		String st_date;
@@ -126,10 +117,10 @@ public class MemberInfoVo {
 		String ed_date;
 
 		@Schema(description = "결제금액", required = true, example = "300000")
-		String resrvation_price;
+		String reservation_price;
 
 		@Schema(description = "예약상태", required = true, example = "0")
-		String resrvation_status;
+		String reservation_status;
 
 	}
 
@@ -139,16 +130,16 @@ public class MemberInfoVo {
 	public static class MemberReservationRequest {
 
 		@Schema(description = "회원번호", required = true, example = "000001")
-		String user_num;
+		String member_num;
 
 		@Schema(description = "객실상세번호", required = true, example = "000002")
 		String room_detail_num;
 
 		@Schema(description = "예약자명", required = true, example = "예약자명")
-		String resrvation_name;
+		String reservation_name;
 
 		@Schema(description = "휴대폰번호", required = true, example = "01012345678")
-		String resrvation_phone;
+		String reservation_phone;
 
 		@Schema(description = "호텔명", required = true, example = "호텔 델루나")
 		String name;
@@ -157,7 +148,7 @@ public class MemberInfoVo {
 		String room_detail_name;
 
 		@Schema(description = "투숙인원", required = true, example = "2")
-		Integer resrvation_peple;
+		Integer reservation_people;
 
 		@Schema(description = "예약 시작일", required = true, example = "2022-08-28 14:20:00")
 		String st_date;
@@ -166,7 +157,7 @@ public class MemberInfoVo {
 		String ed_date;
 
 		@Schema(description = "결제금액", required = true, example = "300000")
-		BigDecimal resrvation_price;
+		BigDecimal reservation_price;
 
 	}
 
@@ -176,7 +167,7 @@ public class MemberInfoVo {
 	@Schema(description = "결제 정보 조회")
 	public static class ReservationPaymentsInfo {
 		@Schema(description = "예약번호", required = true, example = "0013313")
-		String resrvation_num;
+		String reservation_num;
 
 		@Schema(description = "예약상세번호", required = true, example = "0000001")
 		String payment_detail_num;
@@ -201,7 +192,7 @@ public class MemberInfoVo {
 	public static class MemberWithdrawRequest {
 
 		@Schema(description = "회원 예약번호", required = true, example = "1108668")
-		String resrvation_num;
+		String reservation_num;
 
 		@Schema(description = "객실 상세정보 번호", required = true, example = "3332221")
 		String room_detail_num;

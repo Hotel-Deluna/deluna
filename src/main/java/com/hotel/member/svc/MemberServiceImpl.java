@@ -1,37 +1,112 @@
 package com.hotel.member.svc;
 
 import com.hotel.common.CommonResponseVo;
+import com.hotel.common.vo.JwtTokenDto.TokenDto;
+import com.hotel.jwt.JwtTokenProvider;
+import com.hotel.mapper.MemberMapper;
+import com.hotel.member.dto.MemberRequestDto;
+import com.hotel.member.dto.MemberResponseDto;
+import com.hotel.member.repo.MemberRepository;
+import com.hotel.member.vo.Member;
 import com.hotel.member.vo.MemberVo;
-import com.hotel.member.vo.MemberVo.LoginMemberRequest;
 import com.hotel.member.vo.MemberVo.LoginMemberRequestGoogle;
 import com.hotel.member.vo.MemberVo.LoginMemberRequestKokao;
 import com.hotel.member.vo.MemberVo.LoginMemberRequestNaver;
 import com.hotel.member.vo.MemberVo.MemberFindPwdRequest;
 import com.hotel.member.vo.MemberVo.MemberUpdatePwdRequest;
+import com.hotel.util.SecurityUtil;
+
+import lombok.RequiredArgsConstructor;
+
+import java.util.Optional;
+
+import javax.servlet.http.Cookie;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class MemberServiceImpl implements MemberService {
+@RequiredArgsConstructor
+public class MemberServiceImpl {
 
-	@Override
+	private final AuthenticationManagerBuilder authenticationManagerBuilder;
+
+	private final JwtTokenProvider jwtTokenProvider;
+
+	private final MemberRepository memberRepository;
+	
+	private final MemberMapper memberMapper;
+
 	public CommonResponseVo MemberSignUp(MemberVo.RegisterMemberRequest memberVo) {
 
 		CommonResponseVo result = new CommonResponseVo();
 		result.setMessage("회원 가입 완료");
-
+		
+		String findByEmail = memberMapper.findByEmail(memberVo.getEmail());
+		
+		// 이메일 중복여부 체크
+		// 비밀번호 암호화 후 db 인서트
+		try {
+			if(findByEmail == null) {
+				
+				//비밀번호 암호화
+				// 추가 예정
+				
+				System.out.println("memberVo = " + memberVo.toString());
+				int registerMember = memberMapper.registerMemberInfo(memberVo);
+				
+				System.out.println("registerMember = " + registerMember);
+				
+				if(registerMember > 0) {
+					result.setMessage("회원가입이 완료되었습니다.");
+				}
+			}
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
 		return result;
 	}
 
-	@Override
-	public CommonResponseVo MemberSignIn(LoginMemberRequest memberVo) {
+	// 이메일 조회
+	@Transactional(readOnly = true)
+	public TokenDto getMemberInfo(MemberRequestDto memberRequestDto) {
+		
+		TokenDto dto = new TokenDto();
+		
+		try {
+			Optional<Member> member = memberRepository.findByEmail(memberRequestDto.getEmail());
 
-		CommonResponseVo result = new CommonResponseVo();
-		result.setMessage("로그인 성공!!");
+			if (member.get().getEmail().equals(null) || member.get().getEmail().equals("")) {
+				return null;
+			}
+			
+			String id = member.get().getEmail();
+			System.out.println("id = " + id);
+			UsernamePasswordAuthenticationToken authenticationToken = memberRequestDto.toAuthentication();
+			System.out.println("authenticationToken = " + authenticationToken.toString());
+			
+			dto = jwtTokenProvider.generateTokenDto(authenticationToken);
+			System.out.println("dto = " + dto.toString());
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 
-		return result;
+		return dto;
 	}
 
-	@Override
+	// 현재 SecurityContext 에 있는 유저 정보 가져오기
+	@Transactional(readOnly = true)
+	public MemberResponseDto getMyInfo() {
+		return memberRepository.findById(SecurityUtil.getCurrentMemberId()).map(MemberResponseDto::of)
+				.orElseThrow(() -> new RuntimeException("로그인 유저 정보가 없습니다."));
+	}
+
 	public CommonResponseVo memberSignInKakao(LoginMemberRequestKokao memberVo) {
 		CommonResponseVo result = new CommonResponseVo();
 		result.setMessage("code정보");
@@ -39,7 +114,6 @@ public class MemberServiceImpl implements MemberService {
 		return result;
 	}
 
-	@Override
 	public CommonResponseVo memberSignInNaver(LoginMemberRequestNaver memberVo) {
 		CommonResponseVo result = new CommonResponseVo();
 		result.setMessage("code정보");
@@ -47,7 +121,6 @@ public class MemberServiceImpl implements MemberService {
 		return result;
 	}
 
-	@Override
 	public CommonResponseVo memberSignInGoogle(LoginMemberRequestGoogle memberVo) {
 		CommonResponseVo result = new CommonResponseVo();
 		result.setMessage("code정보, 수정 예정");
@@ -55,14 +128,12 @@ public class MemberServiceImpl implements MemberService {
 		return result;
 	}
 
-	@Override
 	public CommonResponseVo MemberEditInfo(MemberVo.MemberUpdateInfo memberInfoVo) {
 		CommonResponseVo result = new CommonResponseVo();
 		result.setMessage("고객정보 수정 완료");
 		return result;
 	}
 
-	@Override
 	public MemberVo.MemberInfoResponse ViewMemberInfo() {
 //        ApiResponseVo result = new ApiResponseVo();
 		MemberVo.MemberInfoResponse result = new MemberVo.MemberInfoResponse();
@@ -76,7 +147,6 @@ public class MemberServiceImpl implements MemberService {
 		return result;
 	}
 
-	@Override
 	public CommonResponseVo MemberWithdraw(MemberVo.MemberDeleteRequest memberWithdrawRequest) {
 		CommonResponseVo result = new CommonResponseVo();
 		// 사업자 회원 탈퇴처리
@@ -85,7 +155,6 @@ public class MemberServiceImpl implements MemberService {
 		return result;
 	}
 
-	@Override
 	public CommonResponseVo FindPasswdEmail(MemberFindPwdRequest findPwdRequest) {
 		CommonResponseVo result = new CommonResponseVo();
 		if (findPwdRequest.getEmail().equals("")) {
@@ -100,7 +169,6 @@ public class MemberServiceImpl implements MemberService {
 		return result;
 	}
 
-	@Override
 	public CommonResponseVo UpdatePasswd(MemberUpdatePwdRequest updatePwdRequest) {
 		CommonResponseVo result = new CommonResponseVo();
 		if (updatePwdRequest.getPassword().equals("")) {
@@ -112,31 +180,29 @@ public class MemberServiceImpl implements MemberService {
 		}
 		result.setMessage("비밀번호 변경이 완료되었습니다.");
 
-        return result;
-    }
+		return result;
+	}
 
-    @Override
-    public MemberVo.FindIdResponse FindId(MemberVo.FindIdRequest findIdRequest) {
-        MemberVo.FindIdResponse result = new MemberVo.FindIdResponse();
-        MemberVo.IdInfo idInfo = new MemberVo.IdInfo();
-        // 첫 4글자 제외한 나머지 글자 블러처리 (@ 전까지)
-        idInfo.setEmail("abcd**@hotel.com");
+	public MemberVo.FindIdResponse FindId(MemberVo.FindIdRequest findIdRequest) {
+		MemberVo.FindIdResponse result = new MemberVo.FindIdResponse();
+		MemberVo.IdInfo idInfo = new MemberVo.IdInfo();
+		// 첫 4글자 제외한 나머지 글자 블러처리 (@ 전까지)
+		idInfo.setEmail("abcd**@hotel.com");
 
-        result.setMessage("아이디 조회 완료");
-        result.setData(idInfo);
+		result.setMessage("아이디 조회 완료");
+		result.setData(idInfo);
 
-        return result;
-    }
+		return result;
+	}
 
-    @Override
-    public CommonResponseVo EditPassword(MemberVo.EditPasswordRequest editPasswordRequest) {
-        CommonResponseVo result = new CommonResponseVo();
-        // 기존비밀번호 암호화 이후 DB 비밀번호와 비교
-        // 만약 일치하지 않으면 일치하지 않는다는 에러값 리턴
+	public CommonResponseVo EditPassword(MemberVo.EditPasswordRequest editPasswordRequest) {
+		CommonResponseVo result = new CommonResponseVo();
+		// 기존비밀번호 암호화 이후 DB 비밀번호와 비교
+		// 만약 일치하지 않으면 일치하지 않는다는 에러값 리턴
 
-        result.setMessage("비밀번호 변경 완료");
+		result.setMessage("비밀번호 변경 완료");
 
-        return result;
-    }
+		return result;
+	}
 
 }

@@ -1,22 +1,37 @@
 package com.hotel.member.vo;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
+
 import com.hotel.common.CommonResponseVo;
-import com.hotel.owner.vo.OwnerVo;
-import com.hotel.reservation.vo.MemberInfoVo;
 
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-import io.swagger.models.auth.In;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
+import nonapi.io.github.classgraph.json.Id;
 
-import java.util.List;
-
+@Getter
+@NoArgsConstructor
+@Table(name="member")
 public class MemberVo {
+	
+	@Id
+	@Column(value = "member_num")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long member_num;
+	
+	private String email;
+	
+	private String password;
+	
+	private String phone_num;
+	
 
 	@Data
 	@AllArgsConstructor
@@ -41,11 +56,14 @@ public class MemberVo {
 		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
 		String email;
 
-		@Schema(description = "휴대폰 인증번호", required = true, example = "123456")
-		String phone_auth_num;
+		//@Schema(description = "휴대폰 인증번호", required = true, example = "123456")
+		//String phone_auth_num;
 
 		@Schema(description = "비밀번호", required = true, example = "비밀번호 입력")
 		String password;
+		
+		@Schema(description = "회원상태여부", required = true, example = "0:고객,1:사업자")
+		String role;
 
 	}
 
@@ -182,7 +200,7 @@ public class MemberVo {
 	public static class MemberDeleteRequest {
 
 		@Schema(description = "고객번호", required = true, example = "000001")
-		String user_num;
+		String member_num;
 
 		@Schema(description = "고객 탈퇴 사유", required = true, example = "사용안함111")
 		String reason;

@@ -1,5 +1,7 @@
 package com.hotel.common;
 
+import java.util.Map;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -43,5 +45,8 @@ public class CommonResponseVo {
 
     @Schema(description = "메시지", required = true)
     String message;
+    
+    @Schema(description = "데이터", required = true)
+    Map<String, Object> map;
 
 }
