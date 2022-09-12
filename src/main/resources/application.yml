@@ -4,7 +4,6 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
-
 ---
 
 spring:
@@ -16,6 +15,7 @@ spring:
     url: jdbc:mariadb://monsu1016.cafe24.com:3306/hotel-deluna?characterEncoding=UTF-8&serverTimezone=UTC
     username: monsu1016
     password:
+    schema-name: monsu1016
 ---
 
 spring:
@@ -27,6 +27,10 @@ spring:
     url: jdbc:mariadb://localhost:3306/hotel_deluna?characterEncoding=UTF-8&serverTimezone=UTC
     username: root
     password: qwerasdf1.
+    schema-name: 
+---
+
+spring:
   jpa:
     open-in-view: false
     generate-ddl: true
@@ -34,11 +38,66 @@ spring:
     hibernate:
       ddl-auto: update
       
+ # Mail
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: gooyo.gmail.com
+    password: nnmfnktgzzdnmiah
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  
+# AES256
+aes:
+  256:
+    key: eThWmZq4t7w!z%C*F-JaNdRfUjXn2r5u
+# 설정 파일 암호화
+
+jasypt:
+  encryptor:
+    password: delunacoin
+    bean: encryptorBean
+
+# SMS
+naver:
+  sms:
+    accessKey: bsgSEfhPb9bqhgma4xTL
+    serviceId: ncp:sms:kr:292049742534:hotel-deluna
+    secretKey: QjG7ohHyTgBwZuR8Tr1SeAi1B0z3PA8HYbYs433Y
+    senderPhoneNum: 01068774919
+
 mybatis:
   mapper-locations: classpath:mapper/*.xml
-  
-# AWS Key 파일, JWT개인키등 - 서버에 config로 관리하고 여기엔 해당 위치만 표기
 
-jwt:
+JWT:
   secret: Y29kZXN0YXRlcy1iaXRodW1iLW1zYS10ZWFtLW1lbWJlci1zcHJpbmctYm9vdC13ZWJmbHV4LWp3dC1zZWNyZXQ
-    
+
+# AWS
+cloud:
+  aws:
+    credentials:
+      accessKey: AKIA6KWD6G4MY75XJ5WD
+      secretKey: 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
+    s3:
+      bucket: cointalk-drawing-bucket
+    region:
+      static: ap-northeast-2
+      auto: false
+    stack:
+      auto: false
+      
+# 공공데이터포탈
+
+odcloud:
+  serviceKey: fEtrUgp6ppbQCb6nObfH4LW8rj8A300ctovn7AheyoV%2BXKUG97SlxVCtMP23hJz81Y3lROZcbqwOX48Tey%2FN7A%3D%3D
+
+logging:
+  level:
+    com:
+      amazonaws:
+        util:
+          EC2MetadataUtils: error

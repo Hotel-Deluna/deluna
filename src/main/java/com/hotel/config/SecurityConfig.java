@@ -3,7 +3,9 @@ package com.hotel.config;
 import com.hotel.jwt.JwtAuthenticationEntryPoint;
 import com.hotel.jwt.JwtAuthenticationFilter;
 import com.hotel.jwt.JwtTokenProvider;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -28,8 +30,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 	private final JwtTokenProvider tokenProvider;
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
-	
-	
+
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 		web.ignoring().antMatchers("/static/css/, /static/js/, *.ico");

@@ -48,6 +48,11 @@ public class OwnerController {
         return ownerService.OwnerWithdraw(ownerWithdrawReasonVo);
     }
 
-
+    @ApiOperation(value="사업자 번호 진위여부 조회 - 사업자 등록번호 유효 : true, 사업자 등록번호 유효하지않음 : false")
+    @ResponseBody
+    @PostMapping(value = "/verify", produces = "application/json")
+    public OwnerVo.OwnerVerifyResponse OwnerVerify(@RequestBody OwnerVo.OwnerVerifyRequest ownerVerifyRequest){
+        return ownerService.OwnerVerify(ownerVerifyRequest);
+    }
 
 }

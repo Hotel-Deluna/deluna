@@ -3,10 +3,6 @@ package com.hotel.common.controller;
 import com.hotel.common.CommonResponseVo;
 import com.hotel.common.svc.CommonService;
 import com.hotel.common.vo.CommonVo;
-import com.hotel.owner.vo.OwnerVo;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -40,11 +36,60 @@ public class CommonController {
         return commonService.EmailDuplicateCheck(emailDuplicateCheckRequest);
     }
 
-//    @ApiOperation(value="호텔 태그 - 중복이면 true. 아니면 false 리턴")
-//    @ResponseBody
-//    @PostMapping("/email/duplicate-check")
-//    public CommonVo.EmailDuplicateCheckResponse EmailDuplicateCheck(@RequestBody CommonVo.EmailDuplicateCheckRequest emailDuplicateCheckRequest){
-//        return commonService.EmailDuplicateCheck(emailDuplicateCheckRequest);
-//    }
+    @ApiOperation(value="회원 코드 - 사업자, 일반회원 구분")
+    @ResponseBody
+    @GetMapping("/code/user-role")
+    public CommonVo.CommonCodeResponse UserRoleCode(){
+        return commonService.UserRoleCode();
+    }
+
+    @ApiOperation(value="호텔 태그 코드 (호텔시설)")
+    @ResponseBody
+    @GetMapping("/code/hotel")
+    public CommonVo.CommonCodeResponse HotelTagCode(){
+        return commonService.HotelTagCode();
+    }
+
+    @ApiOperation(value="객실 태그 코드 (객실 서비스)")
+    @ResponseBody
+    @GetMapping("/code/room")
+    public CommonVo.CommonCodeResponse RoomTagCode(){
+        return commonService.RoomTagCode();
+    }
+
+    @ApiOperation(value="탈퇴사유 코드 - 회원")
+    @ResponseBody
+    @GetMapping("/code/delete-reason/member")
+    public CommonVo.CommonCodeResponse MemberDeleteReasonCode(){
+        return commonService.MemberDeleteReasonCode();
+    }
+
+    @ApiOperation(value="탈퇴사유 코드 - 사업자")
+    @ResponseBody
+    @GetMapping("/code/delete-reason/owner")
+    public CommonVo.CommonCodeResponse OwnerDeleteReasonCode(){
+        return commonService.OwnerDeleteReasonCode();
+    }
+
+    @ApiOperation(value="지역코드 - 시,도 구분용")
+    @ResponseBody
+    @GetMapping("/code/region")
+    public CommonVo.CommonCodeResponse RegionCode(){
+        return commonService.RegionCode();
+    }
+
+    @ApiOperation(value="여행지 코드 - 메인페이지 여행지 목록")
+    @ResponseBody
+    @GetMapping("/code/tourist-spot")
+    public CommonVo.CommonCodeResponse TouristSpotCode(){
+        return commonService.TouristSpotCode();
+    }
+
+    @ApiOperation(value="설정파일 암호화 - 내부 API")
+    @ResponseBody
+    @GetMapping("/encrypt/config")
+    public String EncryptConfig(String text){
+        return commonService.EncryptConfig(text);
+    }
 
 }

@@ -172,7 +172,7 @@ public class HotelSearchVo {
         @Nullable
         List<Float> location;
 
-        @Schema(description = "정렬 구분번호 - 0: 호텔등급순 1: 가격높은순 2: 가격낮은순", required = true, example = "3")
+        @Schema(description = "정렬 구분번호 - 1: 호텔등급순 2: 가격높은순 3: 가격낮은순", required = true, example = "3")
         Integer rank_num;
     }
 

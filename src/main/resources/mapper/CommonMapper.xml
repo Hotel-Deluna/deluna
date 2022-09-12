@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.hotel.common.dto.CommonMapper">
+    <!-- 해당 테이블에서 다음에 생성될 PK숫자 조회 -->
+    <select id="getAutoIncrementNext" resultType="int">
+        SELECT Auto_increment
+        FROM information_schema.tables
+        WHERE table_schema = #{schema_name}
+          AND table_name = #{table_name}
+    </select>
+
+    <select id="verifyPhoneAuth" resultType="date">
+        SELECT dt_insert
+        FROM d_phone_auth
+        WHERE phone_num = #{phone_num}
+          AND phone_auth_num = #{auth_num}
+    </select>
+
+    <insert id="insertPhoneAuthInfo">
+        INSERT INTO d_phone_auth (phone_num, phone_auth_num, dt_insert) VALUE (#{phone_num}, #{auth_num}, NOW())
+    </insert>
+
+
+</mapper>

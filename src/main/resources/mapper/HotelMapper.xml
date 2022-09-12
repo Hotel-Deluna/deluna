@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.hotel.company.dto.HotelMapper">
+
+    <!-- 호텔 등록 -->
+    <insert id="insertHotelInfo">
+        INSERT INTO d_hotel (business_user_num, phone_num, address, latitude, longitude, name, eng_name, hotel_info, hotel_rule, hotel_star,
+                             holiday_price_status, region_code, region_address, is_delete, dt_insert, dt_update, insert_user, update_user)
+            VALUE (#{business_user_num}, #{phone_num}, #{address}, #{latitude}, #{longitude}, #{name}, #{eng_name}, #{info}, #{rule},
+                   #{star}, #{holiday_price_status}, #{region_1depth_name}, #{region_2depth_name},
+                   'N', NOW(), NOW(), #{insert_user}, #{update_user})
+    </insert>
+
+    <!-- 호텔 태그 등록 -->
+    <insert id="insertHotelTags">
+        INSERT INTO d_hotel_reference_tag (hotel_num, hotel_tag_num, dt_insert, dt_update, insert_user, update_user)
+            VALUE (#{pk_num}, #{tag_num}, NOW(), NOW(), #{insert_user}, #{update_user})
+    </insert>
+
+    <!-- 호텔 정보 수정 -->
+    <update id="updateHotelInfo">
+        UPDATE d_hotel
+        SET phone_num = #{phone_num},
+          address = #{address},
+          name = #{name},
+          eng_name = #{eng_name},
+          hotel_info = #{info},
+          hotel_rule = #{rule},
+          hotel_star = #{star},
+          region_code = #{region_1depth_name},
+          region_address = #{region_2depth_name},
+          latitude = #{latitude},
+          longitude = #{longitude},
+          dt_update = NOW(),
+          update_user = #{update_user}
+        WHERE hotel_num = #{hotel_num}
+    </update>
+
+    <!-- 이미지 등록 -->
+    <insert id="insertImage">
+        INSERT INTO d_image (select_type, primary_key, picture_name, bucket_url, picture_sequence, dt_insert, dt_update, insert_user, update_user)
+            VALUE (#{select_type}, #{primary_key}, #{picture_name}, #{bucket_url}, #{picture_sequence}, NOW(), NOW(), #{insert_user}, #{update_user})
+    </insert>
+
+    <!-- 성수기 등록 -->
+    <insert id="insertPeekSeason">
+        INSERT INTO d_peak_season (hotel_num, peak_season_std, peak_season_end, is_delete, dt_insert, dt_update, insert_user, update_user)
+        VALUE (#{hotel_num}, #{peak_season_std}, #{peak_season_end}, 'N', NOW(), NOW(), #{insert_user}, #{update_user})
+    </insert>
+
+    <!-- 성수기 소프트 삭제 -->
+    <update id="softDeletePeekSeason">
+        UPDATE d_peak_season
+        SET is_delete = 'Y'
+        WHERE hotel_num = #{hotel_num}
+    </update>
+
+    <!-- 호텔 이미지 삭제 -->
+    <delete id="deleteHotelImage">
+        DELETE
+        FROM d_image
+        WHERE select_type = #{select_type} AND primary_key = #{primary_key}
+    </delete>
+
+    <!-- 호텔 태그 삭제 -->
+    <delete id="deleteHotelTags">
+        DELETE
+        FROM d_hotel_reference_tag
+        WHERE hotel_num = #{hotel_num}
+    </delete>
+
+    <!-- 객실 등록 -->
+    <insert id="insertRoomInfo">
+        INSERT INTO d_room (hotel_num, minimum_people, maximum_people, name, double_bed_count, single_bed_count,
+                            check_in, check_out, weekday_price, weekend_price, p_weekday_price, p_weekend_price, is_delete, dt_insert, dt_update, insert_user, update_user)
+            VALUE (#{hotel_num}, #{minimum_people}, #{maximum_people}, #{name}, #{double_bed_count}, #{single_bed_count},
+                   #{check_in_time}, #{check_out_time}, #{weekday_price}, #{weekend_price}, #{p_weekday_price}, #{p_weekend_price}, 'N', NOW(), NOW(), #{insert_user}, #{update_user})
+    </insert>
+
+    <!-- 객실 태그 등록 -->
+    <insert id="insertRoomTags">
+        INSERT INTO d_room_reference_tag (room_num, room_tag_num, dt_insert, dt_update, insert_user, update_user)
+            VALUE (#{pk_num}, #{tag_num}, NOW(), NOW(), #{insert_user}, #{update_user})
+    </insert>
+
+    <!-- 공휴일 가격상태 업데이트 -->
+    <update id="updateHolidayPriceStatus">
+        UPDATE d_hotel
+        SET holiday_price_status = #{holiday_price_status},
+            dt_update = NOW(),
+            update_user = #{update_user}
+        WHERE hotel_num = #{hotel_num}
+    </update>
+
+    <!-- 호실 등록 -->
+    <insert id="insertRoomDetailInfo">
+        INSERT INTO d_room_detail (room_num, room_detail_name, room_detail_status, room_closed_start, room_closed_end,
+                                   is_delete, dt_insert, dt_update, insert_user, update_user)
+            VALUE (#{room_num}, #{name}, #{room_detail_status}, #{room_closed_start}, #{room_closed_end},
+                   'N', NOW(), NOW(), #{insert_user}, #{update_user})
+    </insert>
+
+</mapper>

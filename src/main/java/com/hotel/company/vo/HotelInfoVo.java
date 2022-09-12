@@ -1,8 +1,10 @@
 package com.hotel.company.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hotel.common.CommonResponseVo;
+import com.hotel.common.dto.CommonDto;
 import io.micrometer.core.lang.Nullable;
-import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -72,7 +74,7 @@ public class HotelInfoVo {
     @AllArgsConstructor
     @NoArgsConstructor
     @Schema(description = "호텔등록 파라미터")
-    public static class RegisterHotelRequest {
+    public static class RegisterHotelRequest extends CommonDto {
         @ApiParam(value = "한글 호텔명",  required = true, example = "신라스테이")
         String name;
 
@@ -115,6 +117,24 @@ public class HotelInfoVo {
         @ApiParam(value = "멀티파트파일 이미지 리스트", required = false, example = "[멀티파트 파일 이미지1 , 멀티파트 파일 이미지2]")
         @Nullable
         List<MultipartFile> image;
+
+        // 호텔 등록시 insert에 필요한 정보
+        @JsonIgnore
+        @ApiParam(value = "사업자 번호",  required = false)
+        Integer business_user_num;
+
+        @JsonIgnore
+        @ApiParam(value = "위도 값",  required = false)
+        Float latitude;
+
+        @JsonIgnore
+        @ApiParam(value = "경도 값",  required = false)
+        Float longitude;
+
+        @JsonIgnore
+        @ApiParam(value = "공휴일 가격 상태", required = false)
+        Integer holiday_price_status;
+
     }
 
     @Data
@@ -149,6 +169,18 @@ public class HotelInfoVo {
         @ApiParam(value = "호텔 전화번호", required = true, example = "0212345678")
         String phone_num;
 
+        @ApiParam(value = "주소 - 지번주소기준", required = true, example = "서울시 강남구")
+        String address;
+
+        @ApiParam(value = "위도, 경도 값. 0번째 배열 : x, 1번째 배열 : y",  required = true, example = "[123.546, 10.48]")
+        List<Float> location;
+
+        @ApiParam(value = "카카오 API의 지역 구분정보(region_1depth_name) - 특별시,도 정보", required = true, example = "서울시")
+        String region_1depth_name;
+
+        @ApiParam(value = "카카오 API의 지역 구분정보(region_2depth_name) - 시,구 정보", required = true, example = "강남구")
+        String region_2depth_name;
+
         @ApiParam(value = "호텔 정보", required = true, example = "신라스테이 강남점은...")
         String info;
 
@@ -161,8 +193,25 @@ public class HotelInfoVo {
         @ApiParam(value = "성수기 리스트", required = true)
         List<PeakSeason> peak_season_list;
 
-        @ApiParam(value = "이미지 리스트 - Object 형식. 특정 순서 이미지가 변경되면 해당 배열 aws 주소를 멀티파트 파일로 교체. ex) 이미지가 2개 있었는데 첫번재 이미지가 수정된다면 [멀티파트 파일 이미지1 , https://aws.bucket/..] ", required = true, example = "[멀티파트 파일 이미지1 , https://aws.bucket/..]")
-        List<Object> image;
+        @ApiParam(value = "이미지 리스트 - 이미지 멀티파트 파일 리스트", required = true, example = "[멀티파트 파일 이미지1 , 멀티파트 파일 이미지2]")
+        List<MultipartFile> image;
+
+        // 호텔 수정시 update에 필요한 정보
+        @JsonIgnore
+        @ApiParam(value = "사업자 번호",  required = false)
+        Integer business_user_num;
+
+        @JsonIgnore
+        @ApiParam(value = "위도 값",  required = false)
+        Float latitude;
+
+        @JsonIgnore
+        @ApiParam(value = "경도 값",  required = false)
+        Float longitude;
+
+        @JsonIgnore
+        @ApiParam(value = "변경자",  required = false)
+        String update_user;
     }
 
     @Data
@@ -178,7 +227,7 @@ public class HotelInfoVo {
     @NoArgsConstructor
     @AllArgsConstructor
     @Schema(description = "호텔 상세 정보")
-    public static class HotelDetailInfo {
+    public static class HotelDetailInfo extends CommonDto {
 
         @Schema(description = "호텔 구분번호",  required = true, example = "12345")
         Integer hotel_num;
@@ -195,6 +244,15 @@ public class HotelInfoVo {
         @Schema(description = "주소", required = true, example = "서울특별시 강남구")
         String address;
 
+        @ApiParam(value = "위도, 경도 값. 0번째 배열 : x, 1번째 배열 : y",  required = true, example = "[123.546, 10.48]")
+        List<Float> location;
+
+        @ApiParam(value = "카카오 API의 지역 구분정보(region_1depth_name) - 특별시,도 정보", required = true, example = "서울시")
+        String region_1depth_name;
+
+        @ApiParam(value = "카카오 API의 지역 구분정보(region_2depth_name) - 시,구 정보", required = true, example = "강남구")
+        String region_2depth_name;
+
         @Schema(description = "호텔 성급", required = true, example = "5")
         Integer star;
 
@@ -204,17 +262,34 @@ public class HotelInfoVo {
         @Schema(description = "호텔 정보", required = true, example = "신라스테이 강남점은...")
         String info;
 
-        @Schema(description = "호텔 규정", required = true, example = "대욕장 이용안내...")
+        @Schema(description = "호텔 규정", required = false, example = "대욕장 이용안내...")
         String rule;
 
-        @Schema(description = "호텔 성수기 정보 리스트", required = true)
+        @Schema(description = "호텔 성수기 정보 리스트", required = false)
         List<PeakSeason> peak_season_list;
 
-        @Schema(description = "호텔 태그(부가시설/서비스) 구분번호 리스트", required = true, example = "[1,2,3]")
+        @Schema(description = "호텔 태그(부가시설/서비스) 구분번호 리스트", required = false, example = "[1,2,3]")
         List<Integer> tags;
 
-        @Schema(description = "객실 정보 리스트", required = true)
+        @Schema(description = "객실 정보 리스트", required = false)
         List<RoomInfo> room_list;
+
+        // DB
+        @JsonIgnore
+        @ApiParam(value = "사업자 번호",  required = false)
+        Integer business_user_num;
+
+        @JsonIgnore
+        @ApiParam(value = "위도 값",  required = false)
+        Float latitude;
+
+        @JsonIgnore
+        @ApiParam(value = "경도 값",  required = false)
+        Float longitude;
+
+        @JsonIgnore
+        @ApiParam(value = "공휴일 가격 상태", required = false)
+        Integer holiday_price_status;
 
     }
 
@@ -322,11 +397,14 @@ public class HotelInfoVo {
     @Schema(description = "호텔의 성수기 정보")
     public static class PeakSeason {
 
-        @Schema(description = "성수기 시작일")
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
+        @Schema(description = "성수기 시작일", required = false)
         Date peak_season_start;
 
-        @Schema(description = "성수기 종료일")
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
+        @Schema(description = "성수기 종료일", required = false)
         Date peak_season_end;
+
     }
 
     @Data
@@ -363,7 +441,10 @@ public class HotelInfoVo {
     @AllArgsConstructor
     @NoArgsConstructor
     @Schema(description = "객실 등록 파라미터")
-    public static class RegisterRoomRequest {
+    public static class RegisterRoomRequest extends CommonDto {
+        @ApiParam(value = "호텔 구분번호", required = true, example = "12345")
+        Integer hotel_num;
+
         @ApiParam(value = "객실명",  required = true, example = "신라스테이")
         String name;
 
@@ -406,9 +487,8 @@ public class HotelInfoVo {
         @ApiParam(value = "호실 정보", required = true)
         List<RegisterRoomDetailRequest> room_detail_list;
 
-        @ApiParam(value = "공휴일 가격 상태 - 공휴일을 성수기 가격취급할건지 결정. 0: 비성수기 주말가격, 1: 성수기 주말가격",  required = true, example = "1")
+        @ApiParam(value = "공휴일 가격 상태 - 공휴일을 성수기 가격취급할건지 결정. 1: 비성수기 주말가격, 2: 성수기 주말가격",  required = true, example = "1")
         Integer holiday_price_status;
-
     }
 
     @Data
@@ -416,14 +496,17 @@ public class HotelInfoVo {
     @NoArgsConstructor
     @Schema(description = "객실 수정 파라미터")
     public static class EditRoomRequest {
+        @ApiParam(value = "호텔 구분번호", required = true, example = "12345")
+        Integer hotel_num;
+
         @ApiParam(value = "객실번호",  required = true, example = "123456")
         Integer room_num;
 
         @ApiParam(value = "객실명",  required = true, example = "신라스테이")
         String name;
 
-        @ApiParam(value = "이미지 리스트 - Object 형식. 특정 순서 이미지가 변경되면 해당 배열 aws 주소를 멀티파트 파일로 교체. ex) 이미지가 2개 있었는데 첫번재 이미지가 수정된다면 [멀티파트 파일 이미지1 , https://aws.bucket/..] ", required = true, example = "[멀티파트 파일 이미지1 , https://aws.bucket/..]")
-        List<Object> image;
+        @ApiParam(value = "이미지 리스트 - 이미지 멀티파트 파일 리스트", required = true, example = "[멀티파트 파일 이미지1 , 멀티파트 파일 이미지2]")
+        List<MultipartFile> image;
 
         @ApiParam(value = "객실 최소인원", required = true, example = "2")
         Integer minimum_people;
@@ -458,7 +541,7 @@ public class HotelInfoVo {
         @ApiParam(value = "객실 태그", required = true, example = "[1,3,5]")
         List<Integer> tags;
 
-        @ApiParam(value = "공휴일 가격 상태 - 공휴일을 성수기 가격취급할건지 결정. 0: 비성수기 주말가격, 1: 성수기 주말가격",  required = true, example = "1")
+        @ApiParam(value = "공휴일 가격 상태 - 공휴일을 성수기 가격취급할건지 결정. 1: 비성수기 주말가격, 2: 성수기 주말가격",  required = true, example = "1")
         Integer holiday_price_status;
 
     }
@@ -467,15 +550,30 @@ public class HotelInfoVo {
     @NoArgsConstructor
     @AllArgsConstructor
     @Schema(description = "호실 등록 파라미터")
-    public static class RegisterRoomDetailRequest {
+    public static class RegisterRoomDetailRequest extends CommonDto {
         @Schema(description = "호실명", required = true, example = "101호")
         String name;
 
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
         @Schema(description = "호실 사용금지 시작일", required = false, example = "2022/08/01")
         Date room_closed_start;
 
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
         @Schema(description = "호실 사용금지 해제일", required = false, example = "2022/08/03")
         Date room_closed_end;
+
+        // DB
+        @JsonIgnore
+        @Schema(description = "객실번호", required = true)
+        Integer room_num;
+
+        @JsonIgnore
+        @Schema(description = "객실상태값", required = false)
+        Integer room_detail_status;
+
+        @JsonIgnore
+        @Schema(description = "호실 삭제 예정일", required = false, example = "2022/08/03")
+        Date delete_date;
 
     }
 
@@ -500,7 +598,7 @@ public class HotelInfoVo {
         @Schema(description = "호실 삭제 예정일", required = false, example = "2022/08/31")
         Date delete_date;
 
-        @Schema(description = "호실 상태값 - 0: 예약가능 1: 예약불가능 ", required = true, example = "1")
+        @Schema(description = "호실 상태값 - 1: 예약가능 2: 예약불가능 ", required = true, example = "1")
         Integer status;
 
     }
@@ -543,11 +641,17 @@ public class HotelInfoVo {
         @Schema(description = "호실명", required = true, example = "101호")
         String name;
 
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
         @Schema(description = "호실 사용금지 시작일", required = false, example = "2022/08/01")
         Date room_closed_start;
 
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
         @Schema(description = "호실 사용금지 해제일", required = false, example = "2022/08/03")
         Date room_closed_end;
+
+        @JsonIgnore
+        @Schema(description = "객실 상태값", required = true)
+        Integer room_detail_status;
 
     }
 
@@ -555,18 +659,24 @@ public class HotelInfoVo {
     @NoArgsConstructor
     @AllArgsConstructor
     @Schema(description = "호실 정보수정 파라미터")
-    public static class EditRoomDetailRequest {
+    public static class EditRoomDetailRequest extends CommonDto {
         @Schema(description = "호실 구분번호", required = true, example = "12345")
         Integer room_detail_num;
 
         @Schema(description = "호실명", required = true, example = "101호")
         String name;
 
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
         @Schema(description = "호실 사용금지 시작일", required = false, example = "2022/08/01")
         String room_closed_start;
 
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
         @Schema(description = "호실 사용금지 해제일", required = false, example = "2022/08/03")
         String room_closed_end;
+
+        @JsonIgnore
+        @Schema(description = "객실 상태값", required = true, example = "101호")
+        Integer room_detail_status;
 
     }
 
@@ -648,7 +758,21 @@ public class HotelInfoVo {
         @Schema(description = "예약일",  required = true, example = "2022/08/01")
         Date reservation_date;
 
-        @Schema(description = "예약상태 - 0: 예약확정 1: 예약취소 2: 이용완료",  required = true, example = "0")
+        @Schema(description = "예약상태 - 1: 예약확정 2: 예약취소 3: 이용완료",  required = true, example = "1")
         Integer reservation_status;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "태그 참조")
+    public static class Tags extends CommonDto {
+
+        @ApiParam(value = "pk 번호", required = true)
+        Integer pk_num;
+
+        @ApiParam(value = "태그 번호", required = true)
+        Integer tag_num;
+
     }
 }

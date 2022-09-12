@@ -80,7 +80,7 @@ public class MemberInfoVo {
 		@Schema(description = "회원번호", required = true, example = "000001")
 		String user_num;
 
-		@Schema(description = "예약 상태 코드", required = true, example = "0:전체, 1:예약확정, 2:예약취소, 3:사용완료")
+		@Schema(description = "예약 상태 코드", required = true, example = "1:전체, 2:예약확정, 3:예약취소, 4:사용완료")
 		String reservation_status;
 	}
 

@@ -79,7 +79,7 @@ public class MemberVo {
 		@Schema(description = "비밀번호", required = true, example = "123456")
 		String password;
 
-		@Schema(description = "role", required = true, example = "고객:0, 사업자:1")
+		@Schema(description = "role", required = true, example = "고객:1, 사업자:2")
 		String role;
 
 	}
@@ -231,7 +231,7 @@ public class MemberVo {
 	@Schema(description = "공통 비밀번호 재설정 파라미터")
 	public static class MemberUpdatePwdRequest {
 
-		@Schema(description = "role", required = true, example = "고객:0, 사업자:1")
+		@Schema(description = "role", required = true, example = "고객:1, 사업자:2")
 		String role;
 
 		@Schema(description = "비밀번호", required = true, example = "비밀번호 입력")
@@ -255,7 +255,7 @@ public class MemberVo {
 	@NoArgsConstructor
 	@Schema(description = "아이디찾기 파라미터")
 	public static class FindIdRequest {
-		@Schema(description = "일반회원, 사업자 구분값 - 0: 일반회원 1: 사업자",  required = true, example = "1")
+		@Schema(description = "일반회원, 사업자 구분값 - 1: 일반회원 2: 사업자",  required = true, example = "1")
 		Integer role;
 
 		@Schema(description = "이름",  required = true, example = "홍길동")
