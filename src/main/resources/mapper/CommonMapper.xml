@@ -23,5 +23,12 @@
         INSERT INTO d_phone_auth (phone_num, phone_auth_num, dt_insert) VALUE (#{phone_num}, #{auth_num}, NOW())
     </insert>
 
+    <insert id="insertHoliday">
+        INSERT INTO d_holiday_info (holiday_name, holiday_date, dt_insert) VALUE (#{holiday_name}, #{holiday_date}, NOW())
+    </insert>
+
+    <delete id="deleteHoliday">
+        DELETE FROM d_holiday_info
+    </delete>
 
 </mapper>

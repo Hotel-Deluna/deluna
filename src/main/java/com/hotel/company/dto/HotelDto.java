@@ -1,20 +1,14 @@
 package com.hotel.company.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hotel.common.dto.CommonDto;
-import com.hotel.company.vo.HotelInfoVo;
-import io.micrometer.core.lang.Nullable;
 import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
-import java.util.List;
 
 public class HotelDto {
 
@@ -126,6 +120,42 @@ public class HotelDto {
 
         @ApiParam(value = "사진순서", required = true)
         Integer picture_sequence;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "특정 호실 예약날짜")
+    public static class RoomDetailReservationDate {
+        @ApiParam(value = "입실일", required = true)
+        Date st_date;
+
+        @ApiParam(value = "퇴실일", required = true)
+        Date ed_date;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "호텔 예약 리스트")
+    public static class HotelReservationList {
+        @ApiParam(value = "예약 구분번호", required = true)
+        Integer reservation_num;
+
+        @ApiParam(value = "예약자", required = true)
+        String reservation_name;
+
+        @ApiParam(value = "예약자 핸드폰 번호", required = true)
+        String reservation_phone;
+
+        @ApiParam(value = "객실 이름", required = true)
+        String room_name;
+
+        @ApiParam(value = "입실일", required = true)
+        Date st_date;
+
+        @ApiParam(value = "퇴실일", required = true)
+        Date ed_date;
     }
 
 }

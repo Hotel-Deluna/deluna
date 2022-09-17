@@ -17,7 +17,5 @@ public interface OwnerMapper {
 
     int insertOwnerWithdrawReason(OwnerVo.OwnerWithdrawRequest ownerWithdrawRequest);
 
-    String getOwnerTableAutoIncrementNext();
-
     String checkDuplicationOwner(String business_num);
 }

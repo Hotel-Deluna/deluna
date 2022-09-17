@@ -2,6 +2,8 @@ package com.hotel.owner.svc;
 
 import com.hotel.common.CommonResponseVo;
 import com.hotel.common.vo.CommonEnum;
+import com.hotel.common.vo.JwtTokenDto;
+import com.hotel.jwt.JwtTokenProvider;
 import com.hotel.owner.dto.OwnerMapper;
 import com.hotel.util.AES256Util;
 import com.hotel.util.DBUtil;
@@ -47,6 +49,9 @@ public class OwnerServiceImpl implements OwnerService {
     @Autowired
     DateUtil dateUtil;
 
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
+
     @Value("${odcloud.serviceKey}")
     String odcloudServiceKey;
 
@@ -74,7 +79,9 @@ public class OwnerServiceImpl implements OwnerService {
             ownerVo.setInsert_user(ownerCode+nextNum);
             ownerVo.setUpdate_user(ownerCode+nextNum);
 
+
             ownerMapper.ownerSignUp(ownerVo);
+            result.setMessage("사업자 회원 가입 완료");
         }catch (Exception e){
             e.printStackTrace();
             result.setResult("ERROR");
@@ -82,21 +89,25 @@ public class OwnerServiceImpl implements OwnerService {
             return result;
         }
 
-        result.setMessage("사업자 회원 가입 완료");
-
         return result;
     }
 
     @Override
     @Transactional
-    public CommonResponseVo OwnerEditInfo(OwnerVo.OwnerInfo ownerInfoVo) {
+    public CommonResponseVo OwnerEditInfo(OwnerVo.OwnerInfo ownerInfoVo, String jwt) {
         CommonResponseVo result = new CommonResponseVo();
         try{
             // 토큰 파싱해서 사업자 정보 확인
-            // TODO JWT 완성되면 처리로직 만들기 그 전엔 하드코딩
-            int business_user_num = 5;
+            int business_user_num = getPk(jwt);
             OwnerVo.OwnerInfo currentOwnerInfo = ownerMapper.selectOwnerInfo(business_user_num);
             String editBusinessNum = ownerInfoVo.getBusiness_num();
+
+            if(currentOwnerInfo == null){
+                result.setResult("ERROR");
+                result.setMessage("해당 사용자에 대한 정보가 없습니다");
+                return result;
+            }
+
             String currentBusinessNum = currentOwnerInfo.getBusiness_num();
 
             // 중복가입 방지
@@ -107,7 +118,7 @@ public class OwnerServiceImpl implements OwnerService {
                 // 중복가입 조회 - 사업자번호기준
                 if(checkDuplicationOwner(editBusinessNum)){
                     result.setResult("ERROR");
-                    result.setMessage("사업자 번호가 이미 존재합니다");
+                    result.setMessage("동일한 사업자 번호가 이미 존재합니다");
                     return result;
                 }
             }
@@ -116,6 +127,9 @@ public class OwnerServiceImpl implements OwnerService {
             ownerInfoVo.setPhone_num(aes256Util.encrypt(ownerInfoVo.getPhone_num()));
             ownerInfoVo.setUpdate_user(CommonEnum.UserRole.OWNER.getCode()+Integer.toString(business_user_num));
             ownerMapper.ownerEditInfo(ownerInfoVo);
+
+            result.setMessage("사업자 정보 수정 완료");
+
         }catch (Exception e){
             e.printStackTrace();
             result.setResult("ERROR");
@@ -123,18 +137,16 @@ public class OwnerServiceImpl implements OwnerService {
             return result;
         }
 
-        result.setMessage("사업자 정보 수정 완료");
         return result;
     }
 
     @Override
-    public OwnerVo.OwnerInfoResponse ViewOwnerInfo() {
+    public OwnerVo.OwnerInfoResponse ViewOwnerInfo(String jwt) {
         OwnerVo.OwnerInfoResponse result = new OwnerVo.OwnerInfoResponse();
 
         try{
             // 토큰 파싱해서 사업자 정보 확인
-            // TODO JWT 완성되면 처리로직 만들기 그 전엔 하드코딩
-            int business_user_num = 5;
+            int business_user_num = getPk(jwt);
             OwnerVo.OwnerInfo ownerInfo = ownerMapper.selectOwnerInfo(business_user_num);
 
             if(ownerInfo != null){
@@ -160,11 +172,11 @@ public class OwnerServiceImpl implements OwnerService {
 
     @Override
     @Transactional
-    public CommonResponseVo OwnerWithdraw(OwnerVo.OwnerWithdrawRequest ownerWithdrawRequest) {
+    public CommonResponseVo OwnerWithdraw(OwnerVo.OwnerWithdrawRequest ownerWithdrawRequest, String jwt) {
         CommonResponseVo result = new CommonResponseVo();
         try{
-            // TODO JWT 완성되면 처리로직 만들기 그 전엔 하드코딩
-            int business_user_num = 5;
+
+            int business_user_num = getPk(jwt);
             int isDeleteCnt = 0;
             int insertReasonCnt = 0;
 
@@ -203,7 +215,7 @@ public class OwnerServiceImpl implements OwnerService {
             List<Map<String, String>> businesses = new ArrayList<>();
 
             // Date 형식인 개업일 사업자 진위확인 API 형식에 맞춰 형변환
-            String start_dt = dateUtil.DateToStringForAPI(ownerVerifyRequest.getOpening_day());
+            String start_dt = dateUtil.dateToStringForAPI(ownerVerifyRequest.getOpening_day());
 
             // 사업자 진위확인 API 파라미터 형식에 맞춰 데이터 가공
             Map<String, String> ownerInfo = new HashMap<>();
@@ -285,5 +297,16 @@ public class OwnerServiceImpl implements OwnerService {
         }
 
         return result;
+    }
+
+    /**
+     * JWT Token에서 PK조회
+     * @param jwtToken
+     * @return
+     * @throws Exception
+     */
+    private int getPk(String jwtToken) throws Exception{
+        JwtTokenDto.PayLoadDto payloadData = jwtTokenProvider.getPayload(jwtToken);
+        return payloadData.getId();
     }
 }
