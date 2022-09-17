@@ -6,11 +6,11 @@ import com.hotel.owner.vo.OwnerVo;
 public interface OwnerService {
     CommonResponseVo OwnerSignUp(OwnerVo.OwnerSignUpRequest ownerVo);
 
-    CommonResponseVo OwnerEditInfo(OwnerVo.OwnerInfo ownerInfoVo);
+    CommonResponseVo OwnerEditInfo(OwnerVo.OwnerInfo ownerInfoVo, String jwt);
 
-    OwnerVo.OwnerInfoResponse ViewOwnerInfo();
+    OwnerVo.OwnerInfoResponse ViewOwnerInfo(String jwt);
 
-    CommonResponseVo OwnerWithdraw(OwnerVo.OwnerWithdrawRequest ownerWithdrawRequest);
+    CommonResponseVo OwnerWithdraw(OwnerVo.OwnerWithdrawRequest ownerWithdrawRequest, String jwt);
 
     OwnerVo.OwnerVerifyResponse OwnerVerify(OwnerVo.OwnerVerifyRequest ownerVerifyRequest);
 }

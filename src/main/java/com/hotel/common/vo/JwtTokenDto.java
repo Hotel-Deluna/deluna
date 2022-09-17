@@ -23,4 +23,12 @@ public class JwtTokenDto {
         private String refreshToken;
     }
 
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PayLoadDto {
+        int id;
+        String user_role;
+    }
+
 }

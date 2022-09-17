@@ -26,4 +26,7 @@ public interface CommonService {
 
     String EncryptConfig(String text);
 
+    String HolidayCrawling();
+
+    String CreateToken(int user_num, int user_role);
 }

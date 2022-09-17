@@ -92,4 +92,18 @@ public class CommonController {
         return commonService.EncryptConfig(text);
     }
 
+    @ApiOperation(value="공휴일 정보 저장 - 내부 API")
+    @ResponseBody
+    @GetMapping("/crawling/holiday")
+    public String HolidayCrawling(){
+        return commonService.HolidayCrawling();
+    }
+
+    @ApiOperation(value="테스트용 JWT 토큰 생성 - 임시")
+    @ResponseBody
+    @GetMapping("/create/token")
+    public String CreateToken(@RequestParam int user_num, @RequestParam int user_role){
+        return commonService.CreateToken(user_num, user_role);
+    }
+
 }

@@ -34,15 +34,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 		web.ignoring().antMatchers("/static/css/, /static/js/, *.ico");
-		
+
 		web.httpFirewall(defaultHttpFirewall());
-		
+
 		// swagger
 		web.ignoring()
 				.antMatchers("/v3/api-docs", "/configuration/ui", "/swagger-resources", "/configuration/security",
 				"/swagger-ui.html", "/webjars/", "/swagger/");
 	}
-	
+
 	@Bean
 	public HttpFirewall defaultHttpFirewall() {
 		return new DefaultHttpFirewall();

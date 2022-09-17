@@ -79,6 +79,7 @@ public class OwnerVo {
         @Schema(description = "사업자번호", required = true, example = "0123456789")
         String business_num;
 
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
         @Schema(description = "개업일", required = true, example = "2022/08/25")
         Date opening_day;
 

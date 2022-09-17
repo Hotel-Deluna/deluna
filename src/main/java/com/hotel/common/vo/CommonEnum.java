@@ -11,7 +11,8 @@ public class CommonEnum {
     @Getter
     public enum UserRole{
         MEMBER(1, "회원"),
-        OWNER(2, "사업자")
+        OWNER(2, "사업자"),
+        NONMEMBER(3, "비회원"),
         ;
 
         Integer code;
@@ -191,12 +192,75 @@ public class CommonEnum {
     @AllArgsConstructor
     @Getter
     public enum RoomDetailStatus{
-        AVAILABLE(1, "이용가능"),
-        UNAVAILABLE(2, "이용불가"),
+        AVAILABLE(1, "예약가능"),
+        UNAVAILABLE(2, "예약불가"),
         ;
 
         Integer code;
         String name;
 
     }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    public enum HolidayPriceStatus{
+        NO_PEAK_SEASON_PRICE(1, "비성수기 주말가격"),
+        PEAK_SEASON_PRICE(2, "성수기 주말가격"),
+        ;
+
+        Integer code;
+        String name;
+
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    public enum PriceType{
+
+        WEEKDAY_PRICE(1, "평일"),
+        WEEKEND_PRICE(2, "주말"),
+        P_WEEKDAY_PRICE(3, "성수기 평일"),
+        P_WEEKEND_PRICE(4, "성수기 주말"),
+       ;
+
+        Integer code;
+        String name;
+
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    public enum DayCode{
+        SUN(1, "일요일", false),
+        MON(2, "월요일", false),
+        TUE(3, "화요일", false),
+        WED(4, "수요일", false),
+        THU(5, "목요일", false),
+        FRI(6, "금요일", true),
+        SAT(7, "토요일", true),
+        ;
+
+        Integer code;
+        String name;
+        Boolean isWeekend;
+
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    public enum HotelReservationListRankCode{
+        TOTAL(1, "전체"),
+        RESERVATION_CONFIRMATION(2, "예약확정"),
+        RESERVATION_CANCEL(3, "예약취소"),
+        COMPLETED_USE(4, "이용완료"),
+        ;
+
+        Integer code;
+        String name;
+    }
+
 }

@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.List;
 
 public class CommonVo {
@@ -84,6 +85,18 @@ public class CommonVo {
 
         @Schema(description = "코드 이름")
         String name;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "공휴일")
+    public static class Holiday {
+        @Schema(description = "공휴일명")
+        String holiday_name;
+
+        @Schema(description = "공휴일 년/월/일")
+        Date holiday_date;
     }
 
 }

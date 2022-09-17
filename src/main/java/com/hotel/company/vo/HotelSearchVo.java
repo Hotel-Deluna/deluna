@@ -168,7 +168,7 @@ public class HotelSearchVo {
         @Nullable
         List<Integer> tags;
 
-        @Schema(description = "위도, 경도 값. 0번째 배열 : x, 1번째 배열 : y",  required = false, example = "[123.546, 10.48]")
+        @Schema(description = "경도, 위도 값. 0번째 배열 : x, 1번째 배열 : y",  required = false, example = "[123.546, 10.48]")
         @Nullable
         List<Float> location;
 

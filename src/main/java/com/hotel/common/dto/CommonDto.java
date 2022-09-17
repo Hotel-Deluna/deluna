@@ -1,5 +1,6 @@
 package com.hotel.common.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiParam;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,19 +18,24 @@ import java.util.Date;
 @NoArgsConstructor
 public class CommonDto {
 
-    @ApiParam(value = "삭제여부", required = false)
+    @ApiParam(value = "삭제여부", required = false, hidden = true)
+    @JsonIgnore
     String is_delete;
 
-    @ApiParam(value = "생성일", required = false)
+    @ApiParam(value = "생성일", required = false, hidden = true)
+    @JsonIgnore
     Date dt_inert;
 
-    @ApiParam(value = "변경일", required = false)
+    @ApiParam(value = "변경일", required = false, hidden = true)
+    @JsonIgnore
     Date dt_update;
 
-    @ApiParam(value = "생성자", required = false)
+    @ApiParam(value = "생성자", required = false, hidden = true)
+    @JsonIgnore
     String insert_user;
 
-    @ApiParam(value = "변경자", required = false)
+    @ApiParam(value = "변경자", required = false, hidden = true)
+    @JsonIgnore
     String update_user;
 
 }
