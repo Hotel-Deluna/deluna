@@ -48,13 +48,13 @@ public class UnMemberInfoVo {
     public static class UnMemberReservationInfo {
 
         @Schema(description = "예약번호", required = true, example = "1111111")
-        String resrvation_num;
+        String reservation_num;
         
         @Schema(description = "예약자명", required = true, example = "홍길동")
-        String resrvation_name;
+        String reservation_name;
         
         @Schema(description = "휴대폰번호", required = true, example = "01033334444")
-        String resrvation_phone;
+        String reservation_phone;
         
         @Schema(description = "호텔명", required = true, example = "호텔 델루나")
         String name;
@@ -63,7 +63,7 @@ public class UnMemberInfoVo {
         String room_detail_name;
         
         @Schema(description = "투숙인원", required = true, example = "2")
-        Integer resrvation_peple;
+        Integer reservation_people;
         
         @Schema(description = "예약 시작일", required = true, example = "2022-08-28 14:20:00")
         String st_date;
@@ -72,10 +72,10 @@ public class UnMemberInfoVo {
         String ed_date;
         
         @Schema(description = "결제금액", required = true, example = "300000")
-        BigDecimal resrvation_price;
+        BigDecimal reservation_price;
         
         @Schema(description = "예약상태", required = true, example = "0")
-        String resrvation_status;
+        String reservation_status;
     }
     
     @Data
@@ -85,7 +85,7 @@ public class UnMemberInfoVo {
     public static class UnMemberWithdrawRequest {
     	
     	@Schema(description = "비회원 예약번호",  required = true, example = "1108668")
-        String resrvation_num;
+        String reservation_num;
     	
         @Schema(description = "비회원 탈퇴 사유",  required = true, example = "일정변경")
         String reason;

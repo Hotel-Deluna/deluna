@@ -11,7 +11,7 @@
     </insert>
 
     <!-- 사업자 회원정보 수정 -->
-    <update id="OwnerEditInfo">
+    <update id="ownerEditInfo">
         UPDATE d_business_member
         SET email = #{email},
             name = #{name},
@@ -25,7 +25,7 @@
 
     <!-- 사업자 회원정보 조회 -->
     <select id="selectOwnerInfo" resultType="com.hotel.owner.vo.OwnerVo$OwnerInfo">
-        SELECT email, name, phone_num, business_num, opening_day
+        SELECT *
         FROM d_business_member
         WHERE business_user_num = #{business_user_num}
           AND is_delete = 'N'

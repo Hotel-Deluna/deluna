@@ -90,7 +90,7 @@ public class HotelInfoVo {
         @ApiParam(value = "주소 - 지번주소기준", required = true, example = "서울시 강남구")
         String address;
 
-        @ApiParam(value = "위도, 경도 값. 0번째 배열 : x, 1번째 배열 : y",  required = true, example = "[123.546, 10.48]")
+        @ApiParam(value = "경도, 위도 값. 0번째 배열 : x, 1번째 배열 : y",  required = true, example = "[123.546, 10.48]")
         List<Float> location;
 
         @ApiParam(value = "카카오 API의 지역 구분정보(region_1depth_name) - 특별시,도 정보", required = true, example = "서울시")
@@ -141,12 +141,13 @@ public class HotelInfoVo {
     @NoArgsConstructor
     @AllArgsConstructor
     @Schema(description = "호텔삭제 파라미터")
-    public static class DeleteHotelRequest {
+    public static class DeleteHotelRequest extends CommonDto{
         @Schema(description = "호텔 구분번호",  required = true, example = "12345")
         Integer hotel_num;
 
         @Schema(description = "호텔 삭제 사유",  required = true, example = "파산")
         String reason;
+
     }
 
     @Data
@@ -172,7 +173,7 @@ public class HotelInfoVo {
         @ApiParam(value = "주소 - 지번주소기준", required = true, example = "서울시 강남구")
         String address;
 
-        @ApiParam(value = "위도, 경도 값. 0번째 배열 : x, 1번째 배열 : y",  required = true, example = "[123.546, 10.48]")
+        @ApiParam(value = "경도, 위도 값. 0번째 배열 : x, 1번째 배열 : y",  required = true, example = "[123.546, 10.48]")
         List<Float> location;
 
         @ApiParam(value = "카카오 API의 지역 구분정보(region_1depth_name) - 특별시,도 정보", required = true, example = "서울시")
@@ -244,13 +245,13 @@ public class HotelInfoVo {
         @Schema(description = "주소", required = true, example = "서울특별시 강남구")
         String address;
 
-        @ApiParam(value = "위도, 경도 값. 0번째 배열 : x, 1번째 배열 : y",  required = true, example = "[123.546, 10.48]")
+        @Schema(description = "경도, 위도 값. 0번째 배열 : x, 1번째 배열 : y",  required = true, example = "[123.546, 10.48]")
         List<Float> location;
 
-        @ApiParam(value = "카카오 API의 지역 구분정보(region_1depth_name) - 특별시,도 정보", required = true, example = "서울시")
+        @Schema(description = "카카오 API의 지역 구분정보(region_1depth_name) - 특별시,도 정보", required = true, example = "서울시")
         String region_1depth_name;
 
-        @ApiParam(value = "카카오 API의 지역 구분정보(region_2depth_name) - 시,구 정보", required = true, example = "강남구")
+        @Schema(description = "카카오 API의 지역 구분정보(region_2depth_name) - 시,구 정보", required = true, example = "강남구")
         String region_2depth_name;
 
         @Schema(description = "호텔 성급", required = true, example = "5")
@@ -297,7 +298,9 @@ public class HotelInfoVo {
     @NoArgsConstructor
     @AllArgsConstructor
     @Schema(description = "객실 정보")
-    public static class RoomInfo {
+    public static class RoomInfo extends CommonDto {
+        @Schema(description = "호텔 구분번호",  required = true, example = "12345")
+        Integer hotel_num;
 
         @Schema(description = "객실 구분번호",  required = true, example = "12345")
         Integer room_num;
@@ -329,10 +332,10 @@ public class HotelInfoVo {
         @Schema(description = "금일 가격 - 해당 날짜 성수기, 비성수기, 평일, 주말 구분해서 제공", required = true, example = "150000")
         Integer price;
 
-        @Schema(description = "가격정보 - 성수기 평일", required = true, example = "350000")
+        @Schema(description = "가격정보 - 성수기 평일", required = false, example = "350000")
         Integer p_weekday_price;
 
-        @Schema(description = "가격정보 - 성수기 주말", required = true, example = "450000")
+        @Schema(description = "가격정보 - 성수기 주말", required = false, example = "450000")
         Integer p_weekend_price;
 
         @Schema(description = "가격정보 - 평일", required = true, example = "150000")
@@ -344,20 +347,17 @@ public class HotelInfoVo {
         @Schema(description = "예약가능방 갯수", required = true, example = "3")
         Integer reservable_room_count;
 
-        @Schema(description = "객실 사용 가능 여부 - 객실 사용금지상태일때 false", required = true, example = "true")
-        Boolean available_yn;
-
-        @Schema(description = "예약불가 시작일", required = true, example = "2022/08/01")
-        Date room_closed_start;
-
-        @Schema(description = "예약불가 종료일", required = true, example = "2022/08/03")
-        Date room_closed_end;
-
-        @Schema(description = "객실 태그", required = true)
+        @Schema(description = "객실 태그", required = false)
         List<Integer> tags;
 
-        @Schema(description = "호실 정보", required = true)
+        @Schema(description = "호실 정보", required = false)
         List<RoomDetailInfo> room_detail_info = new ArrayList<>();
+
+        @Schema(description = "객실 삭제 예정일", required = false, example = "2022/08/03")
+        Date delete_date;
+
+        @Schema(description = "최종예약날짜", required = false, example = "2022/08/03")
+        Date last_reservation_date;
 
     }
 
@@ -405,6 +405,14 @@ public class HotelInfoVo {
         @Schema(description = "성수기 종료일", required = false)
         Date peak_season_end;
 
+        @JsonIgnore
+        @Schema(description = "성수기 번호", required = false)
+        Integer peak_num;
+
+        @JsonIgnore
+        @Schema(description = "호텔 번호", required = false)
+        Integer hotel_num;
+
     }
 
     @Data
@@ -412,8 +420,8 @@ public class HotelInfoVo {
     @AllArgsConstructor
     @Schema(description = "객실 상세정보 파라미터")
     public static class RoomInfoRequest {
-        @Schema(description = "호텔 구분번호",  required = true, example = "12345")
-        Integer hotel_num;
+        @Schema(description = "객실 구분번호",  required = true, example = "12345")
+        Integer room_num;
     }
 
     @Data
@@ -421,8 +429,8 @@ public class HotelInfoVo {
     @AllArgsConstructor
     @Schema(description = "객실 상세정보리스트 파라미터")
     public static class RoomInfoListRequest {
-        @Schema(description = "객실 구분번호",  required = true, example = "12345")
-        Integer room_num;
+        @Schema(description = "호텔 구분번호",  required = true, example = "12345")
+        Integer hotel_num;
     }
 
     @Data
@@ -495,7 +503,7 @@ public class HotelInfoVo {
     @AllArgsConstructor
     @NoArgsConstructor
     @Schema(description = "객실 수정 파라미터")
-    public static class EditRoomRequest {
+    public static class EditRoomRequest extends CommonDto {
         @ApiParam(value = "호텔 구분번호", required = true, example = "12345")
         Integer hotel_num;
 
@@ -551,6 +559,9 @@ public class HotelInfoVo {
     @AllArgsConstructor
     @Schema(description = "호실 등록 파라미터")
     public static class RegisterRoomDetailRequest extends CommonDto {
+        @Schema(description = "객실 구분번호", required = true)
+        Integer room_num;
+
         @Schema(description = "호실명", required = true, example = "101호")
         String name;
 
@@ -564,15 +575,11 @@ public class HotelInfoVo {
 
         // DB
         @JsonIgnore
-        @Schema(description = "객실번호", required = true)
-        Integer room_num;
-
-        @JsonIgnore
-        @Schema(description = "객실상태값", required = false)
+        @Schema(description = "객실상태값", required = false, hidden = true)
         Integer room_detail_status;
 
         @JsonIgnore
-        @Schema(description = "호실 삭제 예정일", required = false, example = "2022/08/03")
+        @Schema(description = "호실 삭제 예정일", required = false, example = "2022/08/03", hidden = true)
         Date delete_date;
 
     }
@@ -581,8 +588,7 @@ public class HotelInfoVo {
     @NoArgsConstructor
     @AllArgsConstructor
     @Schema(description = "호실 정보")
-    public static class RoomDetailInfo {
-
+    public static class RoomDetailInfo extends CommonDto {
         @Schema(description = "호실 구분번호",  required = true, example = "12345")
         Integer room_detail_num;
 
@@ -601,6 +607,22 @@ public class HotelInfoVo {
         @Schema(description = "호실 상태값 - 1: 예약가능 2: 예약불가능 ", required = true, example = "1")
         Integer status;
 
+        @Schema(description = "호실 사용 가능 여부 - 호실 사용금지상태일때 false", required = true, example = "true")
+        Boolean available_yn;
+
+        @JsonIgnore
+        @Schema(description = "객실 구분번호",  required = true, example = "12345")
+        Integer room_num;
+
+        @JsonIgnore
+        @Schema(description = "예약 상태 구분번호",  required = true, example = "12345")
+        Integer reservation_status;
+
+        @Schema(description = "최종예약날짜",  required = true, example = "2022/08/01")
+        Date last_reservation_date;
+
+        @Schema(description = "객실명",  required = false, example = "스탠다드 트윈룸")
+        String room_name;
     }
 
     @Data
@@ -618,64 +640,61 @@ public class HotelInfoVo {
     @Schema(description = "객실삭제 추가정보 응답값")
     public static class DeleteRoomInfoResponse extends CommonResponseVo {
         @Schema(description = "데이터")
-        DeleteRoomInfo data;
+        RoomInfo data;
     }
+
+//    @Data
+//    @NoArgsConstructor
+//    @AllArgsConstructor
+//    @Schema(description = "객실삭제 추가정보 - 객실정보 + 최종예약날짜 정보 제공")
+//    public static class DeleteRoomInfo extends RoomInfo {
+//        @Schema(description = "최종예약날짜",  required = true, example = "2022/08/01")
+//        Date last_reservation_date;
+//    }
+
+//    @Data
+//    @NoArgsConstructor
+//    @AllArgsConstructor
+//    @Schema(description = "호실 추가 파라미터")
+//    public static class AddRoomDetailRequest extends CommonDto {
+//        @Schema(description = "객실 구분번호", required = true, example = "12345")
+//        Integer room_num;
+//
+//        @Schema(description = "호실명", required = true, example = "101호")
+//        String name;
+//
+//        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
+//        @Schema(description = "호실 사용금지 시작일", required = false, example = "2022/08/01")
+//        Date room_closed_start;
+//
+//        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
+//        @Schema(description = "호실 사용금지 해제일", required = false, example = "2022/08/03")
+//        Date room_closed_end;
+//
+//        @JsonIgnore
+//        @Schema(description = "객실 상태값", required = true)
+//        Integer room_detail_status;
+//
+//    }
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    @Schema(description = "객실삭제 추가정보 - 객실정보 + 최종예약날짜 정보 제공")
-    public static class DeleteRoomInfo extends RoomInfo {
-        @Schema(description = "최종예약날짜",  required = true, example = "2022/08/01")
-        Date last_reservation_date;
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Schema(description = "호실 추가 파라미터")
-    public static class AddRoomDetailRequest {
-        @Schema(description = "객실 구분번호", required = true, example = "12345")
-        Integer room_num;
-
-        @Schema(description = "호실명", required = true, example = "101호")
-        String name;
-
-        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
-        @Schema(description = "호실 사용금지 시작일", required = false, example = "2022/08/01")
-        Date room_closed_start;
-
-        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
-        @Schema(description = "호실 사용금지 해제일", required = false, example = "2022/08/03")
-        Date room_closed_end;
-
-        @JsonIgnore
-        @Schema(description = "객실 상태값", required = true)
-        Integer room_detail_status;
-
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Schema(description = "호실 정보수정 파라미터")
-    public static class EditRoomDetailRequest extends CommonDto {
+    @Schema(description = "호실 이용불가설정 파라미터")
+    public static class DisableSettingRoomDetailRequest extends CommonDto {
         @Schema(description = "호실 구분번호", required = true, example = "12345")
         Integer room_detail_num;
 
-        @Schema(description = "호실명", required = true, example = "101호")
-        String name;
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
+        @Schema(description = "호실 사용금지 시작일", required = true, example = "2022/08/01")
+        Date room_closed_start;
 
         @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
-        @Schema(description = "호실 사용금지 시작일", required = false, example = "2022/08/01")
-        String room_closed_start;
-
-        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
-        @Schema(description = "호실 사용금지 해제일", required = false, example = "2022/08/03")
-        String room_closed_end;
+        @Schema(description = "호실 사용금지 해제일", required = true, example = "2022/08/03")
+        Date room_closed_end;
 
         @JsonIgnore
-        @Schema(description = "객실 상태값", required = true, example = "101호")
+        @Schema(description = "객실 상태값", required = true, hidden = true)
         Integer room_detail_status;
 
     }
@@ -686,7 +705,7 @@ public class HotelInfoVo {
     @Schema(description = "호실 삭제 추가정보 응답값")
     public static class DeleteRoomDetailInfoResponse extends CommonResponseVo {
         @Schema(description = "데이터")
-        DeleteRoomDetailInfo data;
+        RoomDetailInfo data;
     }
 
     @Data
@@ -698,15 +717,15 @@ public class HotelInfoVo {
         Integer room_detail_num;
     }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Schema(description = "호실삭제 추가정보 - 호실정보 + 최종예약날짜 정보 제공")
-    public static class DeleteRoomDetailInfo extends RoomDetailInfo {
-
-        @Schema(description = "최종예약날짜",  required = true, example = "2022/08/01")
-        Date last_reservation_date;
-    }
+//    @Data
+//    @NoArgsConstructor
+//    @AllArgsConstructor
+//    @Schema(description = "호실삭제 추가정보 - 호실정보 + 최종예약날짜 정보 제공")
+//    public static class DeleteRoomDetailInfo extends RoomDetailInfo {
+//
+//        @Schema(description = "최종예약날짜",  required = true, example = "2022/08/01")
+//        Date last_reservation_date;
+//    }
 
     @Data
     @AllArgsConstructor
@@ -714,7 +733,8 @@ public class HotelInfoVo {
     @Schema(description = "호텔 예약정보 조회 응답값")
     public static class HotelReservationListResponse extends CommonResponseVo {
         @Schema(description = "데이터")
-        List<HotelReservation> data;
+        HotelReservationInfo data;
+
     }
 
     @Data
@@ -733,13 +753,41 @@ public class HotelInfoVo {
 
         @Schema(description = "예약자 핸드폰번호",  required = false, example = "01012345678")
         String customer_phone_num;
+
+        @Schema(description = "예약일자",  required = false, example = "2022/09/01")
+        Date reservation_date;
+
+        @Schema(description = "정렬 구분번호 - 1: 전체 2: 예약확정 3: 예약취소 4: 이용완료", required = true, example = "3")
+        Integer rank_num;
+
+        @Schema(description = "페이지당 데이터 갯수", required = false, example = "5")
+        Integer page_cnt;
+
+        @Schema(description = "요청 페이지", required = false, example = "3")
+        Integer page;
+
+        @JsonIgnore
+        @Schema(description = "호실 정보", required = false, hidden = true)
+        List<Integer> room_detail_num_list;
     }
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     @Schema(description = "호텔 예약정보")
-    public static class HotelReservation {
+    public static class HotelReservationInfo {
+        @Schema(description = "조회된 데이터 갯수", required = true, example = "5")
+        Integer total_cnt;
+
+        @Schema(description = "호텔 예약정보 리스트",  required = true)
+        List<HotelReservationDetailInfo> hotel_reservation_info_list;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Schema(description = "호텔 예약정보")
+    public static class HotelReservationDetailInfo {
         @Schema(description = "예약번호",  required = true, example = "123456")
         Integer reservation_num;
 
@@ -755,11 +803,20 @@ public class HotelInfoVo {
         @Schema(description = "예약자 핸드폰번호",  required = true, example = "01012345678")
         String customer_phone_num;
 
-        @Schema(description = "예약일",  required = true, example = "2022/08/01")
-        Date reservation_date;
+        @Schema(description = "예약일",  required = true, example = "2022/08/01 ~ 2022/08/02")
+        String reservation_date;
 
         @Schema(description = "예약상태 - 1: 예약확정 2: 예약취소 3: 이용완료",  required = true, example = "1")
         Integer reservation_status;
+
+        // DB
+        @JsonIgnore
+        @ApiParam(value = "입실일", required = true)
+        Date st_date;
+
+        @JsonIgnore
+        @ApiParam(value = "퇴실일", required = true)
+        Date ed_date;
     }
 
     @Data
@@ -774,5 +831,62 @@ public class HotelInfoVo {
         @ApiParam(value = "태그 번호", required = true)
         Integer tag_num;
 
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "이미지 정보")
+    public static class ImageInfo extends CommonDto {
+
+        @ApiParam(value = "이미지 번호", required = true)
+        Integer image_num;
+
+        @ApiParam(value = "구분값", required = true)
+        Integer select_type;
+
+        @ApiParam(value = "고유값", required = true)
+        Integer primary_key;
+
+        @ApiParam(value = "사진명", required = true)
+        String picture_name;
+
+        @ApiParam(value = "버킷주소", required = true)
+        String bucket_url;
+
+        @ApiParam(value = "사진순서", required = true)
+        Integer picture_sequence;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "삭제 테이블 정보")
+    public static class DeleteTable {
+
+        @ApiParam(value = "PK", required = true)
+        Integer pk;
+
+        @ApiParam(value = "사유", required = false)
+        Integer reason;
+
+        @ApiParam(value = "생성일", required = false)
+        Date dt_inert;
+
+        @ApiParam(value = "생성자", required = false)
+        String insert_user;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "삭제 예약 파라미터")
+    public static class UpdateDeleteDateRequest {
+
+        @ApiParam(value = "PK", required = true)
+        List<Integer> pk;
+
+        @ApiParam(value = "삭제 예약일", required = true)
+        Date delete_date;
     }
 }

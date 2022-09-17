@@ -3,11 +3,13 @@ package com.hotel.util;
 import com.hotel.util.vo.UtilVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
 @Component
+@PropertySource(value = "classpath:application.yml")
 public class MailUtil {
 
     @Value("${spring.mail.username}")

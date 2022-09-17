@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -17,6 +18,7 @@ import java.util.Properties;
  * Mail 전송을 위한 SMTP등 설정
  */
 @Configuration
+@PropertySource(value = "classpath:application.yml")
 public class MailConfig {
 
     @Value("${spring.mail.host}")

@@ -19,6 +19,13 @@ spring:
 #    password: ENC(xZG6QLvv40VdE6bY02CZDtHb4nzCRGaz)
 #    schema-name: monsu1016
 
+  jpa:
+    open-in-view: false
+    generate-ddl: true
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
   # Mail
   mail:
     host: smtp.gmail.com

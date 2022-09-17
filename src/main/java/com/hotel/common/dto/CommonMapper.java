@@ -16,4 +16,8 @@ public interface CommonMapper {
     Date verifyPhoneAuth(CommonVo.VerifyPhoneAuthRequest verifyPhoneAuthRequest) throws Exception;
 
     int getAutoIncrementNext(Map<String, String> data) throws Exception;
+
+    void insertHoliday(CommonVo.Holiday holiday);
+
+    void deleteHoliday();
 }
