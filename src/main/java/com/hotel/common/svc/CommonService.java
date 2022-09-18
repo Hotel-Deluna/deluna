@@ -29,4 +29,8 @@ public interface CommonService {
     String HolidayCrawling();
 
     String CreateToken(int user_num, int user_role);
+
+    String SaveTouristSpotHotelCount();
+
+    String InsertTouristSpotImage(CommonVo.InsertTouristSpotImageRequest insertTouristSpotImageRequest);
 }

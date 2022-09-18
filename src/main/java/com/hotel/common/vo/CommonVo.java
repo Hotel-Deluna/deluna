@@ -2,11 +2,15 @@ package com.hotel.common.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hotel.common.CommonResponseVo;
+import com.hotel.common.dto.CommonDto;
+import com.hotel.company.vo.HotelInfoVo;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
@@ -97,6 +101,18 @@ public class CommonVo {
 
         @Schema(description = "공휴일 년/월/일")
         Date holiday_date;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "여행지 이미지 등록 파라미터")
+    public static class InsertTouristSpotImageRequest extends CommonDto {
+        @ApiParam(value = "여행지 구분번호", required = true, example = "1")
+        Integer tourist_spot_num;
+
+        @ApiParam(value = "여행지 이미지", required = true, example = "멀티파트 파일 이미지")
+        MultipartFile image;
     }
 
 }

@@ -11,7 +11,7 @@ public interface HotelService {
 
     CommonResponseVo RegisterHotel(HotelInfoVo.RegisterHotelRequest registerHotelParamVo, String jwtToken);
 
-    HotelSearchVo.TouristSpotInfoResponse TouristSpotInfo();
+    HotelSearchVo.TouristSpotInfoResponse TouristSpotInfo(HotelSearchVo.TouristSpotInfoRequest touristSpotInfoRequest);
 
     HotelSearchVo.SearchBarResponse SearchBar(HotelSearchVo.SearchBarRequest searchBarVoSearchBarRequest);
 
