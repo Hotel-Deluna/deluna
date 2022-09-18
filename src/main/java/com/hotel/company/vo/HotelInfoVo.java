@@ -23,6 +23,9 @@ public class HotelInfoVo {
     public static class OwnerHotelListResponse extends CommonResponseVo {
         @Schema(description = "데이터")
         List<HotelDetailInfo> data;
+
+        @Schema(description = "조회된 데이터 총 갯수", required = true, example = "5")
+        Integer total_cnt;
     }
 
     @Data
@@ -50,6 +53,9 @@ public class HotelInfoVo {
     public static class RoomInfoListResponse extends CommonResponseVo {
         @Schema(description = "데이터")
         List<RoomInfo> data;
+
+        @Schema(description = "조회된 데이터 총 갯수", required = true, example = "5")
+        Integer total_cnt;
     }
 
     @Data
@@ -68,6 +74,12 @@ public class HotelInfoVo {
     public static class OwnerHotelListRequest {
         @Schema(description = "검색어 - 호텔명",  required = false, example = "신라")
         String text;
+
+        @Schema(description = "페이지당 데이터 갯수", required = false, example = "5")
+        Integer page_cnt;
+
+        @Schema(description = "요청 페이지", required = false, example = "3")
+        Integer page;
     }
 
     @Data
@@ -91,7 +103,7 @@ public class HotelInfoVo {
         String address;
 
         @ApiParam(value = "경도, 위도 값. 0번째 배열 : x, 1번째 배열 : y",  required = true, example = "[123.546, 10.48]")
-        List<Float> location;
+        List<Double> location;
 
         @ApiParam(value = "카카오 API의 지역 구분정보(region_1depth_name) - 특별시,도 정보", required = true, example = "서울시")
         String region_1depth_name;
@@ -125,11 +137,11 @@ public class HotelInfoVo {
 
         @JsonIgnore
         @ApiParam(value = "위도 값",  required = false)
-        Float latitude;
+        Double latitude;
 
         @JsonIgnore
         @ApiParam(value = "경도 값",  required = false)
-        Float longitude;
+        Double longitude;
 
         @JsonIgnore
         @ApiParam(value = "공휴일 가격 상태", required = false)
@@ -174,7 +186,7 @@ public class HotelInfoVo {
         String address;
 
         @ApiParam(value = "경도, 위도 값. 0번째 배열 : x, 1번째 배열 : y",  required = true, example = "[123.546, 10.48]")
-        List<Float> location;
+        List<Double> location;
 
         @ApiParam(value = "카카오 API의 지역 구분정보(region_1depth_name) - 특별시,도 정보", required = true, example = "서울시")
         String region_1depth_name;
@@ -204,11 +216,11 @@ public class HotelInfoVo {
 
         @JsonIgnore
         @ApiParam(value = "위도 값",  required = false)
-        Float latitude;
+        Double latitude;
 
         @JsonIgnore
         @ApiParam(value = "경도 값",  required = false)
-        Float longitude;
+        Double longitude;
 
         @JsonIgnore
         @ApiParam(value = "변경자",  required = false)
@@ -246,7 +258,7 @@ public class HotelInfoVo {
         String address;
 
         @Schema(description = "경도, 위도 값. 0번째 배열 : x, 1번째 배열 : y",  required = true, example = "[123.546, 10.48]")
-        List<Float> location;
+        List<Double> location;
 
         @Schema(description = "카카오 API의 지역 구분정보(region_1depth_name) - 특별시,도 정보", required = true, example = "서울시")
         String region_1depth_name;
@@ -282,11 +294,11 @@ public class HotelInfoVo {
 
         @JsonIgnore
         @ApiParam(value = "위도 값",  required = false)
-        Float latitude;
+        Double latitude;
 
         @JsonIgnore
         @ApiParam(value = "경도 값",  required = false)
-        Float longitude;
+        Double longitude;
 
         @JsonIgnore
         @ApiParam(value = "공휴일 가격 상태", required = false)
@@ -431,6 +443,12 @@ public class HotelInfoVo {
     public static class RoomInfoListRequest {
         @Schema(description = "호텔 구분번호",  required = true, example = "12345")
         Integer hotel_num;
+
+        @Schema(description = "페이지당 데이터 갯수", required = false, example = "5")
+        Integer page_cnt;
+
+        @Schema(description = "요청 페이지", required = false, example = "3")
+        Integer page;
     }
 
     @Data
@@ -733,7 +751,10 @@ public class HotelInfoVo {
     @Schema(description = "호텔 예약정보 조회 응답값")
     public static class HotelReservationListResponse extends CommonResponseVo {
         @Schema(description = "데이터")
-        HotelReservationInfo data;
+        List<HotelReservationDetailInfo> data;
+
+        @Schema(description = "조회된 데이터 총 갯수", required = true, example = "5")
+        Integer total_cnt;
 
     }
 
@@ -776,7 +797,7 @@ public class HotelInfoVo {
     @AllArgsConstructor
     @Schema(description = "호텔 예약정보")
     public static class HotelReservationInfo {
-        @Schema(description = "조회된 데이터 갯수", required = true, example = "5")
+        @Schema(description = "조회된 데이터 총 갯수", required = true, example = "5")
         Integer total_cnt;
 
         @Schema(description = "호텔 예약정보 리스트",  required = true)

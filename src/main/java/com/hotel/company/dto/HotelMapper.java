@@ -1,11 +1,13 @@
 package com.hotel.company.dto;
 
 import com.hotel.company.vo.HotelInfoVo;
+import com.hotel.company.vo.HotelSearchVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 @Mapper
@@ -98,4 +100,18 @@ public interface HotelMapper {
 
     List<String> selectTodayPeakSeason();
 
+    // 검색
+    Set<String> selectHotelSearchBarName(String text) throws Exception;
+
+    Set<String> selectHotelSearchBarAddress(String text) throws Exception;
+
+    Set<String> selectHotelSearchBarRegionCode(String text) throws Exception;
+
+    List<Integer> selectSearchList(HotelSearchVo.HotelSearchListRequest hotelSearchListRequest) throws Exception;
+
+    List<Integer> selectHotelReservationListForSearch(HotelDto.SelectHotelReservationListForSearch hotelReservationListForSearch) throws Exception;
+
+    List<HotelSearchVo.TouristSpotInfo> selectTouristSpotList() throws Exception;
+
+    List<HotelInfoVo.HotelDetailInfo> selectHotelByRegionCode(String kakaoRegion);
 }

@@ -518,6 +518,78 @@
             AND date_format(peak_season_end, '%Y-%m-%d')
     </select>
 
+    <!-- 검색바 - 호텔명 -->
+    <select id="selectHotelSearchBarName" resultType="string">
+        SELECT name
+        FROM d_hotel
+        WHERE name LIKE #{text}
+    </select>
 
+    <!-- 검색바 - 주소 -->
+    <select id="selectHotelSearchBarAddress" resultType="string">
+        SELECT address
+        FROM d_hotel
+        WHERE address LIKE #{text}
+    </select>
+
+    <!-- 검색바 - 지역코드 -->
+    <select id="selectHotelSearchBarRegionCode" resultType="string">
+        SELECT region_code
+        FROM d_hotel
+        WHERE region_code LIKE #{text}
+    </select>
+
+    <!-- 검색하기 - 호텔번호 리스트 -->
+    <select id="selectSearchList" resultType="int">
+        <bind name="text" value="'%' + _parameter.getText() + '%'" />
+        SELECT hotel_num
+        FROM d_hotel
+        WHERE is_delete = 'N'
+        <choose>
+            <when test="search_type == 1">
+                AND region_code LIKE #{text}
+            </when>
+            <when test="search_type == 2">
+                AND address LIKE #{text}
+            </when>
+            <when test="search_type == 3">
+                AND name LIKE #{text}
+            </when>
+        </choose>
+    </select>
+
+    <!-- 호텔 예약리스트 조회 - 검색 -->
+    <select id="selectHotelReservationListForSearch" resultType="int">
+        SELECT
+            re.reservation_num
+        FROM d_reservation re
+        LEFT JOIN d_room_detail rd ON rd.room_detail_num = re.room_detail_num
+        left join d_room r on rd.room_detail_num = r.room_num
+        left join d_hotel h on r.hotel_num = h.hotel_num
+        WHERE h.hotel_num = #{hotel_num}
+        AND re.reservation_status != 1
+        <![CDATA[
+        and (date_format(#{reservation_start_date}, '%Y-%m-%d') > date_format(re.ed_date,'%Y-%m-%d')
+        or date_format(#{reservation_end_date}, '%Y-%m-%d') < date_format(re.st_date, '%Y-%m-%d') )
+        ]]>
+    </select>
+
+    <!-- 여행지 정보 -->
+    <select id="selectTouristSpotList" resultType="com.hotel.company.vo.HotelSearchVo$TouristSpotInfo">
+        SELECT ts.tourist_spot_num,
+               ts.name as tourist_spot_name,
+               ts.count as hotel_count,
+               i.bucket_url as image
+        FROM d_tourist_spot ts
+                 LEFT JOIN d_image i ON ts.tourist_spot_num = i.primary_key AND i.select_type =3
+    </select>
+
+    <!-- 지역코드기준으로 호텔 정보 조회 -->
+    <select id="selectHotelByRegionCode" resultMap="selectHotelInfoMap">
+        SELECT *
+        FROM d_hotel
+        WHERE region_code = #{region_code}
+          AND is_delete = 'N'
+    </select>
 
 </mapper>

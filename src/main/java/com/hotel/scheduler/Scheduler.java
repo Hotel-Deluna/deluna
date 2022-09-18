@@ -16,4 +16,10 @@ public class Scheduler {
     public void holidayCrawling() {
         commonService.HolidayCrawling();
     }
+
+    // 여행지 정보 저장
+    @Scheduled(cron = "0 1 * * * ?")
+    public void SaveTouristSpotHotelCount() {
+        commonService.SaveTouristSpotHotelCount();
+    }
 }

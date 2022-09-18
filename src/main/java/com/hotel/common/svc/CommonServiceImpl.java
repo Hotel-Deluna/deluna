@@ -5,6 +5,8 @@ import com.hotel.common.dto.CommonMapper;
 import com.hotel.common.vo.CommonEnum;
 import com.hotel.common.vo.CommonVo;
 import com.hotel.common.vo.JwtTokenDto;
+import com.hotel.company.dto.HotelMapper;
+import com.hotel.company.vo.HotelSearchVo;
 import com.hotel.jwt.JwtTokenProvider;
 import com.hotel.util.*;
 import com.hotel.util.vo.UtilVo;
@@ -19,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -58,6 +61,12 @@ public class CommonServiceImpl implements CommonService {
 
     @Autowired
     JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
+    HotelMapper hotelMapper;
+
+    @Autowired
+    ImageUtil imageUtil;
 
     @Override
     public CommonResponseVo RequestPhoneAuth(CommonVo.PhoneAuthRequest phoneAuthRequest) {
@@ -328,5 +337,54 @@ public class CommonServiceImpl implements CommonService {
         JwtTokenDto.TokenDto tokenDto = jwtTokenProvider.generateTokenDto(authenticationToken);
 
         return tokenDto.getAccessToken();
+    }
+
+    @Override
+    public String SaveTouristSpotHotelCount() {
+
+        try{
+            // 여행지 정보 조회
+            List<HotelSearchVo.TouristSpotInfo> getTouristSpotRegion = hotelMapper.selectTouristSpotList();
+
+            // 각 여행지별 호텔 갯수 카운트
+            for(HotelSearchVo.TouristSpotInfo touristSpotInfo : getTouristSpotRegion){
+                int count = 0;
+                count = commonMapper.countHotelTouristSpot(touristSpotInfo);
+                touristSpotInfo.setHotel_count(count);
+                // 정보저장
+                commonMapper.updatecountHotelTouristSpot(touristSpotInfo);
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+
+
+        return "여행지 호텔갯수 저장완료";
+    }
+
+    @Override
+    public String InsertTouristSpotImage(CommonVo.InsertTouristSpotImageRequest insertTouristSpotImageRequest) {
+
+        try{
+            int tourist_spot_num = insertTouristSpotImageRequest.getTourist_spot_num();
+            int select_type = CommonEnum.ImageType.TOURIST_SPOT.getCode();
+            String userPk = "0"; // 관리자
+
+            List<MultipartFile> multipartFileList = new ArrayList<>();
+            multipartFileList.add(insertTouristSpotImageRequest.getImage());
+
+            // DB에 저장된 해당 여행지 이미지 모두 삭제
+            imageUtil.deleteImage(select_type, tourist_spot_num);
+
+            // 이미지 파일 저장 & DB에 정보 저장
+            imageUtil.insertImage(multipartFileList, select_type, tourist_spot_num, userPk);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return "여행지 이미지 등록 완료";
     }
 }

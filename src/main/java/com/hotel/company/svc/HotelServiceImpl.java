@@ -6,17 +6,24 @@ import com.hotel.common.vo.JwtTokenDto;
 import com.hotel.company.dto.HotelDto;
 import com.hotel.company.dto.HotelMapper;
 import com.hotel.jwt.JwtTokenProvider;
-import com.hotel.util.AES256Util;
-import com.hotel.util.DBUtil;
-import com.hotel.util.DateUtil;
+import com.hotel.util.*;
 import com.hotel.company.vo.*;
-import com.hotel.util.ImageUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -43,13 +50,23 @@ public class HotelServiceImpl implements HotelService {
     @Autowired
     JwtTokenProvider jwtTokenProvider;
 
+    @Value("${kakao.secretKey}")
+    String kakaoKey;
+
+    @Value("${search.distance}")
+    Integer allowedDistance;
+
+
     @Override
     public HotelInfoVo.OwnerHotelListResponse OwnerHotelList(HotelInfoVo.OwnerHotelListRequest ownerHotelListRequest, String jwtToken) {
         HotelInfoVo.OwnerHotelListResponse result = new HotelInfoVo.OwnerHotelListResponse();
+        int total_cnt = 0;
 
         try{
             List<HotelInfoVo.HotelDetailInfo> ownerHotelList = new ArrayList<>();
             int business_user_num = getPk(jwtToken);
+            Integer page = ownerHotelListRequest.getPage();
+            Integer pageCnt = ownerHotelListRequest.getPage_cnt();
 
             // 해당 사업자 소유 호텔번호 조회
             List<Integer> ownerHotelNumList = hotelMapper.selectOwnerHotelList(business_user_num);
@@ -78,7 +95,13 @@ public class HotelServiceImpl implements HotelService {
                 return result;
             }
 
+            total_cnt = ownerHotelList.size();
+
+            // pagination
+            ownerHotelList = PageUtil.paginationList(page, pageCnt,total_cnt, ownerHotelList);
+
             result.setMessage("사업자 소유 호텔 리스트 조회 완료");
+            result.setTotal_cnt(total_cnt);
             result.setData(ownerHotelList);
 
         }catch (Exception e){
@@ -158,106 +181,248 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
-    public HotelSearchVo.TouristSpotInfoResponse TouristSpotInfo() {
+    public HotelSearchVo.TouristSpotInfoResponse TouristSpotInfo(HotelSearchVo.TouristSpotInfoRequest touristSpotInfoRequest) {
         HotelSearchVo.TouristSpotInfoResponse result = new HotelSearchVo.TouristSpotInfoResponse();
-        HotelSearchVo.TouristSpotInfo touristSpotInfo_a = new HotelSearchVo.TouristSpotInfo();
-        HotelSearchVo.TouristSpotInfo touristSpotInfo_b = new HotelSearchVo.TouristSpotInfo();
-        HotelSearchVo.TouristSpotInfo touristSpotInfo_c = new HotelSearchVo.TouristSpotInfo();
+        int total_cnt = 0;
 
-        touristSpotInfo_a.setTourist_spot_name("서울");
-        touristSpotInfo_a.setImage("https://aws.bucket/");
-        touristSpotInfo_a.setHotel_count(2500);
+        try{
+            Integer page = touristSpotInfoRequest.getPage();
+            Integer pageCnt = touristSpotInfoRequest.getPage_cnt();
 
-        touristSpotInfo_b.setTourist_spot_name("부산");
-        touristSpotInfo_b.setImage("https://aws.bucket/");
-        touristSpotInfo_b.setHotel_count(1500);
+            List<HotelSearchVo.TouristSpotInfo> touristSpotList = hotelMapper.selectTouristSpotList();
 
-        touristSpotInfo_c.setTourist_spot_name("제주");
-        touristSpotInfo_c.setImage("https://aws.bucket/");
-        touristSpotInfo_c.setHotel_count(500);
+            total_cnt = touristSpotList.size();
 
-        List<HotelSearchVo.TouristSpotInfo> touristSpotInfoList = new ArrayList<>();
-        touristSpotInfoList.add(touristSpotInfo_a);
-        touristSpotInfoList.add(touristSpotInfo_b);
-        touristSpotInfoList.add(touristSpotInfo_c);
+            //pagination
+            touristSpotList = PageUtil.paginationList(page, pageCnt, total_cnt, touristSpotList);
 
-        result.setMessage("여행지 정보 조회 완료");
-        result.setData(touristSpotInfoList);
+            result.setMessage("여행지 정보 조회 완료");
+            result.setData(touristSpotList);
+            result.setTotal_cnt(total_cnt);
+        }catch (Exception e){
+            e.printStackTrace();
+
+        }
 
         return result;
     }
 
     @Override
     public HotelSearchVo.SearchBarResponse SearchBar(HotelSearchVo.SearchBarRequest searchBarVoRequest) {
-        // 검색어에 일치하는 지역명, 호텔명, 호텔주소 있는지 DB 조회
-
-        /*
-         검색어에 가장 가까운 호텔 정보 나타내주는거 가능할듯
-         카카오 해당 검색어에 가장 가까운 검색어를 리턴해주는 api가 존재함 대신 공식 api는 아님 https://devtalk.kakao.com/t/api/108598
-         검색어 정보 api로 검색어에 가장 가까운 장소 3개 정도 리턴. 비공식 api라 그런가 선정기준이 있진않아보임..
-         */
-
         HotelSearchVo.SearchBarResponse result = new HotelSearchVo.SearchBarResponse();
         HotelSearchVo.HotelSearchData HotelSearchData = new HotelSearchVo.HotelSearchData();
+        String text = searchBarVoRequest.getText();
+        String dbLikeSearchText = "%"+searchBarVoRequest.getText()+"%";
+        Set<String> hotel_address_list = new HashSet<>();
+        Set<String> hotel_name_list = new HashSet<>();
+        Set<String> region_list = new HashSet<>();
+        Set<String> place_list = new HashSet<>();
 
-        List<String> region_list = new ArrayList<>();
-        region_list.add("서울");
+        try{
 
-        List<String> place_list = new ArrayList<>();
-        place_list.add("서울역");
-        place_list.add("서울대입구");
+            hotel_name_list = hotelMapper.selectHotelSearchBarName(dbLikeSearchText);
+            hotel_address_list = hotelMapper.selectHotelSearchBarAddress(dbLikeSearchText);
+            region_list = hotelMapper.selectHotelSearchBarRegionCode(dbLikeSearchText);
 
-       List<String> hotel_address_list = new ArrayList<>();
-        hotel_address_list.add("노보텔 엠비시티 서울 용산");
+            // 카카오 api호출로 장소 리스트 받아옴 3개까지만
+            URL url = new URL("https://dapi.kakao.com/v2/local/search/keyword.json?size=3&query="+URLEncoder.encode(text, StandardCharsets.UTF_8));
 
-        List<String> hotel_name_list = new ArrayList<>();
-        hotel_name_list.add("서울신라호텔");
-        hotel_name_list.add("밀레니엄 힐튼 서울");
+            // GET 전송
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+            con.setRequestProperty("Content-type", "application/json");
+            con.setRequestProperty("Authorization", kakaoKey);
+            con.setDoOutput(true);
+            con.setConnectTimeout(5000);
+            con.setReadTimeout(5000);
 
-        HotelSearchData.setRegion_list(region_list);
-        HotelSearchData.setHotel_address_list(hotel_address_list);
-        HotelSearchData.setHotel_name_list(hotel_name_list);
-        HotelSearchData.setPlace_list(place_list);
+            StringBuilder sb = new StringBuilder();
+            if (con.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                BufferedReader br = new BufferedReader(
+                        new InputStreamReader(con.getInputStream(), "utf-8"));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line);
+                }
+                br.close();
 
-        result.setMessage("검색 완료");
-        result.setData(HotelSearchData);
+                // 받아온 response 데이터 json 형식으로 파싱 -> 필요한 결과값 추출
+                JSONParser parser = new JSONParser();
+                Object obj = parser.parse(sb.toString());
+                JSONObject jsonObj = (JSONObject) obj;
+                JSONArray jsonArrayData = (JSONArray) jsonObj.get("documents");
 
+                for(int i = 0; i< jsonArrayData.size(); i++){
+                    place_list.add((String) ((JSONObject) jsonArrayData.get(i)).get("place_name"));
+                }
+
+            } else {
+                log.info("카카오 API 연동에 실패하였습니다");
+                throw new Exception();
+            }
+
+            HotelSearchData.setHotel_name_list(hotel_name_list);
+            HotelSearchData.setHotel_address_list(hotel_address_list);
+            HotelSearchData.setRegion_list(region_list);
+            HotelSearchData.setPlace_list(place_list);
+
+            result.setMessage("검색 완료");
+            result.setData(HotelSearchData);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         return result;
-
     }
 
     @Override
     public HotelSearchVo.SearchListResponse SearchHotelList(HotelSearchVo.HotelSearchListRequest searchBarVoSearchBarRequest) {
         HotelSearchVo.SearchListResponse result = new HotelSearchVo.SearchListResponse();
-        List<HotelSearchVo.HotelSearchList> hotelSearchList = new ArrayList<>();
-        HotelSearchVo.HotelSearchList hotel_a = new HotelSearchVo.HotelSearchList();
-        HotelSearchVo.HotelSearchList hotel_b = new HotelSearchVo.HotelSearchList();
-        List<Integer> tags = new ArrayList<>();
-        tags.add(1);
-        tags.add(3);
-        tags.add(5);
+        List<HotelSearchVo.HotelSearchInfo> hotelSearchList = new ArrayList<>();
 
-        hotel_a.setHotel_num(12345);
-        hotel_a.setImage("https://aws.bucket/123");
-        hotel_a.setName("신라스테이 서초점");
-        hotel_a.setEng_name("Shilla Stay Seocho");
-        hotel_a.setStar(5);
-        hotel_a.setMinimum_price(330000);
-        hotel_a.setTags(tags);
+        try{
+            String text = searchBarVoSearchBarRequest.getText();
+            String dbText = searchBarVoSearchBarRequest.getText();
+            int page = searchBarVoSearchBarRequest.getPage();
+            int pageCnt = searchBarVoSearchBarRequest.getPage_cnt();
 
-        hotel_b.setHotel_num(45678);
-        hotel_b.setImage("https://aws.bucket/456");
-        hotel_b.setName("힐튼");
-        hotel_b.setEng_name("Hilton");
-        hotel_b.setStar(5);
-        hotel_b.setMinimum_price(230000);
-        hotel_b.setTags(tags);
+            List<Integer> hotel_num_list = new ArrayList<>();
 
-        hotelSearchList.add(hotel_a);
-        hotelSearchList.add(hotel_b);
+            //Search_type = 4  카카오 api를 통한 별도처리필요
+            if(searchBarVoSearchBarRequest.getSearch_type() != 4){
+                hotel_num_list = hotelMapper.selectSearchList(searchBarVoSearchBarRequest);
+            }else {
+                try{
+                    // 카카오 키워드 검색 API호출 가장 위에있는 검색결과의 address_name의 첫번째 소절 (서울, 경기등 시,도정보임) 위도,경도정보 추출
+                    JSONArray jsonArrayData = KaKaoUtil.getKeywordMapData(text);
+                    if(jsonArrayData != null){
+                        JSONObject jsonObject = (JSONObject) jsonArrayData.get(0);
+                        String kakaoRegion = (String) jsonObject.get("address_name");
+                        kakaoRegion = kakaoRegion.substring(0, 1);
+                        double kakaoLongitude = Double.parseDouble((String) jsonObject.get("x"));
+                        double kakaoLatitude = Double.parseDouble((String) jsonObject.get("y"));
 
-        result.setMessage("호텔 검색 리스트 조회 완료");
-        result.setData(hotelSearchList);
+                        // DB에서 address_name의 첫번째 소절에 해당하는 region_code 의 호텔만 추출
+                        List<HotelInfoVo.HotelDetailInfo> hotelList = hotelMapper.selectHotelByRegionCode(kakaoRegion);
+                        // 해당 호텔들의 위도 경도와 가장 위에있는 검색결과의 위도, 경도 비교해서 1km이내의 호텔만 추출
+                        for(HotelInfoVo.HotelDetailInfo hotelDetailInfo : hotelList){
+                            if(DistanceUtil.getDistance(
+                                    kakaoLatitude,
+                                    kakaoLongitude,
+                                    hotelDetailInfo.getLatitude(),
+                                    hotelDetailInfo.getLongitude())
+                                    <= allowedDistance){
+                                hotel_num_list.add(hotelDetailInfo.getHotel_num());
+                            }
+                        }
+                    }
+                }catch (Exception e){
+                    throw new Exception();
+                }
+            }
+            int total_cnt = 0;
+            int roomDetailTotalCount = 0;
+
+            for(int hotel_num : hotel_num_list){
+                boolean available_yn = true;
+                boolean isPeopleCountAvailable = false;
+                int isAllRoomNotAvailable = 0;
+                List<Integer> priceList = new ArrayList<>();
+                List<Integer> room_detail_num_list = new ArrayList<>();
+                HotelSearchVo.HotelSearchInfo hotelSearchInfo = new HotelSearchVo.HotelSearchInfo();
+                HotelInfoVo.HotelDetailInfoResponse hotelDetailInfoResponse = HotelDetailInfo(hotel_num);
+                HotelInfoVo.HotelDetailInfo hotelDetailInfo = hotelDetailInfoResponse.getData();
+                List<HotelInfoVo.RoomInfo> roomInfoList = hotelDetailInfo.getRoom_list();
+                for(HotelInfoVo.RoomInfo roomInfo : roomInfoList){
+                    boolean isRoomDetailAvailable = false; // 호실 전부 사용불가인지 체크용
+
+                    // 투숙인원 조건이 있으면 투숙인원 체크. 조건에 해당되는 방이 한개라도 있으면 true
+                    if(searchBarVoSearchBarRequest.getPeople_count() != null){
+                        if(roomInfo.getMinimum_people() <= searchBarVoSearchBarRequest.getPeople_count() &&
+                                searchBarVoSearchBarRequest.getPeople_count() <= roomInfo.getMaximum_people()){
+                            isPeopleCountAvailable = true;
+                        }
+                    }
+                    List<HotelInfoVo.RoomDetailInfo> roomDetailInfoList = roomInfo.getRoom_detail_info();
+                    for(HotelInfoVo.RoomDetailInfo roomDetailInfo : roomDetailInfoList){
+                        // 사용가능한 호실이 1개라도 있으면 isRoomDetailAvailable = ture
+                        if(roomDetailInfo.getAvailable_yn()){
+                            isRoomDetailAvailable = true;
+                        }
+                    }
+
+                    if(!isRoomDetailAvailable){ // 모든 호실이 사용불가인 객실 카운트
+                        isAllRoomNotAvailable += 1;
+                    }
+
+                    // 객실 가격 수집
+                    priceList.add(roomInfo.getPrice());
+                }
+
+                // 해당 호텔의 모든 객실이 사용불가능 이라면 available_yn = false
+                if(roomInfoList.size() == isAllRoomNotAvailable){
+                    available_yn = false;
+                }
+
+                // 예약범위 & 투숙인원 데이터가 있으면 체크해서 넣어줌
+
+                // 투숙인원조건이 있는데 이에 해당하는 객실이 없으면 해당호텔 패스
+                if(searchBarVoSearchBarRequest.getPeople_count() != null){
+                    if(!isPeopleCountAvailable){
+                        continue;
+                    }
+                }
+
+                // 예약범위 조건이 있는데 이에 해당하는 객실이 없으면 해당호텔 패스
+                if(searchBarVoSearchBarRequest.getReservation_start_date() != null &&
+                        searchBarVoSearchBarRequest.getReservation_end_date() != null){
+                    HotelDto.SelectHotelReservationListForSearch param = new HotelDto.SelectHotelReservationListForSearch();
+                    param.setHotel_num(hotel_num);
+                    param.setReservation_start_date(searchBarVoSearchBarRequest.getReservation_start_date());
+                    param.setReservation_start_date(searchBarVoSearchBarRequest.getReservation_end_date());
+                    List<Integer> hotelReservationAvailableList =
+                            hotelMapper.selectHotelReservationListForSearch(param);
+                    if(hotelReservationAvailableList == null){
+                        continue;
+                    }
+                }
+
+                hotelSearchInfo.setHotel_num(hotel_num);
+                hotelSearchInfo.setName(hotelDetailInfo.getName());
+                hotelSearchInfo.setEng_name(hotelDetailInfo.getEng_name());
+                hotelSearchInfo.setStar(hotelDetailInfo.getStar());
+                hotelSearchInfo.setTags(hotelDetailInfo.getTags());
+                if(hotelDetailInfo.getImage() != null && hotelDetailInfo.getImage().size() > 0){
+                    hotelSearchInfo.setImage(hotelDetailInfo.getImage().get(0)); // 메인이미지만 제공
+                }
+                hotelSearchInfo.setAvailable_yn(available_yn);
+                if(priceList.size() <= 0){ // 객실이 존재하지않으면
+                    hotelSearchInfo.setMinimum_price(0);
+                }else {
+                    hotelSearchInfo.setMinimum_price(Collections.min(priceList)); // 객실들 가격중 최저가
+                }
+                hotelSearchList.add(hotelSearchInfo);
+            }
+
+            total_cnt = hotelSearchList.size();
+
+            if(total_cnt <= 0){
+                noSearchResult(result);
+                return result;
+            }
+
+            // pagination
+            hotelSearchList = PageUtil.paginationList(page, pageCnt, total_cnt, hotelSearchList);
+
+            // 호텔 등급순으로 역순 정렬
+            hotelSearchList.sort(Comparator.comparing(HotelSearchVo.HotelSearchInfo::getStar).reversed());
+
+            result.setData(hotelSearchList);
+            result.setTotal_cnt(total_cnt);
+            result.setMessage("호텔 검색 리스트 조회 완료");
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         return result;
     }
@@ -265,38 +430,184 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public HotelSearchVo.SearchListResponse SearchHotelListFilter(HotelSearchVo.HotelSearchListFilterRequest hotelSearchListFilterRequest) {
 
-        // 전달받은 호텔 번호 목록을 필터 조건에 따라 필터링
-
         HotelSearchVo.SearchListResponse result = new HotelSearchVo.SearchListResponse();
-        List<HotelSearchVo.HotelSearchList> hotelSearchFilterList = new ArrayList<>();
-        HotelSearchVo.HotelSearchList hotel_a = new HotelSearchVo.HotelSearchList();
-        HotelSearchVo.HotelSearchList hotel_b = new HotelSearchVo.HotelSearchList();
-        List<Integer> tags = new ArrayList<>();
-        tags.add(1);
-        tags.add(3);
-        tags.add(5);
+        List<HotelSearchVo.HotelSearchInfo> hotelSearchList = new ArrayList<>();
+        int total_cnt = 0;
 
-        hotel_a.setHotel_num(12345);
-        hotel_a.setImage("https://aws.bucket/123");
-        hotel_a.setName("신라스테이 서초점");
-        hotel_a.setEng_name("Shilla Stay Seocho");
-        hotel_a.setStar(5);
-        hotel_a.setMinimum_price(330000);
-        hotel_a.setTags(tags);
+        try{
+            // 페이지
+            int page = hotelSearchListFilterRequest.getPage();
+            int pageCnt = hotelSearchListFilterRequest.getPage_cnt();
 
-        hotel_b.setHotel_num(45678);
-        hotel_b.setImage("https://aws.bucket/456");
-        hotel_b.setName("밀레니엄 힐튼 서울");
-        hotel_b.setEng_name("Hilton");
-        hotel_b.setStar(5);
-        hotel_b.setMinimum_price(230000);
-        hotel_b.setTags(tags);
+            // 정렬조건
+            int rank_num = hotelSearchListFilterRequest.getRank_num();
 
-        hotelSearchFilterList.add(hotel_b);
-        hotelSearchFilterList.add(hotel_a);
+            // 해당 호텔 정보 조회
+            List<Integer> hotel_num_list = hotelSearchListFilterRequest.getHotel_num();
 
-        result.setMessage("호텔 검색 필터 조회 완료");
-        result.setData(hotelSearchFilterList);
+
+            // 필터조건
+            List<Double> location = hotelSearchListFilterRequest.getLocation();
+            List<Integer> room_tags = hotelSearchListFilterRequest.getRoom_tags();
+            List<Integer> hotel_tags = hotelSearchListFilterRequest.getHotel_tags();
+            Integer minimum_price = hotelSearchListFilterRequest.getMinimum_price(); // null 체크를 위해 Integer사용
+            Integer maximum_price = hotelSearchListFilterRequest.getMaximum_price();
+            Integer star = hotelSearchListFilterRequest.getStar();
+
+            /*
+             * 필터조건 여러개 존재할때 우선순위
+             * 1. 위도,경도 (위치)
+             * 2. 성급
+             * 3. 호텔 태그
+             * 4. 객실 태그
+             * 5. 가격
+             */
+
+            for(int hotel_num : hotel_num_list){
+                boolean available_yn = true;
+                int isAllRoomNotAvailable = 0;
+                List<Integer> priceList = new ArrayList<>();
+                List<Integer> room_detail_num_list = new ArrayList<>();
+                List<List<Integer>> roomTagList = new ArrayList<>();
+                HotelSearchVo.HotelSearchInfo hotelSearchInfo = new HotelSearchVo.HotelSearchInfo();
+                HotelInfoVo.HotelDetailInfoResponse hotelDetailInfoResponse = HotelDetailInfo(hotel_num);
+                HotelInfoVo.HotelDetailInfo hotelDetailInfo = hotelDetailInfoResponse.getData();
+                List<HotelInfoVo.RoomInfo> roomInfoList = hotelDetailInfo.getRoom_list();
+
+                for(HotelInfoVo.RoomInfo roomInfo : roomInfoList){
+
+                    boolean isRoomDetailAvailable = false; // 호실 전부 사용불가인지 체크용
+
+                    List<HotelInfoVo.RoomDetailInfo> roomDetailInfoList = roomInfo.getRoom_detail_info();
+                    for(HotelInfoVo.RoomDetailInfo roomDetailInfo : roomDetailInfoList){
+                        // 사용가능한 호실이 1개라도 있으면 isRoomDetailAvailable = ture
+                        if(roomDetailInfo.getAvailable_yn()){
+                            isRoomDetailAvailable = true;
+                        }
+                    }
+
+                    if(!isRoomDetailAvailable){ // 모든 호실이 사용불가인 객실 카운트
+                        isAllRoomNotAvailable += 1;
+                    }
+
+                    // 객실 가격 수집
+                    if(roomInfo.getPrice() != null){
+                        priceList.add(roomInfo.getPrice());
+                    }
+
+                    // 객실 태그정보 수집
+                    if(roomInfo.getTags() != null){
+                        roomTagList.add(roomInfo.getTags());
+                    }
+                }
+
+                // 필터조건
+                // 위도, 경도. 해당 위도경도에 반경 1km 이내여야 검색됨
+                if(location != null){
+                    if(DistanceUtil.getDistance(
+                            location.get(1),
+                            location.get(0),
+                            hotelDetailInfo.getLatitude(),
+                            hotelDetailInfo.getLongitude())
+                            > allowedDistance){
+                        continue; // 1km 넘으면 패스
+                    }
+                }
+
+                // 성급
+                if(star != null){
+                    if(!star.equals(hotelDetailInfo.getStar())){
+                        continue;
+                    }
+                }
+                // 호텔 태그 조건 있고 호텔 태그도 존재하면 호텔태그 필터 체크
+                if(hotel_tags != null && hotelDetailInfo.getTags() != null){
+                    // 호탤 태그가 요청 태그조건을 모두 만족하면 그대로 진행, 아니면 패스
+                    if(!hotelDetailInfo.getTags().containsAll(hotel_tags)){
+                        continue;
+                    }
+                }
+
+                // 객실 태그 필터 조건 체크
+                if(room_tags != null){
+                    if(roomTagList.size() > 0){
+                        // 객실중 해당 객실 필터 조건에 해당되는 객실이 1개라도 있으면 true
+                        roomTagList = roomTagList
+                                .stream()
+                                .filter(roomTags -> roomTags.containsAll(room_tags))
+                                .collect(Collectors.toList());
+                        if(roomTagList.size() <= 0){
+                            continue;
+                        }
+                    }else { // 해당 호탤 객실들에 태그가 전혀 없으면 필터조건에 맞지않는것으로 간주
+                        continue;
+                    }
+                }
+
+                // 가격 필터조건 체크
+                if(minimum_price != null && maximum_price != null && priceList.size() > 0){
+                    priceList = priceList
+                            .stream()
+                            .filter(price-> (minimum_price <= price) && (price <= maximum_price))
+                            .collect(Collectors.toList());
+                    if(priceList.size() <= 0){
+                        continue;
+                    }
+                }
+
+                // 해당 호텔의 모든 객실이 사용불가능 이라면 available_yn = false
+                if(roomInfoList.size() == isAllRoomNotAvailable){
+                    available_yn = false;
+                }
+
+                hotelSearchInfo.setHotel_num(hotel_num);
+                hotelSearchInfo.setName(hotelDetailInfo.getName());
+                hotelSearchInfo.setEng_name(hotelDetailInfo.getEng_name());
+                hotelSearchInfo.setStar(hotelDetailInfo.getStar());
+                hotelSearchInfo.setTags(hotelDetailInfo.getTags());
+                if(hotelDetailInfo.getImage() != null && hotelDetailInfo.getImage().size() > 0){
+                    hotelSearchInfo.setImage(hotelDetailInfo.getImage().get(0)); // 메인이미지만 제공
+                }
+                hotelSearchInfo.setAvailable_yn(available_yn);
+                if(priceList.size() <= 0){ // 객실이 존재하지않으면 최소가 0원
+                    hotelSearchInfo.setMinimum_price(0);
+                }else {
+                    hotelSearchInfo.setMinimum_price(Collections.min(priceList)); // 객실들 가격중 최저가
+                }
+
+                hotelSearchList.add(hotelSearchInfo);
+            }
+
+            total_cnt = hotelSearchList.size();
+
+            if(total_cnt <= 0){
+                noSearchResult(result);
+                return result;
+            }
+
+            // pagination
+            hotelSearchList = PageUtil.paginationList(page, pageCnt, total_cnt, hotelSearchList);
+
+            // 정렬
+            if(rank_num == 1){
+                // 호텔 등급 높은순
+                hotelSearchList.sort(Comparator.comparing(HotelSearchVo.HotelSearchInfo::getStar).reversed());
+            }else if(rank_num == 2){
+                // 최소가 높은순
+                hotelSearchList.sort(Comparator.comparing(HotelSearchVo.HotelSearchInfo::getMinimum_price).reversed());
+            }else if(rank_num == 3){
+                // 최소가 낮은순
+                hotelSearchList.sort(Comparator.comparing(HotelSearchVo.HotelSearchInfo::getMinimum_price));
+            }
+            result.setTotal_cnt(total_cnt);
+            result.setMessage("호텔 검색 필터 조회 완료");
+            result.setData(hotelSearchList);
+
+        }catch (Exception e){
+            e.printStackTrace();
+            ErrorResult(result);
+            return result;
+        }
 
         return result;
     }
@@ -321,7 +632,7 @@ public class HotelServiceImpl implements HotelService {
             }
 
             // 위도 경도값 / 호텔 전화번호 복호화
-            List<Float> location = new ArrayList<>();
+            List<Double> location = new ArrayList<>();
             location.add(hotelDetailInfo.getLongitude());
             location.add(hotelDetailInfo.getLatitude());
             hotelDetailInfo.setLocation(location);
@@ -792,9 +1103,12 @@ public class HotelServiceImpl implements HotelService {
     public HotelInfoVo.RoomInfoListResponse RoomInfoList(HotelInfoVo.RoomInfoListRequest roomInfoRequest) {
         HotelInfoVo.RoomInfoListResponse result = new HotelInfoVo.RoomInfoListResponse();
         List<HotelInfoVo.RoomInfo> RoomInfoListData = new ArrayList<>();
+        int total_cnt = 0;
 
         try{
             List<HotelInfoVo.RoomInfo> roomInfoList = hotelMapper.selectRoomInfoList(roomInfoRequest.getHotel_num());
+            Integer page = roomInfoRequest.getPage();
+            Integer pageCnt = roomInfoRequest.getPage_cnt();
             for(HotelInfoVo.RoomInfo roomInfo : roomInfoList){
                 addRoomInfoData(roomInfo); // 객실, 호실정보등 필요한 데이터 추가
                 RoomInfoListData.add(roomInfo);
@@ -804,7 +1118,13 @@ public class HotelServiceImpl implements HotelService {
                 return result;
             }
 
+            total_cnt = RoomInfoListData.size();
+
+            //pagination
+            RoomInfoListData = PageUtil.paginationList(page, pageCnt, total_cnt, RoomInfoListData);
+
             result.setData(RoomInfoListData);
+            result.setTotal_cnt(total_cnt);
             result.setMessage("객실 리스트 조회 완료");
         }catch (Exception e){
             e.printStackTrace();
@@ -983,7 +1303,7 @@ public class HotelServiceImpl implements HotelService {
         HotelInfoVo.HotelReservationListResponse result = new HotelInfoVo.HotelReservationListResponse();
 
         try{
-            HotelInfoVo.HotelReservationInfo hotelReservationInfo = new HotelInfoVo.HotelReservationInfo();
+//            HotelInfoVo.HotelReservationInfo hotelReservationInfo = new HotelInfoVo.HotelReservationInfo();
             // 해당 호텔 조회
             int hotel_num = hotelReservationListRequest.getHotel_num();
             HotelInfoVo.HotelDetailInfoResponse hotelDetailInfoResponse = HotelDetailInfo(hotel_num);
@@ -1028,11 +1348,12 @@ public class HotelServiceImpl implements HotelService {
                         + " ~ "
                         + DateUtil.dateToString(hotelReservationDetailInfo.getEd_date())); // 예약일 넣어줌 yyyy/MM/dd ~ yyyy/MM/dd
             }
-            hotelReservationInfo.setHotel_reservation_info_list(hotelReservationList);
-            hotelReservationInfo.setTotal_cnt(total_cnt);
+//            hotelReservationInfo.setHotel_reservation_info_list(hotelReservationList);
+//            hotelReservationInfo.setTotal_cnt(total_cnt);
 
             result.setMessage("호텔 예약정보 조회 완료");
-            result.setData(hotelReservationInfo);
+            result.setData(hotelReservationList);
+            result.setTotal_cnt(total_cnt);
         }catch (Exception e){
             e.printStackTrace();
             ErrorResult(result);

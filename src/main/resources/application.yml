@@ -5,19 +5,19 @@ spring:
     pathmatch:
       matching-strategy: ant_path_matcher
   # DB - Local
-  datasource:
-    driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:3306/kys
-    username: ENC(MzVYb4ZviEJWdLvVFw0CSA==)
-    password: ENC(5S02fsms4i0sL9H7seXhGA==)
-    schema-name: kys
-  # DB - Remote
 #  datasource:
 #    driver-class-name: org.mariadb.jdbc.Driver
-#    url: jdbc:mariadb://monsu1016.cafe24.com:3306/monsu1016
-#    username: ENC(eAdrBOt3oVrDRFHPDxMDnCTqHzLnVKbG)
-#    password: ENC(xZG6QLvv40VdE6bY02CZDtHb4nzCRGaz)
-#    schema-name: monsu1016
+#    url: jdbc:mariadb://localhost:3306/kys
+#    username: ENC(MzVYb4ZviEJWdLvVFw0CSA==)
+#    password: ENC(5S02fsms4i0sL9H7seXhGA==)
+#    schema-name: kys
+  # DB - Remote
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://monsu1016.cafe24.com:3306/monsu1016
+    username: ENC(eAdrBOt3oVrDRFHPDxMDnCTqHzLnVKbG)
+    password: ENC(xZG6QLvv40VdE6bY02CZDtHb4nzCRGaz)
+    schema-name: monsu1016
 
   jpa:
     open-in-view: false
@@ -82,6 +82,12 @@ cloud:
 # 공공데이터포탈
 odcloud:
   serviceKey: ENC(FmB3m1M9Q5Ocu6+QkypSbBQVJjs2+s+0ytMIEgF4EOeaadpebNlbkq9J8KoegAG4PHmCaJ0pUxBznxRwWRMvlzHiX+OAlHqcVPng3Mx7+97voaTtBEcCLZ1tcQ4y3zxV9LKuBBEbS8F9pIp2VBhQ/g==)
+
+kakao:
+  secretKey: KakaoAK e3c6a35b694e94ec63c0afca1411ae0c
+
+search:
+  distance: 1000
 
 logging:
   level:
