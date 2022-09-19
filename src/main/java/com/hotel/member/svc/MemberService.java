@@ -28,7 +28,7 @@ public interface MemberService {
 
     MemberVo.MemberInfoResponse ViewMemberInfo();
 
-    MemberVo.FindIdResponse FindId(MemberVo.FindIdRequest findIdRequest);
+    MemberVo.FindIdRequest FindId(MemberVo.FindIdRequest findIdRequest);
     
     CommonResponseVo EditPassword(MemberVo.EditPasswordRequest editPasswordRequest);
 

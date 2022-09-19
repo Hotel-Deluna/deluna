@@ -33,13 +33,13 @@ public class UnMemberInfoVo {
     @Schema(description = "비회원 예약조회 파라미터")
     public static class UnMemberReservationRequest {
         @Schema(description = "한글 이름",  required = true, example = "임꺽정")
-        String name;
+        String reservation_name;
 
         @Schema(description = "비회원 전화번호", required = true, example = "01012345678")
-        String phone_num;
+        String reservation_phone;
 
         @Schema(description = "예약번호", required = true, example = "1108668")
-        String reservation_num;
+        int reservation_num;
     }
 
     @Data
@@ -84,12 +84,23 @@ public class UnMemberInfoVo {
     @Schema(description = "비회원 예약 취소")
     public static class UnMemberWithdrawRequest {
     	
-    	@Schema(description = "비회원 예약번호",  required = true, example = "1108668")
-        String reservation_num;
-    	
-        @Schema(description = "비회원 탈퇴 사유",  required = true, example = "일정변경")
-        String reason;
+    	@Schema(description = "회원 예약번호", required = true, example = "1108668")
+		int reservation_num;
+		
+	//	@Schema(description = "객실 상세정보 번호", required = true, example = "2")
+	//	int room_detail_num;
+		
+		@Schema(description = "고객 번호", required = true, example = "1")
+		int member_num;
+		
+		@Schema(description = "결제 상세 번호", required = true, example = "1")
+		int payment_detail_num;
 
+		@Schema(description = "비회원 탈퇴 사유", required = true, example = "다른호텔 예약")
+		String content;
+		
+		@Schema(description = "update_user", required = true, example = "백엔드에서만 사용")
+		int update_user;
     }
 
 

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.hotel.mapper.ReservationMapper">
+
+	<insert id="reservationInfo"
+		parameterType="com.hotel.reservation.vo.MemberInfoVo$MemberReservationRequest">
+
+		insert into
+		d_reservation
+		(
+		member_num, room_detail_num, reservation_phone,
+		reservation_name, reservation_people, reservation_price, st_date, ed_date
+		,reservation_status, is_delete, dt_insert, insert_user
+		)
+		values(
+		#{member_num}, #{room_detail_num}, #{reservation_phone},
+		#{reservation_name},#{reservation_people}, #{reservation_price},
+		#{st_date}, #{ed_date}
+		,1 , 'N', NOW(), #{insert_user}
+		)
+
+	</insert>
+
+	<insert id="payInfo"
+		parameterType="com.hotel.reservation.vo.MemberInfoVo$ReservationDetailPaymentsRequest">
+
+		insert into d_payment_detail (payment_status, payment_price, dt_insert,
+		insert_user)
+
+		values (1, #{payment_price}, NOW(), #{insert_user})
+
+	</insert>
+
+	<select id="selectUserInfo" resultType="string">
+
+		select insert_user from d_member where member_num = #{member_num}
+
+	</select>
+
+	<delete id="reservationDelete" parameterType="int">
+
+		delete from d_reservation where member_num = #{member_num}
+
+	</delete>
+
+	<delete id="paymentDelete" parameterType="string">
+
+		delete from d_payment_detail where insert_user = #{insert_user}
+
+	</delete>
+
+	<select id="selectReservationNum" resultType="int">
+
+		select MAX(reservation_num) from d_reservation where member_num =
+		#{member_num}
+
+	</select>
+
+	<select id="selectPaymentNum" resultType="int">
+
+		select MAX(payment_detail_num) from d_payment_detail where insert_user =
+		#{insert_user}
+
+	</select>
+
+	<insert id="insertPaymentInfo"
+		parameterType="com.hotel.reservation.vo.MemberInfoVo$ReservationPaymentsRequest">
+
+		insert into d_payment (reservation_num, payment_detail_num, dt_insert,
+		insert_user)
+
+		values (#{reservation_num}, #{payment_detail_num}, NOW(), #{insert_user})
+
+	</insert>
+
+	<select id="selectInsertUser" resultType="string">
+
+		select insert_user from d_reservation where reservation_num =
+		#{reservation_num}
+
+	</select>
+
+	<update id="reservationCancelUpdate"
+		parameterType="com.hotel.reservation.vo.MemberInfoVo$MemberWithdrawRequest">
+
+		update d_reservation set is_delete='Y', dt_update = NOW(), update_user =
+		#{update_user} where reservation_num = #{reservation_num}
+
+	</update>
+
+	<insert id="reservationDeleteUpdate"
+		parameterType="com.hotel.reservation.vo.MemberInfoVo$MemberWithdrawRequest">
+
+		insert into d_reservation_delete(reservation_num, content, dt_insert,
+		insert_member)
+
+		values(#{reservation_num}, #{content}, NOW(), #{update_user})
+
+	</insert>
+
+	<select id="paymentNum" resultType="int">
+
+		select MAX(payment_detail_num) from d_payment_detail where insert_user =
+		#{update_user}
+
+	</select>
+
+	<select id="reservationList" resultType="com.hotel.reservation.vo.MemberInfoVo$MemberReservationListInfo">
+
+		select 
+			reservation_num, member_num, room_detail_num,
+			reservation_phone, reservation_name,reservation_people,
+			reservation_price, reservation_status, st_date, ed_date
+		
+		from d_reservation
+		
+		where member_num = #{member_num} 
+		
+			and reservation_status = #{reservation_status}
+		
+			and st_date LIKE CONCAT(#{st_date},'%') 
+		
+			and ed_date LIKE CONCAT(#{ed_date},'%')
+		
+		ORDER BY reservation_num DESC;
+
+	</select>
+	
+	<select id="selectReservationCancelContent" resultType="com.hotel.reservation.vo.MemberInfoVo$MemberReservationDeleteRequest">
+
+		select content from d_reservation_delete where reservation_num=#{reservation_num}
+
+	</select>
+	
+	<select id= "selectMemberPhoneInfo" resultType="string">
+	
+		select reservation_phone from d_reservation where reservation_num = #{reservation_num}
+	
+	</select>
+	
+	<select id="unMemberReservationInfo" resultType="com.hotel.reservation.vo.UnMemberInfoVo$UnMemberReservationRequest">
+	
+		select 
+			reservation_num, member_num, room_detail_num,
+			reservation_phone, reservation_name,reservation_people,
+			reservation_price, reservation_status, st_date, ed_date
+		
+		from d_reservation
+		
+		where reservation_name = #{reservation_name} 
+		
+			and reservation_phone = #{reservation_phone}
+		
+			and reservation_num = #{reservation_num} 
+	
+	</select>
+	
+	
+	<select id="selectInsertUnUser" resultType="string">
+
+		select insert_user from d_reservation where reservation_num =
+		#{reservation_num}
+
+	</select>
+	
+	<update id="unReservationCancelUpdate"
+		parameterType="com.hotel.reservation.vo.MemberInfoVo$MemberWithdrawRequest">
+
+		update d_reservation set is_delete='Y', dt_update = NOW(), update_user =
+		#{update_user} where reservation_num = #{reservation_num}
+
+	</update>
+	
+	<insert id="unReservationDeleteUpdate"
+		parameterType="com.hotel.reservation.vo.MemberInfoVo$MemberWithdrawRequest">
+
+		insert into d_reservation_delete(reservation_num, content, dt_insert,
+		insert_member)
+
+		values(#{reservation_num}, #{content}, NOW(), #{update_user})
+
+	</insert>
+	
+	
+</mapper>

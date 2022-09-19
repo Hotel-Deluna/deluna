@@ -69,5 +69,7 @@ public class UtilVo {
         String text;
         @Schema(description = "수신자 이메일",  required = true)
         String receiver;
+        @Schema(description = "인증키 전송",  required = true)
+        String key;
     }
 }

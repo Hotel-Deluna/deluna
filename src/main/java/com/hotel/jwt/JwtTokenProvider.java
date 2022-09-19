@@ -16,7 +16,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.util.Date;
 import java.util.stream.Collectors;
 
 import io.jsonwebtoken.*;
@@ -42,19 +41,35 @@ public class JwtTokenProvider {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public JwtTokenDto.TokenDto generateTokenDto(Authentication authentication) {
+    public JwtTokenDto.TokenDto generateTokenDto(Authentication authentication, String role) {
         // 권한들 가져오기
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
-
+        
+        if(authorities.equals("")) {
+        	authorities = role;
+        }
+        
+        Map<String, Object> test = new HashMap<>();
+        test.put("auth", authorities);
+        test.put("id", "1234-567-889");
+        
         long now = (new Date()).getTime();
 
         // Access Token 생성
         Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
+//        String accessToken = Jwts.builder()
+//                .setSubject(authentication.getName())       // payload "sub": "name"
+//                .claim(AUTHORITIES_KEY, authorities)        // payload "auth": "ROLE_USER"
+//                .setExpiration(accessTokenExpiresIn)        // payload "exp": 1516239022 (예시)
+//                .signWith(key, SignatureAlgorithm.HS512)    // header "alg": "HS512"
+//                .compact();
+        
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())       // payload "sub": "name"
                 .claim(AUTHORITIES_KEY, authorities)        // payload "auth": "ROLE_USER"
+                .setId("12345678")
                 .setExpiration(accessTokenExpiresIn)        // payload "exp": 1516239022 (예시)
                 .signWith(key, SignatureAlgorithm.HS512)    // header "alg": "HS512"
                 .compact();
@@ -76,7 +91,7 @@ public class JwtTokenProvider {
     public Authentication getAuthentication(String accessToken) {
         // 토큰 복호화
         Claims claims = parseClaims(accessToken);
-
+        
         if (claims.get(AUTHORITIES_KEY) == null) {
             throw new RuntimeException("권한 정보가 없는 토큰입니다.");
         }
