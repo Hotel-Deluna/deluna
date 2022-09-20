@@ -4,15 +4,21 @@ import com.hotel.common.CommonResponseVo;
 import com.hotel.company.svc.HotelService;
 import com.hotel.company.vo.HotelInfoVo;
 import com.hotel.company.vo.HotelSearchVo;
+import com.hotel.jwt.CheckTokenInfo;
+import com.hotel.jwt.JwtTokenProvider;
+import com.hotel.member.svc.MemberServiceImpl;
 import com.hotel.owner.vo.OwnerVo;
 import com.hotel.reservation.svc.ReservationService;
 import com.hotel.reservation.vo.MemberInfoVo;
 import com.hotel.reservation.vo.UnMemberInfoVo;
+import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberReservationInfoResponseDto;
+import com.hotel.util.SHA512Util;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListInfo;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationResponseDto;
 import com.hotel.reservation.vo.MemberInfoVo.ReservationDeleteContentResponseDto;
 
 import io.swagger.annotations.*;
+import lombok.RequiredArgsConstructor;
 
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
@@ -21,50 +27,47 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/reservation")
-
 public class ReservationController {
+	
+	private final CheckTokenInfo info;
 
 	@Autowired
 	ReservationService reservationService;
 
 	@ApiOperation(value = "비회원 조회")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PostMapping("/unMemberInfo")
-	public Map<String, Object> UnMemberInfo(
+	public UnMemberReservationInfoResponseDto UnMemberInfo(
 			@RequestBody UnMemberInfoVo.UnMemberReservationRequest unMemberReservationRequest)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
-		Map<String, Object> result = new HashMap<>();
+		UnMemberReservationInfoResponseDto dto = new UnMemberReservationInfoResponseDto();
 
 		if (unMemberReservationRequest.getReservation_name().equals("")) {
-			result.put("result", "ERR");
-			result.put("reason", "name Not Found");
-			result.put("data", "");
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("name Not Found");
+			return dto;
 		} else if (unMemberReservationRequest.getReservation_phone().equals("")) {
-			result.put("result", "ERR");
-			result.put("reason", "phone Not Found");
-			result.put("data", "");
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("phone Not Found");
+			return dto;
 		} else if (unMemberReservationRequest.getReservation_num() == 0) {
-			result.put("result", "ERR");
-			result.put("reason", "reservation_num Not Found");
-			result.put("data", "");
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("reservation_num Not Found");
+			return dto;
 		}
 
 		return reservationService.UnMemberReservationInfo(unMemberReservationRequest);
 	}
 
 	@ApiOperation(value = "비회원 예약 삭제")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@DeleteMapping(value = "/unMemberwithdraw", produces = "application/json")
 	public MemberReservationResponseDto UnMemberReservationWithdraw(
@@ -103,14 +106,13 @@ public class ReservationController {
 
 	@ApiOperation(value = "고객 객실 예약하기")
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PostMapping("/memberReservation")
 	public MemberReservationResponseDto MemberReservation(
-			@RequestBody MemberInfoVo.MemberReservationRequest memberReservationRequest) {
+			@RequestBody MemberInfoVo.MemberReservationRequest memberReservationRequest, HttpServletRequest req) {
 
 		MemberReservationResponseDto dto = new MemberReservationResponseDto();
-		Map<String, Object> map = new HashMap<>();
 
 		// 파라미터 밸리데이션 체크
 		if (memberReservationRequest.getEd_date().equals("")) {
@@ -154,12 +156,19 @@ public class ReservationController {
 			dto.setReason("start_date Not Found");
 			return dto;
 		}
+		
+		else if (memberReservationRequest.getRole() == 1 || memberReservationRequest.getRole() == 2) {
+			String token = req.getHeader("accessToken");
+			String email = info.tokenInfo(token);
+			return dto;
+		}
+		
 		return reservationService.memberReservation(memberReservationRequest);
 	}
 
 	@ApiOperation(value = "고객 예약 삭제")
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PutMapping(value = "/memberReservationwithdraw", produces = "application/json")
 	public MemberReservationResponseDto MemberReservationWithdraw(
@@ -195,7 +204,7 @@ public class ReservationController {
 
 	@ApiOperation(value = "고객 예약내역 조회")
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PostMapping(value = "/memberReservationList", produces = "application/json")
 	public Map<String, Object> MemberReservationList(@RequestBody MemberInfoVo.MemberReservationListRequest memberInfo)

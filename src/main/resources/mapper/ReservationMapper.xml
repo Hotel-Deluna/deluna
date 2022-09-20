@@ -141,7 +141,7 @@
 	
 	</select>
 	
-	<select id="unMemberReservationInfo" resultType="com.hotel.reservation.vo.UnMemberInfoVo$UnMemberReservationRequest">
+	<select id="unMemberReservationInfo" resultType="com.hotel.reservation.vo.UnMemberInfoVo$UnMemberReservationInfoResponseDto">
 	
 		select 
 			reservation_num, member_num, room_detail_num,

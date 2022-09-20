@@ -166,6 +166,9 @@ public class MemberInfoVo {
 		@Schema(description = "결제금액", required = true, example = "300000")
 		int reservation_price;
 		
+		@Schema(description = "role", required = true, example = "고객:1, 사업자:2, 비회원:3")
+		int role;
+		
 		@Schema(description = "insert_user", required = true, example = "백엔드에서만 사용")
 		String insert_user;
 		

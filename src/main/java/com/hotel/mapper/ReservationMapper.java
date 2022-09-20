@@ -13,6 +13,7 @@ import com.hotel.reservation.vo.MemberInfoVo.MemberReservationRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberWithdrawRequest;
 import com.hotel.reservation.vo.MemberInfoVo.ReservationDetailPaymentsRequest;
 import com.hotel.reservation.vo.MemberInfoVo.ReservationPaymentsRequest;
+import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberReservationInfoResponseDto;
 import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberReservationRequest;
 import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberWithdrawRequest;
 
@@ -51,7 +52,7 @@ public interface ReservationMapper {
 	String selectMemberPhoneInfo(UnMemberReservationRequest unMemberReservationInfo);
 	
 	/////////////////////비회원 추가///////////////////////////////
-	List<UnMemberReservationRequest> unMemberReservationInfo(UnMemberReservationRequest unMemberReservationInfo);
+	List<UnMemberReservationInfoResponseDto> unMemberReservationInfo(UnMemberReservationRequest unMemberReservationInfo);
 	
 	int selectInsertUnUser(UnMemberWithdrawRequest unMemberWithdrawVo);
 	

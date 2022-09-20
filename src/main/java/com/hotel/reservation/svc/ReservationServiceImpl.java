@@ -16,6 +16,7 @@ import com.hotel.reservation.vo.MemberInfoVo.ReservationDeleteContentResponseDto
 import com.hotel.reservation.vo.MemberInfoVo.ReservationDetailPaymentsRequest;
 import com.hotel.reservation.vo.MemberInfoVo.ReservationPaymentsRequest;
 import com.hotel.reservation.vo.UnMemberInfoVo;
+import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberReservationInfoResponseDto;
 import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberReservationRequest;
 import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberWithdrawRequest;
 import com.hotel.util.AES256Util;
@@ -43,44 +44,44 @@ public class ReservationServiceImpl implements ReservationService {
 	private final AES256Util aesUtil;
 
 	@Override
-	public Map<String, Object> UnMemberReservationInfo(
+	public UnMemberReservationInfoResponseDto UnMemberReservationInfo(
 			UnMemberReservationRequest unMemberReservationInfo) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
 
-		Map<String, Object> result = new HashMap<>();
+		UnMemberReservationInfoResponseDto dto = new UnMemberReservationInfoResponseDto();
 
 		String phone = reservationMapper.selectMemberPhoneInfo(unMemberReservationInfo);
 		
 		if(phone.equals("")) {
-			result.put("result", "ERR");
-			result.put("reason", "reservation_num Not Found");
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("reservation_num select fail");
+			return dto;
 		}
 		
 		//암호화 된 핸드폰 번호 복호화
 		phone = aesUtil.decrypt(phone);
 		String reqPhone = unMemberReservationInfo.getReservation_phone();
-		List<UnMemberReservationRequest> list;
+		List<UnMemberReservationInfoResponseDto> list;
 		
 		//예약된 고객 번호와 입력된 고객번호가 맞는지 확인 후
 		if(reqPhone.equals(phone)) {
 			list = reservationMapper.unMemberReservationInfo(unMemberReservationInfo);	
 		}else {
-			result.put("result", "ERR");
-			result.put("reason", "phone Not Found");
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("phone eqaule fail");
+			return dto;
 		}
 		
 		//예약정보 확인
 		if(list.size() == 0) {
-			result.put("result", "ERR");
-			result.put("reason", "reservation Info Not Found");
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("unReservation Info select fail");
+			return dto;
 		}else {
-			result.put("result", "OK");
-			result.put("reason", "");
-			result.put("data", list);
+			dto.setResult("OK");
+			dto.setReason("unReservation select success");
+			dto.setTotalCnt(list.size());
 		}
-		return result;
+		return dto;
 	}
 
 	@Override

@@ -18,12 +18,13 @@ import com.hotel.reservation.vo.MemberInfoVo.MemberReservationResponseDto;
 import com.hotel.reservation.vo.MemberInfoVo.MemberWithdrawRequest;
 import com.hotel.reservation.vo.MemberInfoVo.ReservationDeleteContentResponseDto;
 import com.hotel.reservation.vo.UnMemberInfoVo;
+import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberReservationInfoResponseDto;
 import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberWithdrawRequest;
 
 @Service
 public interface ReservationService {
 
-	Map<String, Object> UnMemberReservationInfo(UnMemberInfoVo.UnMemberReservationRequest unMemberReservationInfo) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException;
+	UnMemberReservationInfoResponseDto UnMemberReservationInfo(UnMemberInfoVo.UnMemberReservationRequest unMemberReservationInfo) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException;
 	
 	MemberReservationResponseDto UnMemberReservationWithdraw(UnMemberInfoVo.UnMemberWithdrawRequest unMemberWithdrawVo);
 

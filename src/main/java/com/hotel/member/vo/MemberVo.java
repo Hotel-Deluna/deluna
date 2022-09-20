@@ -96,14 +96,20 @@ public class MemberVo {
 	@Schema(description = "고객 카카오 로그인 파라미터")
 	public static class LoginMemberRequestKokao {
 
-		//@Schema(description = "클라이언트 키", required = true, example = "백엔드처리(REST APIKey)")
-		//String client_id;
+		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
+		String email;
+		
+		@Schema(description = "고객 이름", required = true, example = "example@naver.com")
+		String name;
 
-		@Schema(description = "리다이렉트url", required = true, example = "리다이렉트할 페이지 정보")
-		String redirect_uri;
+		@Schema(description = "비밀번호", required = true, example = "필수값이라 필요한데")
+		String password;
+		
+		@Schema(description = "핸드폰번호", required = true, example = "01012345678")
+		String phone_num;
 
-		@Schema(description = "response_type", required = true, example = "code 로 고정")
-		String response_type;
+		@Schema(description = "Oauth2", required = true, example = "소셜 인증키")
+		String auth;
 	}
 
 	@Data
@@ -112,14 +118,20 @@ public class MemberVo {
 	@Schema(description = "고객 네이버 로그인 파라미터")
 	public static class LoginMemberRequestNaver {
 
-		//@Schema(description = "클라이언트 키", required = true, example = "백엔드처리(REST APIKey)")
-		//String client_id;
+		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
+		String email;
 		
-		//@Schema(description = "클라이언트 시크릿 키", required = true, example = "백엔드처리(시크릿 Key)")
-		//String client_secret;
+		@Schema(description = "고객 이름", required = true, example = "example@naver.com")
+		String name;
 
-		@Schema(description = "리다이렉트url", required = true, example = "리다이렉트할 페이지 정보")
-		String redirect_uri;
+		@Schema(description = "비밀번호", required = true, example = "필수값이라 필요한데")
+		String password;
+		
+		@Schema(description = "핸드폰번호", required = true, example = "01012345678")
+		String phone_num;
+
+		@Schema(description = "Oauth2", required = true, example = "소셜 인증키")
+		String auth;
 
 	}
 	
@@ -129,23 +141,20 @@ public class MemberVo {
 	@Schema(description = "고객 구글 로그인 파라미터")
 	public static class LoginMemberRequestGoogle {
 
-		//@Schema(description = "클라이언트 키", required = true, example = "백엔드처리(REST APIKey)")
-		//String client_id;
+		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
+		String email;
 		
-		//@Schema(description = "클라이언트 시크릿 키", required = true, example = "백엔드처리(시크릿 Key)")
-		//String client_secret;
+		@Schema(description = "고객 이름", required = true, example = "example@naver.com")
+		String name;
 
-		@Schema(description = "리다이렉트url", required = true, example = "리다이렉트할 페이지 정보")
-		String redirect_uri;
+		@Schema(description = "비밀번호", required = true, example = "필수값이라 필요한데")
+		String password;
 		
-		@Schema(description = "response_type", required = true, example = "인증코드 반환여부 확인")
-		String response_type;
-		
-		//@Schema(description = "동의범위", required = true, example = "Oauth 동의 법위")
-		//String scope;
-		
-		//@Schema(description = "엑세스토큰을 새로고칠수 있는지 여부", required = true, example = "액세스토큰 새로코칠수 있는지 여부")
-		//String accessType;
+		@Schema(description = "핸드폰번호", required = true, example = "01012345678")
+		String phone_num;
+
+		@Schema(description = "Oauth2", required = true, example = "소셜 인증키")
+		String auth;
 
 	}
 

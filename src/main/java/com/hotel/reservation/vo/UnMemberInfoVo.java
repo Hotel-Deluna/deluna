@@ -42,7 +42,58 @@ public class UnMemberInfoVo {
         int reservation_num;
     }
 
+    
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "비회원 예약 조회 response")
+    public static class UnMemberReservationInfoResponseDto {
+    	
+    	@Schema(description = "api 결과값", required = true, example = "OK or ERR")
+		String result;
+		
+		@Schema(description = "상세내용", required = true, example = "param Not Found")
+		String reason;
+		
+		@Schema(description = "totalSize", required = true, example = "30")
+		int totalCnt;
+		
+		@Schema(description = "페이지 당 출력할 리스트 갯수", required = true, example = "10")
+		int recordSize;
+
+        @Schema(description = "예약번호", required = true, example = "1111111")
+        String reservation_num;
+        
+        @Schema(description = "예약자명", required = true, example = "홍길동")
+        String reservation_name;
+        
+        @Schema(description = "휴대폰번호", required = true, example = "01033334444")
+        String reservation_phone;
+        
+        @Schema(description = "호텔명", required = true, example = "호텔 델루나")
+        String name;
+        
+        @Schema(description = "객실명", required = true, example = "스탠다드 룸")
+        String room_detail_name;
+        
+        @Schema(description = "투숙인원", required = true, example = "2")
+        Integer reservation_people;
+        
+        @Schema(description = "예약 시작일", required = true, example = "2022-08-28 14:20:00")
+        String st_date;
+        
+        @Schema(description = "예약 종료일", required = true, example = "2022-08-29 11:00:00")
+        String ed_date;
+        
+        @Schema(description = "결제금액", required = true, example = "300000")
+        BigDecimal reservation_price;
+        
+        @Schema(description = "예약상태", required = true, example = "0")
+        String reservation_status;
+    }
+    
+    @Data
+    @AllArgsConstructor
     @NoArgsConstructor
     @Schema(description = "비회원 예약 조회")
     public static class UnMemberReservationInfo {
