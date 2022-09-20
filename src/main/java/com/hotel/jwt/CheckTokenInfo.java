@@ -1,7 +1,10 @@
 package com.hotel.jwt;
 
+import java.util.Collection;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import com.hotel.member.svc.MemberServiceImpl;

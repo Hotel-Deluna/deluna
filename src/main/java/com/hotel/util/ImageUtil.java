@@ -2,6 +2,9 @@ package com.hotel.util;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.*;
+import com.hotel.company.dto.HotelDto;
+import com.hotel.company.dto.HotelMapper;
+import com.hotel.company.vo.HotelInfoVo;
 import lombok.RequiredArgsConstructor;
 import marvin.image.MarvinImage;
 import org.marvinproject.image.transform.scale.Scale;
@@ -31,6 +34,9 @@ public class ImageUtil {
 
     @Autowired
     AmazonS3Client amazonS3Client;
+
+    @Autowired
+    HotelMapper hotelMapper;
 
     /**
      * AWS 파일 업로드
@@ -139,5 +145,62 @@ public class ImageUtil {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * 이미지 AWS 업로드, 이미지 리사이징, 이미지 정보 DB 저장
+     * @return
+     */
+    public void insertImage(List<MultipartFile> multipartFile, int selectType, int PK, String userPk) throws Exception{
+
+        List<String> imageUrlList = uploadImage(multipartFile);
+        for(int i=0; i < imageUrlList.size(); i++){
+            String imageName = imageUrlList.get(i);
+            String bucket_url = getImageUrl(imageName);
+            HotelDto.ImageTable imageTable = new HotelDto.ImageTable();
+            imageTable.setSelect_type(selectType);
+            imageTable.setPrimary_key(PK);
+            imageTable.setPicture_name(imageName);
+            imageTable.setBucket_url(bucket_url);
+            imageTable.setPicture_sequence(i+1); // 사진순서 1부터 시작
+            imageTable.setInsert_user(userPk);
+            imageTable.setUpdate_user(userPk);
+            hotelMapper.insertImage(imageTable);
+        }
+
+    }
+
+    /**
+     * 이미지 정보 조회
+     * @param selectType
+     * @param PK
+     * @return
+     */
+    public List<String> selectImage(int selectType, int PK) throws Exception{
+        List<String> result;
+        HotelInfoVo.ImageInfo imageParams = new HotelInfoVo.ImageInfo();
+        imageParams.setSelect_type(selectType);
+        imageParams.setPrimary_key(PK);
+        result = hotelMapper.selectImageList(imageParams);
+
+        return result;
+    }
+
+    /**
+     * AWS에 저장된 이미지 삭제 & 이미지 테이블 정보 삭제
+     * @param selectType
+     * @param PK
+     * @throws Exception
+     */
+    public void deleteImage(int selectType, int PK) throws Exception{
+        List<String> imageList = selectImage(selectType, PK);
+        if(imageList != null){
+            deleteImage(imageList);
+
+            HotelDto.ImageTable deleteImageParam = new HotelDto.ImageTable();
+            deleteImageParam.setPrimary_key(PK);
+            deleteImageParam.setSelect_type(selectType);
+            hotelMapper.deleteImage(deleteImageParam);
+        }
     }
 }

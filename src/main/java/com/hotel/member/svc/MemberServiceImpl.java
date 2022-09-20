@@ -17,6 +17,7 @@ import com.hotel.member.vo.MemberVo.MemberDeleteVo;
 import com.hotel.member.vo.MemberVo.MemberEmailAuthInfo;
 import com.hotel.member.vo.MemberVo.MemberFindPwdRequest;
 import com.hotel.member.vo.MemberVo.MemberUpdatePwdRequest;
+import com.hotel.member.vo.MemberVo.ViewMemberInfoResponseDto;
 import com.hotel.util.AES256Util;
 import com.hotel.util.AuthUtil;
 import com.hotel.util.MailUtil;
@@ -115,8 +116,7 @@ public class MemberServiceImpl implements UserDetailsService {
 	// 이메일 조회
 	@SuppressWarnings("static-access")
 	@Transactional(readOnly = true)
-	public CommonResponseVo getMemberInfo(MemberRequestDto memberRequestDto) {
-		CommonResponseVo result = new CommonResponseVo();
+	public Map<String, Object> getMemberInfo(MemberRequestDto memberRequestDto) {
 		Map<String, Object> map = new HashMap<>();
 		TokenDto dto = new TokenDto();
 
@@ -126,17 +126,15 @@ public class MemberServiceImpl implements UserDetailsService {
 			System.out.println("test = " + member.isEmpty()); 
 			
 			if (member.isEmpty() == true) {
-				result.setResult("ERR");
-				result.setMessage("member Not Found");
-				result.setMap(map);
-				return result;
+				map.put("result", "ERR");
+				map.put("reason", "member Not Found");
+				return map;
 			}
 			member = memberRepository.findByPassword(memberRequestDto.getPassword());
 			if (member.isEmpty() == true) {
-				result.setResult("ERR");
-				result.setMessage("password auth fail");
-				result.setMap(map);
-				return result;
+				map.put("result", "ERR");
+				map.put("reason", "memberPwd Not Found");
+				return map;
 			}
 			String id = member.get().getEmail();
 			String role = member.get().getRole();
@@ -149,7 +147,7 @@ public class MemberServiceImpl implements UserDetailsService {
 			}
 			member.get().builder().email(id).role(role);
 			UsernamePasswordAuthenticationToken authenticationToken = memberRequestDto.toAuthentication();
-			dto = jwtTokenProvider.generateTokenDto(authenticationToken, member.get().getRole());
+			dto = jwtTokenProvider.generateMemberTokenDto(authenticationToken, member.get().getRole());
 			
 			map.put("AccessToken", dto.getAccessToken());
 			map.put("RefreshToken", dto.getRefreshToken());
@@ -158,8 +156,7 @@ public class MemberServiceImpl implements UserDetailsService {
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-			result.setMap(map);
-		return result;
+		return map;
 	}
 
 	// 현재 SecurityContext 에 있는 유저 정보 가져오기
@@ -190,36 +187,32 @@ public class MemberServiceImpl implements UserDetailsService {
 		return result;
 	}
 
-	public CommonResponseVo MemberEditInfo(MemberVo.MemberUpdateInfo memberInfoVo)
+	public MemberVo.MemberResponseDto MemberEditInfo(MemberVo.MemberUpdateInfo memberInfoVo)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
-		CommonResponseVo result = new CommonResponseVo();
-		Map<String, Object> map = new HashMap<>();
-
+		
+		MemberVo.MemberResponseDto dto = new MemberVo.MemberResponseDto();
+		
 		String phone = memberInfoVo.getPhone_num();
 
 		memberInfoVo.setPhone_num(aesUtil.encrypt(phone));
 
-		System.out.println("phone = " + memberInfoVo.getPhone_num());
-
 		int chk = memberMapper.updateMemberInfo(memberInfoVo);
 
 		if (chk > 0) {
-			map.put("result", "OK");
-			map.put("reason", "");
-			result.setMap(map);
+			dto.setResult("OK");
+			dto.setReason("");
 		} else {
-			map.put("result", "ERR");
-			map.put("reason", "member Not Found");
-			result.setMap(map);
+			dto.setResult("ERR");
+			dto.setReason("update Fail");
 		}
 
-		return result;
+		return dto;
 	}
 
-	public MemberVo.MemberInfoResponse ViewMemberInfo(String email)
+	public ViewMemberInfoResponseDto ViewMemberInfo(String email)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
 //        ApiResponseVo result = new ApiResponseVo();
-		MemberVo.MemberInfoResponse result = new MemberVo.MemberInfoResponse();
+		ViewMemberInfoResponseDto result = new ViewMemberInfoResponseDto();
 		MemberVo.MemberInfo memberInfoVo = new MemberVo.MemberInfo();
 
 		memberInfoVo = memberMapper.viewMemberInfo(email);
@@ -227,13 +220,19 @@ public class MemberServiceImpl implements UserDetailsService {
 		// 핸드폰 복호화
 		memberInfoVo.setPhone_num(aesUtil.decrypt(String.valueOf(memberInfoVo.getPhone_num())));
 
-		result.setMessage("고객정보 조회 완료");
-		result.setData(memberInfoVo);
+		result.setResult("OK");
+		result.setReason("");
+		result.setEmail(memberInfoVo.getEmail());
+		result.setName(memberInfoVo.getName());
+		result.setPhone_num(memberInfoVo.getPhone_num());
+		result.setRole(memberInfoVo.getRole());
+		result.setInsert_user(memberInfoVo.getInsert_user());
+		
 		return result;
 	}
 
-	public CommonResponseVo MemberWithdraw(MemberDeleteVo deleteVo) {
-		CommonResponseVo result = new CommonResponseVo();
+	public MemberVo.MemberResponseDto MemberWithdraw(MemberDeleteVo deleteVo) {
+		MemberVo.MemberResponseDto result = new MemberVo.MemberResponseDto();
 		// 회원 탈퇴처리
 		// ownerWithdrawReasonVo 사유 DB 저장
 
@@ -255,13 +254,11 @@ public class MemberServiceImpl implements UserDetailsService {
 				int deleteOk = memberMapper.insertDeleteMember(deleteVo);
 				Map<String, Object> map = new HashMap<>();
 				if (deleteOk == 1) {
-					map.put("result", "OK");
-					map.put("reason", "");
-					result.setMap(map);
+					result.setResult("OK");
+					result.setReason("delete Success");
 				} else {
-					map.put("result", "ERR");
-					map.put("reason", "ERR");
-					result.setMap(map);
+					result.setResult("ERR");
+					result.setReason("delete Fail");
 				}
 			}
 		}
@@ -269,33 +266,30 @@ public class MemberServiceImpl implements UserDetailsService {
 		return result;
 	}
 
-	public CommonResponseVo FindByPasswd(MemberFindPwdRequest findPwdRequest)
+	public MemberVo.MemberResponseDto FindByPasswd(MemberFindPwdRequest findPwdRequest)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
-		CommonResponseVo result = new CommonResponseVo();
-		Map<String, Object> map = new HashMap<>();
+		
+		MemberVo.MemberResponseDto dto = new MemberVo.MemberResponseDto();
+		
 		findPwdRequest.setPhone_num(aesUtil.encrypt(findPwdRequest.getPhone_num()));
 
 		String email = memberMapper.checkEmailByPwd(findPwdRequest);
 
 		if (email == null) {
-			map.put("result", "ERR");
-			map.put("reason", "email Not Found");
-			result.setMap(map);
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("email Not Found");
+			return dto;
 		}
 
 		String user_num = memberMapper.selectMemberNum(email);
 
 		if (user_num == null) {
-			map.put("result", "ERR");
-			map.put("reason", "member_num Not Found");
-			result.setMap(map);
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("member_num Not Found");
+			return dto;
 		}
 
 		String key = authUtil.CreateAuthNum();
-
-		System.out.println("key = " + key);
 
 		MemberEmailAuthInfo req = new MemberEmailAuthInfo();
 
@@ -305,11 +299,9 @@ public class MemberServiceImpl implements UserDetailsService {
 		int data = memberMapper.updateEmailAuthInfo(req);
 
 		if (data == 0) {
-			result.setResult("ERR");
-			result.setMessage("");
-			map.put("errContent", "auth Not Insert");
-			result.setMap(map);
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("auth Not Insert");
+			return dto;
 		}
 
 		UtilVo.MailRequest mailSender = new MailRequest();
@@ -319,17 +311,15 @@ public class MemberServiceImpl implements UserDetailsService {
 		// 수신자 메일정보 저장
 		mailUtil.sendMail(mailSender);
 
-		map.put("data", "");
-		result.setResult("OK");
-		result.setMessage("");
-		result.setMap(map);
+		dto.setResult("OK");
+		dto.setReason("mail send : " + email);
 
-		return result;
+		return dto;
 	}
 
-	public CommonResponseVo UpdatePasswd(MemberUpdatePwdRequest updatePwdRequest) throws Exception {
-		CommonResponseVo result = new CommonResponseVo();
-		Map<String, Object> map = new HashMap<>();
+	public MemberVo.MemberResponseDto UpdatePasswd(MemberUpdatePwdRequest updatePwdRequest) throws Exception {
+		
+		MemberVo.MemberResponseDto dto = new MemberVo.MemberResponseDto();
 		
 		String user_num = memberMapper.selectMemberNum(updatePwdRequest.getEmail());
 		
@@ -337,11 +327,9 @@ public class MemberServiceImpl implements UserDetailsService {
 		String auth_num = memberMapper.checkEmailAuthInfo(updatePwdRequest);
 		
 		if(auth_num == null) {
-			result.setResult("ERR");
-			result.setMessage("");
-			map.put("auth_num", "auth Not Found");
-			result.setMap(map);
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("user_num Not Found");
+			return dto;
 		}
 		
 		updatePwdRequest.setPassword(shaUtil.encryptSHA512(updatePwdRequest.getPassword()));
@@ -349,15 +337,15 @@ public class MemberServiceImpl implements UserDetailsService {
 		int updatePwd = memberMapper.updatePwdInfo(updatePwdRequest);
 		
 		if(updatePwd == 0) {
-			result.setResult("ERR");
-			result.setMessage("");
-			map.put("pwd", "update fail");
-			result.setMap(map);
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("update fail");
+			return dto;
 		}
 		
+		dto.setResult("OK");
+		dto.setReason("");
 		
-		return result;
+		return dto;
 	}
 
 	public Map<String, Object> FindId(MemberVo.FindIdRequest findIdRequest)

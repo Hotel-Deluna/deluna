@@ -53,14 +53,14 @@ public class MemberInfoVo {
 		int reservation_num;
 	}
 
-	@Data
-	@AllArgsConstructor
-	@NoArgsConstructor
-	@Schema(description = "회원 예약삭제 사유")
-	public static class MemberReservationDeleteInfo {
-		@Schema(description = "예약삭제 사유", required = true, example = "왜 그럴때 있잖아요....")
-		String content;
-	}
+//	@Data
+//	@AllArgsConstructor
+//	@NoArgsConstructor
+//	@Schema(description = "회원 예약삭제 사유")
+//	public static class MemberReservationDeleteInfo {
+//		@Schema(description = "예약삭제 사유", required = true, example = "왜 그럴때 있잖아요....")
+//		String content;
+//	}
 
 	@Data
 	@NoArgsConstructor
@@ -221,6 +221,37 @@ public class MemberInfoVo {
 		@Schema(description = "update_user", required = true, example = "백엔드에서만 사용")
 		int update_user;
 
+	}
+	
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
+	@Schema(description = "곧통 예약 API Response")
+	public static class MemberReservationResponseDto {
+
+		@Schema(description = "api 결과값", required = true, example = "OK or ERR")
+		String result;
+		
+		@Schema(description = "상세내용", required = true, example = "param Not Found")
+		String reason;
+		
+	}
+	
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
+	@Schema(description = "예약취소 사유 조회 Response")
+	public static class ReservationDeleteContentResponseDto {
+
+		@Schema(description = "api 결과값", required = true, example = "OK or ERR")
+		String result;
+		
+		@Schema(description = "상세내용", required = true, example = "param Not Found")
+		String reason;
+		
+		@Schema(description = "취소사유", required = true, example = "지구오락실")
+		String content;
+		
 	}
 
 

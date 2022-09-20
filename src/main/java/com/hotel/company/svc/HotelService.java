@@ -7,11 +7,11 @@ import io.micrometer.core.lang.Nullable;
 
 public interface HotelService {
 
-    HotelInfoVo.OwnerHotelListResponse OwnerHotelList(@Nullable HotelInfoVo.OwnerHotelListRequest ownerHotelListRequest);
+    HotelInfoVo.OwnerHotelListResponse OwnerHotelList(@Nullable HotelInfoVo.OwnerHotelListRequest ownerHotelListRequest, String jwtToken);
 
-    CommonResponseVo RegisterHotel(HotelInfoVo.RegisterHotelRequest registerHotelParamVo);
+    CommonResponseVo RegisterHotel(HotelInfoVo.RegisterHotelRequest registerHotelParamVo, String jwtToken);
 
-    HotelSearchVo.TouristSpotInfoResponse TouristSpotInfo();
+    HotelSearchVo.TouristSpotInfoResponse TouristSpotInfo(HotelSearchVo.TouristSpotInfoRequest touristSpotInfoRequest);
 
     HotelSearchVo.SearchBarResponse SearchBar(HotelSearchVo.SearchBarRequest searchBarVoSearchBarRequest);
 
@@ -19,33 +19,33 @@ public interface HotelService {
 
     HotelSearchVo.SearchListResponse SearchHotelListFilter(HotelSearchVo.HotelSearchListFilterRequest hotelSearchListFilterRequest);
 
-    HotelInfoVo.HotelDetailInfoResponse HotelDetailInfo(HotelInfoVo.HotelDetailInfoRequest hotelDetailInfoRequest);
+    HotelInfoVo.HotelDetailInfoResponse HotelDetailInfo(int hotelDetailInfoRequest);
 
-    CommonResponseVo DeleteHotel(HotelInfoVo.DeleteHotelRequest deleteHotelRequest);
+    CommonResponseVo DeleteHotel(HotelInfoVo.DeleteHotelRequest deleteHotelRequest, String jwtToken);
 
-    CommonResponseVo EditHotel(HotelInfoVo.EditInfoHotelRequest editHotelRequest);
+    CommonResponseVo EditHotel(HotelInfoVo.EditInfoHotelRequest editHotelRequest, String jwtToken);
 
-    CommonResponseVo RegisterRoom(HotelInfoVo.RegisterRoomRequest registerRoomRequest);
+    CommonResponseVo RegisterRoom(HotelInfoVo.RegisterRoomRequest registerRoomRequest, String jwtToken);
 
-    HotelInfoVo.RoomInfoResponse RoomInfo(HotelInfoVo.RoomInfoRequest roomInfoRequest);
+    HotelInfoVo.RoomInfoResponse RoomInfo(int roomInfoRequest);
 
-    CommonResponseVo EditRoom(HotelInfoVo.EditRoomRequest registerRoomRequest);
+    CommonResponseVo EditRoom(HotelInfoVo.EditRoomRequest registerRoomRequest, String jwtToken);
 
     HotelInfoVo.CheckDuplicateRoomNameResponse CheckDuplicateRoomName(HotelInfoVo.CheckDuplicateRoomNameRequest checkDuplicateRoomNameRequest);
 
-    CommonResponseVo DeleteRoom(HotelInfoVo.DeleteRoomRequest deleteRoomRequest);
+    CommonResponseVo DeleteRoom(HotelInfoVo.DeleteRoomRequest deleteRoomRequest, String jwtToken);
 
-    HotelInfoVo.DeleteRoomInfoResponse DeleteRoomInfo(HotelInfoVo.DeleteRoomRequest deleteRoomRequest);
+    HotelInfoVo.DeleteRoomInfoResponse DeleteRoomInfo(HotelInfoVo.DeleteRoomRequest deleteRoomRequest, String jwtToken);
 
-    HotelInfoVo.RoomInfoListResponse RoomInfoList(HotelInfoVo.RoomInfoRequest roomInfoRequest);
+    HotelInfoVo.RoomInfoListResponse RoomInfoList(HotelInfoVo.RoomInfoListRequest roomInfoRequest);
 
-    CommonResponseVo AddRoomDetail(HotelInfoVo.AddRoomDetailRequest addRoomDetailRequest);
+    CommonResponseVo AddRoomDetail(HotelInfoVo.RegisterRoomDetailRequest registerRoomDetailRequest, String jwtToken);
 
-    CommonResponseVo EditRoomDetail(HotelInfoVo.EditRoomDetailRequest editRoomDetailRequest);
+    CommonResponseVo DisableSettingRoomDetail(HotelInfoVo.DisableSettingRoomDetailRequest disableSettingRoomDetailRequest, String jwtToken);
 
-    CommonResponseVo DeleteRoomDetail(HotelInfoVo.DeleteRoomDetailRequest deleteRoomDetailRequest);
+    CommonResponseVo DeleteRoomDetail(HotelInfoVo.DeleteRoomDetailRequest deleteRoomDetailRequest, String jwtToken);
 
-    HotelInfoVo.DeleteRoomDetailInfoResponse DeleteRoomDetailInfo(HotelInfoVo.DeleteRoomDetailRequest deleteRoomDetailRequest);
+    HotelInfoVo.DeleteRoomDetailInfoResponse DeleteRoomDetailInfo(HotelInfoVo.DeleteRoomDetailRequest deleteRoomDetailRequest, String jwtToken);
 
-    HotelInfoVo.HotelReservationListResponse HotelReservationList(HotelInfoVo.HotelReservationListRequest hotelReservationListRequest);
+    HotelInfoVo.HotelReservationListResponse HotelReservationList(HotelInfoVo.HotelReservationListRequest hotelReservationListRequest, String jwtToken);
 }

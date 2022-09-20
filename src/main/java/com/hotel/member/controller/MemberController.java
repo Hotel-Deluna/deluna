@@ -1,13 +1,16 @@
 package com.hotel.member.controller;
 
 import com.hotel.common.CommonResponseVo;
+import com.hotel.common.vo.JwtTokenDto;
 import com.hotel.common.vo.JwtTokenDto.TokenDto;
 import com.hotel.jwt.CheckTokenInfo;
 import com.hotel.jwt.JwtTokenProvider;
 import com.hotel.member.dto.MemberRequestDto;
 import com.hotel.member.svc.MemberServiceImpl;
 import com.hotel.member.vo.MemberVo;
+import com.hotel.member.vo.MemberVo.LoginMemberResponseDto;
 import com.hotel.member.vo.MemberVo.MemberDeleteVo;
+import com.hotel.member.vo.MemberVo.ViewMemberInfoResponseDto;
 import com.hotel.util.SHA512Util;
 
 import io.swagger.annotations.*;
@@ -23,6 +26,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -71,28 +76,28 @@ public class MemberController {
 	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PostMapping("/sign-in")
-	public ResponseEntity<CommonResponseVo> MemberSignIn(@RequestBody MemberRequestDto memberRequestDto,
+	public LoginMemberResponseDto MemberSignIn(@RequestBody MemberRequestDto memberRequestDto,
 			HttpServletResponse res) throws Exception {
-
+		LoginMemberResponseDto dto = new LoginMemberResponseDto();
 		System.out.println("test  = " + memberRequestDto.toString());
 
 		String email = memberRequestDto.getEmail();
 		String pwd = memberRequestDto.getPassword();
 
-		if (email.equals("") || email.equals(null)) {
-			return ResponseEntity.of(null);
-		} else if (memberRequestDto.getPassword().equals("")) {
-			return ResponseEntity.of(null);
-		}
+		if (email.equals("") || email.equals(null) || pwd.equals("") || pwd.equals(null)) {
+			dto.setEmail("");
+			dto.setRole("");
+			return dto; 
+		} 
 		memberRequestDto.setPassword(shaUtil.encryptSHA512(pwd));
-		CommonResponseVo dto = memberServiceImpl.getMemberInfo(memberRequestDto);
-		res.setHeader("AccessToken", (String) dto.getMap().get("AccessToken"));
-		res.setHeader("RefreshToken", (String) dto.getMap().get("RefreshToken"));
+		Map<String, Object> data = memberServiceImpl.getMemberInfo(memberRequestDto);
+		res.setHeader("AccessToken", (String) data.get("AccessToken"));
+		res.setHeader("RefreshToken", (String) data.get("RefreshToken"));
 		
-		dto.getMap().remove("AccessToken");
-		dto.getMap().remove("RefreshToken");
-		// role 체크 없으면 메세지 리턴
-		return ResponseEntity.ok(dto);
+		dto.setEmail((String) data.get("email"));
+		dto.setRole((String) data.get("role"));
+		
+		return dto;
 	}
 //	@ResponseBody
 //	@PostMapping("/token")
@@ -141,23 +146,21 @@ public class MemberController {
 //
 	@ApiOperation(value = "고객 정보조회")
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PostMapping("/view-info")
-	public CommonResponseVo ViewMemberInfo(HttpServletRequest req)
+	public ViewMemberInfoResponseDto ViewMemberInfo(HttpServletRequest req)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
-		CommonResponseVo vo = new CommonResponseVo();
-		Map<String, Object> map = new HashMap<>();
+		ViewMemberInfoResponseDto dto = new ViewMemberInfoResponseDto();
 		String token = req.getHeader("accessToken");
 		String email = info.tokenInfo(token);
 
 		System.out.println("email = " + email);
 
 		if (email.equals("") || email.equals(null)) {
-			map.put("result", "ERR");
-			map.put("reason", "Token Not Found");
-			vo.setMap(map);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("token Fail");
+			return dto;
 		}
 
 		return memberServiceImpl.ViewMemberInfo(email);
@@ -165,29 +168,33 @@ public class MemberController {
 
 	@ApiOperation(value = "고객 정보수정")
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PatchMapping("/edit-info")
-	public CommonResponseVo MemberEditInfo(@RequestBody MemberVo.MemberUpdateInfo memberInfo, HttpServletRequest req)
+	public MemberVo.MemberResponseDto MemberEditInfo(@RequestBody MemberVo.MemberUpdateInfo memberInfo, HttpServletRequest req)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
-		CommonResponseVo vo = new CommonResponseVo();
-		Map<String, Object> result = new HashMap<>();
+		
+		MemberVo.MemberResponseDto dto = new MemberVo.MemberResponseDto();
+		
+		String token = req.getHeader("accessToken");
+		String email = info.tokenInfo(token);
 
 		if (memberInfo.getEmail().equals("")) {
-			result.put("result", "err");
-			result.put("reason", "email Not Found");
-			vo.setMap(result);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("token Not Found");
+			
+			if(!memberInfo.getEmail().equals(email)) {
+				dto.setReason("email deference fail");
+			}
+			return dto;
 		} else if (memberInfo.getName().equals("")) {
-			result.put("result", "err");
-			result.put("reason", "name Not Found");
-			vo.setMap(result);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("name Not Found");
+			return dto;
 		} else if (memberInfo.getPhone_num().equals("")) {
-			result.put("result", "err");
-			result.put("reason", "phone_num Not Found");
-			vo.setMap(result);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("phone_num Not Found");
+			return dto;
 		}
 
 		return memberServiceImpl.MemberEditInfo(memberInfo);
@@ -198,31 +205,36 @@ public class MemberController {
 	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PostMapping("/findPwd")
-	public CommonResponseVo FindByPasswd(@RequestBody MemberVo.MemberFindPwdRequest findPwdRequest,
-			HttpServletRequest req)
+	public MemberVo.MemberResponseDto FindByPasswd(@RequestBody MemberVo.MemberFindPwdRequest findPwdRequest,
+			HttpServletResponse res)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
 
-		CommonResponseVo vo = new CommonResponseVo();
-		Map<String, Object> map = new HashMap<>();
-
+		MemberVo.MemberResponseDto dto = new MemberVo.MemberResponseDto();
+		
 		if (findPwdRequest.getEmail().equals("")) {
-			map.put("result", "ERR");
-			map.put("reason", "email Not Found");
-			vo.setMap(map);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("name Not Found");
+			return dto;
 		} else if (findPwdRequest.getName().equals("")) {
-			map.put("result", "ERR");
-			map.put("reason", "name Not Found");
-			vo.setMap(map);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("name Not Found");
+			return dto;
 		} else if (findPwdRequest.getPhone_num().equals("")) {
-			map.put("result", "ERR");
-			map.put("reason", "phone_num Not Found");
-			vo.setMap(map);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("phone_num Not Found");
+			return dto;
 		}
-
-		return memberServiceImpl.FindByPasswd(findPwdRequest);
+		
+		dto = memberServiceImpl.FindByPasswd(findPwdRequest);
+		
+		//토큰 전달
+		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(findPwdRequest.getEmail(), findPwdRequest.getPhone_num());
+		TokenDto token = new TokenDto();
+		token = jwtTokenProvider.generateMemberTokenDto(authenticationToken, "ROLE_UPDATE_MEMBER");
+		res.setHeader("AccessToken", token.getAccessToken());
+		res.setHeader("RefreshToken", token.getRefreshToken());
+		
+		return dto; 
 	}
 
 	@ApiOperation(value = "공통 비밀번호 재설정")
@@ -230,38 +242,28 @@ public class MemberController {
 	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PatchMapping("/updatePwd")
-	public CommonResponseVo UpdatePasswd(@RequestBody MemberVo.MemberUpdatePwdRequest updatePwdRequest,
+	public  MemberVo.MemberResponseDto UpdatePasswd(@RequestBody MemberVo.MemberUpdatePwdRequest updatePwdRequest,
 			HttpServletRequest req) throws Exception {
 
-		CommonResponseVo result = new CommonResponseVo();
-		Map<String, Object> map = new HashMap<>();
-
+		MemberVo.MemberResponseDto dto = new  MemberVo.MemberResponseDto();
+		 
 		if (updatePwdRequest.getEmail_auth_num().equals("")) {
-			result.setResult("ERR");
-			result.setMessage("auth_num Not Found");
-			result.setMap(map);
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("auth_num Not Found");
+			return dto;
 		} else if (updatePwdRequest.getPassword().equals("")) {
-			result.setResult("ERR");
-			result.setMessage("password Not Found");
-			result.setMap(map);
-			return result;
-		} else if (updatePwdRequest.getPassword().equals("")) {
-			result.setResult("ERR");
-			result.setMessage("password Not Found");
-			result.setMap(map);
-			return result;
-		}
+			dto.setResult("ERR");
+			dto.setReason("password Not Found");
+			return dto;
+		} 
 
 		String token = req.getHeader("accessToken");
 		String email = info.tokenInfo(token);
-		
 
 		if (email.equals("")) {
-			result.setResult("ERR");
-			result.setMessage("token Not Found");
-			result.setMap(map);
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("token Not Found");
+			return dto;
 		}
 		
 		updatePwdRequest.setEmail(email);
@@ -302,23 +304,25 @@ public class MemberController {
 //
 	@ApiOperation(value = "고객 회원탈퇴")
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@DeleteMapping(value = "/withdraw", produces = "application/json")
-	public CommonResponseVo MemberWithdraw(@RequestBody MemberVo.MemberDeleteRequest memberWithdrawReasonVo,
+	public MemberVo.MemberResponseDto MemberWithdraw(@RequestBody MemberVo.MemberDeleteRequest memberWithdrawReasonVo,
 			HttpServletRequest req) {
 
-		CommonResponseVo vo = new CommonResponseVo();
+		MemberVo.MemberResponseDto dto = new MemberVo.MemberResponseDto();
 		if (Integer.toString(memberWithdrawReasonVo.getReason()).equals("")) {
-			vo.setMessage("reason not found");
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("reason Not Found");
+			return dto;
 		}
 
 		String token = req.getHeader("accessToken");
 		String email = info.tokenInfo(token);
 		if (email.equals("") || email.equals(null)) {
-			vo.setMessage("토큰정보가 잘못되었습니다.");
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("token Fail");
+			return dto;
 		}
 
 		MemberVo.MemberDeleteVo deleteVo = new MemberVo.MemberDeleteVo();

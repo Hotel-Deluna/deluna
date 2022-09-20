@@ -1,11 +1,11 @@
 package com.hotel.company.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hotel.common.CommonResponseVo;
 import io.micrometer.core.lang.Nullable;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiParam;
-import io.swagger.models.auth.In;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 public class HotelSearchVo {
 
@@ -31,7 +32,10 @@ public class HotelSearchVo {
     @Schema(description = "사용자 검색어,조건에 해당하는 호텔 리스트")
     public static class SearchListResponse extends CommonResponseVo {
         @Schema(description = "데이터")
-        List<HotelSearchList> data;
+        List<HotelSearchInfo> data;
+
+        @Schema(description = "조회된 데이터 총 갯수", required = true, example = "5")
+        Integer total_cnt;
     }
 
     @Data
@@ -40,7 +44,21 @@ public class HotelSearchVo {
     @Schema(description = "여행지 목록과 해당 여행지의 호텔 갯수")
     public static class TouristSpotInfoResponse extends CommonResponseVo {
         @Schema(description = "데이터")
-        List<TouristSpotInfo> data;
+        List<HotelSearchVo.TouristSpotInfo> data;
+
+        @Schema(description = "조회된 데이터 총 갯수", required = true, example = "5")
+        Integer total_cnt;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @ApiModel(value = "여행지 정보 Request")
+    public static class TouristSpotInfoRequest {
+        @Schema(description = "페이지당 데이터 갯수", required = false, example = "5")
+        Integer page_cnt;
+
+        @Schema(description = "요청 페이지", required = false, example = "3")
+        Integer page;
     }
 
     @Data
@@ -57,6 +75,9 @@ public class HotelSearchVo {
     @Data
     @Schema(description = "여행지 정보")
     public static class TouristSpotInfo {
+        @Schema(description = "여행지 번호",  required = true)
+        Integer tourist_spot_num;
+
         @Schema(description = "여행지명",  required = true, example = "서울")
         String tourist_spot_name;
 
@@ -74,19 +95,19 @@ public class HotelSearchVo {
     public static class HotelSearchData {
         @Schema(description = "검색어에 해당되는 지역(시,도) 리스트",  required = false, example = "[서울]")
         @Nullable
-        List<String> region_list;
+        Set<String> region_list;
 
         @Schema(description = "검색어에 해당되는 호텔의 주소 리스트",  required = false, example = "[노보텔 엠비시티 서울 용산]")
         @Nullable
-        List<String> hotel_address_list;
+        Set<String> hotel_address_list;
 
         @Schema(description = "검색어에 해당되는 호텔명 리스트",  required = false, example = "[서울신라호텔, 밀레니엄 힐튼 서울]")
         @Nullable
-        List<String> hotel_name_list;
+        Set<String> hotel_name_list;
 
         @Schema(description = "검색어에 해당되는 장소 리스트",  required = false, example = "[서울역, 서울스퀘어]")
         @Nullable
-        List<String> place_list;
+        Set<String> place_list;
     }
 
     @Data
@@ -97,30 +118,35 @@ public class HotelSearchVo {
         String text;
 
         @ApiModelProperty(value = "사용자가 선택한 검색어 타입 -  \t " +
-                "0: 검색어에 해당되는 지역(시,도) 리스트 \t " +
-                "1: 검색어에 해당되는 호텔의 주소 리스트 \t " +
-                "2: 검색어에 해당되는 호텔명 리스트 \t "+
-                "3: 검색어에 해당되는 장소 리스트 \t ", example = "1")
+                "1: 검색어에 해당되는 지역(시,도) 리스트 \t " +
+                "2: 검색어에 해당되는 호텔의 주소 리스트 \t " +
+                "3: 검색어에 해당되는 호텔명 리스트 \t "+
+                "4: 검색어에 해당되는 장소 리스트 \t ", example = "1")
         Integer search_type;
 
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
         @ApiParam(value = "예약범위 - 시작일", example = "2022/07/01", required = false)
-        @Nullable
         Date reservation_start_date;
 
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
         @ApiParam(value = "예약범위 - 종료일", example = "2022/07/03", required = false)
-        @Nullable
         Date reservation_end_date;
 
         @ApiParam(value = "투숙인원", example = "2", required = false)
-        @Nullable
         Integer people_count;
+
+        @Schema(description = "페이지당 데이터 갯수", required = false, example = "5")
+        Integer page_cnt;
+
+        @Schema(description = "요청 페이지", required = false, example = "3")
+        Integer page;
     }
 
     @AllArgsConstructor
     @NoArgsConstructor
     @Data
-    @Schema(description = "사용자가 요청한 검색어, 조건에 일치하는 호텔의 리스트")
-    public static class HotelSearchList {
+    @Schema(description = "사용자가 요청한 검색어, 조건에 일치하는 호텔 정보")
+    public static class HotelSearchInfo {
         @Schema(description = "호텔 구분번호",  required = true, example = "12345")
         Integer hotel_num;
 
@@ -140,8 +166,10 @@ public class HotelSearchVo {
         Integer minimum_price;
 
         @Schema(description = "호텔 태그 구분번호 리스트",  required = false, example = "[1, 2]")
-        @Nullable
         List<Integer> tags;
+
+        @Schema(description = "호텔 사용 가능 여부 - 해당 호텔의 모든 객실중 사용가능한 방이 0이면 false", required = true)
+        Boolean available_yn;
     }
 
     @Data
@@ -157,23 +185,28 @@ public class HotelSearchVo {
         Integer minimum_price;
 
         @Schema(description = "가격범위 - 최대가", required = false, example = "200000")
-        @Nullable
         Integer maximum_price;
 
         @Schema(description = "호텔 성급", example = "5", required = false)
-        @Nullable
         Integer star;
 
         @Schema(description = "호텔 태그 구분번호 리스트",  required = false, example = "[1, 3, 5]")
-        @Nullable
-        List<Integer> tags;
+        List<Integer> hotel_tags;
 
-        @Schema(description = "위도, 경도 값. 0번째 배열 : x, 1번째 배열 : y",  required = false, example = "[123.546, 10.48]")
-        @Nullable
-        List<Float> location;
+        @Schema(description = "객실 태그 구분번호 리스트",  required = false, example = "[1, 3, 5]")
+        List<Integer> room_tags;
+
+        @Schema(description = "경도, 위도 값. 0번째 배열 : x, 1번째 배열 : y",  required = false, example = "[123.546, 10.48]")
+        List<Double> location;
 
         @Schema(description = "정렬 구분번호 - 1: 호텔등급순 2: 가격높은순 3: 가격낮은순", required = true, example = "3")
         Integer rank_num;
+
+        @Schema(description = "페이지당 데이터 갯수", required = false, example = "5")
+        Integer page_cnt;
+
+        @Schema(description = "요청 페이지", required = false, example = "3")
+        Integer page;
     }
 
 }

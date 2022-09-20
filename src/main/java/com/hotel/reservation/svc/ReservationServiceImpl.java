@@ -5,13 +5,14 @@ import com.hotel.company.vo.*;
 import com.hotel.mapper.ReservationMapper;
 import com.hotel.reservation.vo.MemberInfoVo;
 import com.hotel.reservation.vo.MemberInfoVo.MemberInfoRequest;
-import com.hotel.reservation.vo.MemberInfoVo.MemberReservationDeleteInfo;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationDeleteRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationInfo;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListInfo;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationRequest;
+import com.hotel.reservation.vo.MemberInfoVo.MemberReservationResponseDto;
 import com.hotel.reservation.vo.MemberInfoVo.MemberWithdrawRequest;
+import com.hotel.reservation.vo.MemberInfoVo.ReservationDeleteContentResponseDto;
 import com.hotel.reservation.vo.MemberInfoVo.ReservationDetailPaymentsRequest;
 import com.hotel.reservation.vo.MemberInfoVo.ReservationPaymentsRequest;
 import com.hotel.reservation.vo.UnMemberInfoVo;
@@ -83,8 +84,8 @@ public class ReservationServiceImpl implements ReservationService {
 	}
 
 	@Override
-	public CommonResponseVo UnMemberReservationWithdraw(UnMemberWithdrawRequest unMemberWithdrawVo) {
-		CommonResponseVo result = new CommonResponseVo();
+	public MemberReservationResponseDto UnMemberReservationWithdraw(UnMemberWithdrawRequest unMemberWithdrawVo) {
+		MemberReservationResponseDto result = new MemberReservationResponseDto();
 		Map<String, Object> map = new HashMap<>();
 		int member_num;
 
@@ -94,9 +95,8 @@ public class ReservationServiceImpl implements ReservationService {
 
 		int reservation_cancel = reservationMapper.unReservationCancelUpdate(unMemberWithdrawVo);
 		if (reservation_cancel == 0) {
-			map.put("result", "ERR");
-			map.put("reason", "reservation_cancel Not Found");
-			result.setMap(map);
+			result.setResult("ERR");
+			result.setReason("reservation_cancel Fail");
 			return result;
 		} else {
 
@@ -105,9 +105,8 @@ public class ReservationServiceImpl implements ReservationService {
 			int payment_detail_num = reservationMapper.paymentNum(reservation_num);
 
 			if (payment_detail_num == 0) {
-				map.put("result", "ERR");
-				map.put("reason", "payment_num Not Found");
-				result.setMap(map);
+				result.setResult("ERR");
+				result.setReason("payment_num Not Found");
 				return result;
 			}
 			unMemberWithdrawVo.setPayment_detail_num(payment_detail_num);
@@ -115,14 +114,12 @@ public class ReservationServiceImpl implements ReservationService {
 			int reservation_delete = reservationMapper.unReservationDeleteUpdate(unMemberWithdrawVo);
 
 			if (reservation_delete == 0) {
-				map.put("result", "ERR");
-				map.put("reason", "reservation_delete Not Found");
-				result.setMap(map);
+				result.setResult("ERR");
+				result.setReason("reservation_delete Update Fail");
 				return result;
 			}else {
-				map.put("result", "OK");
-				map.put("reason", "");
-				result.setMap(map);
+				result.setResult("OK");
+				result.setReason("delete success");
 			}
 		}
 		return result;
@@ -142,8 +139,8 @@ public class ReservationServiceImpl implements ReservationService {
 	}
 
 	@Override
-	public CommonResponseVo memberReservation(MemberReservationRequest memberReservationRequest) {
-		CommonResponseVo result = new CommonResponseVo();
+	public MemberReservationResponseDto memberReservation(MemberReservationRequest memberReservationRequest) {
+		MemberReservationResponseDto dto = new MemberReservationResponseDto();
 		Map<String, Object> map = new HashMap<>();
 		// 예약정보 입력
 		// 결재상세정보 입력
@@ -153,11 +150,9 @@ public class ReservationServiceImpl implements ReservationService {
 		String insert_user = reservationMapper.selectUserInfo(memberReservationRequest.getMember_num());
 
 		if (insert_user == null) {
-			map.put("result", "err");
-			map.put("reason", "insert_user Not Found");
-			result.setMap(map);
-			;
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("insert_user select fail");
+			return dto;
 		}
 
 		// 예약자 정보 입력
@@ -167,10 +162,9 @@ public class ReservationServiceImpl implements ReservationService {
 
 		if (reservation_info == 0) {
 			// insert 실패 시 에러 처리
-			map.put("result", "ERR");
-			map.put("reason", "reservation Info insert ERR");
-			result.setMap(map);
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("reservation info insert fail");
+			return dto;
 		} else {
 
 			// 예약완료 일 떄
@@ -185,10 +179,9 @@ public class ReservationServiceImpl implements ReservationService {
 			if (pay_info == 0) {
 				// 가격 인서트 안될 경우 예약정보도 취소해야 함
 				reservationMapper.reservationDelete(memberReservationRequest.getMember_num());
-				map.put("result", "ERR");
-				map.put("reason", "payment Info insert ERR");
-				result.setMap(map);
-				return result;
+				dto.setResult("ERR");
+				dto.setReason("payment Info insert fail");
+				return dto;
 			} else {
 
 				// 예약정보 + 결제상세정보 입력이 끝났을 때
@@ -213,20 +206,18 @@ public class ReservationServiceImpl implements ReservationService {
 						reservationMapper.paymentDelete(req.getInsert_user());
 
 					} else {
-						map.put("result", "OK");
-						map.put("reason", "");
-						result.setMap(map);
+						dto.setResult("OK");
+						dto.setReason("reservation success");
 					}
 				}
 			}
 		}
-		return result;
+		return dto;
 	}
 
 	@Override
-	public CommonResponseVo MemberReservationWithdraw(MemberWithdrawRequest memberWithdrawVo) {
-		CommonResponseVo result = new CommonResponseVo();
-		Map<String, Object> map = new HashMap<>();
+	public MemberReservationResponseDto MemberReservationWithdraw(MemberWithdrawRequest memberWithdrawVo) {
+		MemberReservationResponseDto dto = new MemberReservationResponseDto();
 		int member_num;
 
 		if (memberWithdrawVo.getMember_num() == 0) {
@@ -235,10 +226,9 @@ public class ReservationServiceImpl implements ReservationService {
 
 		int reservation_cancel = reservationMapper.reservationCancelUpdate(memberWithdrawVo);
 		if (reservation_cancel == 0) {
-			map.put("result", "ERR");
-			map.put("reason", "reservation_cancel Not Found");
-			result.setMap(map);
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("reservation_cancel update fail");
+			return dto;
 		} else {
 
 			int reservation_num = memberWithdrawVo.getUpdate_user();
@@ -246,27 +236,24 @@ public class ReservationServiceImpl implements ReservationService {
 			int payment_detail_num = reservationMapper.paymentNum(reservation_num);
 
 			if (payment_detail_num == 0) {
-				map.put("result", "ERR");
-				map.put("reason", "payment_num Not Found");
-				result.setMap(map);
-				return result;
+				dto.setResult("ERR");
+				dto.setReason("payment_num Not Found");
+				return dto;
 			}
 			memberWithdrawVo.setPayment_detail_num(payment_detail_num);
 
 			int reservation_delete = reservationMapper.reservationDeleteUpdate(memberWithdrawVo);
 
 			if (reservation_delete == 0) {
-				map.put("result", "ERR");
-				map.put("reason", "reservation_delete Not Found");
-				result.setMap(map);
-				return result;
+				dto.setResult("ERR");
+				dto.setReason("reservation_delete update fail");
+				return dto;
 			}else {
-				map.put("result", "OK");
-				map.put("reason", "");
-				result.setMap(map);
+				dto.setResult("OK");
+				dto.setReason("reservation_delete success");
 			}
 		}
-		return result;
+		return dto;
 	}
 
 	@Override
@@ -298,19 +285,22 @@ public class ReservationServiceImpl implements ReservationService {
 	}
 
 	@Override
-	public Map<String, Object> MemberReservationDeleteContent(MemberReservationDeleteRequest memberInfoRequest) {
-		CommonResponseVo result = new CommonResponseVo();
-		MemberInfoVo.MemberReservationDeleteInfo content = new MemberInfoVo.MemberReservationDeleteInfo();
+	public ReservationDeleteContentResponseDto MemberReservationDeleteContent(MemberReservationDeleteRequest memberInfoRequest) {
+		ReservationDeleteContentResponseDto dto = new ReservationDeleteContentResponseDto();
 		
 		String data = reservationMapper.selectReservationCancelContent(memberInfoRequest);
-
-		Map<String, Object> map = new HashMap<>();
-
-		map.put("result", "OK");
-		map.put("reason", "");
-		map.put("data", data);
-
-		return map;
+		
+		if(data == null) {
+			dto.setResult("ERR");
+			dto.setReason("content Not Found");
+			dto.setContent("");
+			return dto;
+			
+		}
+		dto.setResult("ERR");
+		dto.setReason("content Not Found");
+		dto.setContent(data);
+		return dto;
 	}
 
 //    @Override

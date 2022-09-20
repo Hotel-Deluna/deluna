@@ -1,5 +1,6 @@
 package com.hotel;
 
+import com.hotel.company.dto.HotelMapper;
 import com.hotel.util.MailUtil;
 import com.hotel.util.vo.UtilVo;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -10,6 +11,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 
+import java.util.Calendar;
+import java.util.Date;
+
 @SpringBootTest
 @PropertySource("application.yml")
 class DelunaApplicationTests {
@@ -19,6 +23,9 @@ class DelunaApplicationTests {
 
 	@Autowired
 	MailUtil mailUtil;
+
+	@Autowired
+	HotelMapper hotelMapper;
 
 //	@Test
 //	void JasyptTest() {
@@ -45,6 +52,16 @@ class DelunaApplicationTests {
 //		mailRequest.setText("메일 테스트 !@#$");
 //
 //		mailUtil.sendMail(mailRequest);
+//	}
+
+//	@Test
+//	void testTest() {
+//		Calendar cal = Calendar.getInstance();
+//      cal.set(2022, 9, 9);
+//		Date now = new Date(cal.getTimeInMillis());
+//		log.info(String.valueOf(now));
+//		log.info(hotelMapper.selectHoliday("2022-09-09"));
+//
 //	}
 
 }

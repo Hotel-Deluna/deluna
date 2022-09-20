@@ -72,22 +72,23 @@ public class MemberVo {
 
 	}
 
-	@Data
-	@NoArgsConstructor
-	@AllArgsConstructor
-	@Schema(description = "공통 로그인 파라미터")
-	public static class LoginMemberRequest {
-
-		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
-		String email;
-
-		@Schema(description = "비밀번호", required = true, example = "123456")
-		String password;
-
-		@Schema(description = "role", required = true, example = "고객:1, 사업자:2")
-		String role;
-
-	}
+//	@Data
+//	@NoArgsConstructor
+//	@AllArgsConstructor
+//	@Schema(description = "공통 로그인 파라미터")
+//	public static class LoginMemberRequest {
+//
+//		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
+//		String email;
+//
+//		@Schema(description = "비밀번호", required = true, example = "123456")
+//		String password;
+//
+//		@Schema(description = "role", required = true, example = "고객:1, 사업자:2")
+//		String role;
+//
+//	}
+	
 
 	@Data
 	@NoArgsConstructor
@@ -162,6 +163,12 @@ public class MemberVo {
 
 		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
 		String email;
+		
+		@Schema(description = "role", required = true, example = "고객:1, 사업자:2, 비회원:3")
+		String role;
+		
+		@Schema(description = "insert_user", required = true, example = "role + PK")
+		String insert_user;
 
 	}
 
@@ -318,6 +325,73 @@ public class MemberVo {
 
 		@Schema(description = "변경할 비밀번호",  required = true, example = "!!123456abC")
 		String edit_password;
+	}
+	
+	
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@Schema(description = "공통 로그인 response")
+	public static class LoginMemberResponseDto {
+		
+		@Schema(description = "result", required = true, example = "결과값 OK or ERR")
+		String result;
+
+		@Schema(description = "reason", required = true, example = "내용")
+		String reason;
+
+
+		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
+		String email;
+
+		@Schema(description = "role", required = true, example = "고객:1, 사업자:2, 비회원:3")
+		String role;
+
+	}
+	
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@Schema(description = "고객정보 조회 response")
+	public static class ViewMemberInfoResponseDto {
+		
+		@Schema(description = "result", required = true, example = "결과값 OK or ERR")
+		String result;
+
+		@Schema(description = "reason", required = true, example = "내용")
+		String reason;
+
+		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
+		String email;
+		
+		@Schema(description = "고객 이름", required = true, example = "example@naver.com")
+		String name;
+		
+		@Schema(description = "고객 핸드폰번호", required = true, example = "01012345678")
+		String phone_num;
+
+		@Schema(description = "role", required = true, example = "고객:1, 사업자:2, 비회원:3")
+		String role;
+		
+		@Schema(description = "insert_user", required = true, example = "role + PK")
+		String insert_user;
+
+	}
+	
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@ApiModel(description = "api 응답값 response")
+	public static class MemberResponseDto {
+
+		@Schema(description = "result", required = true, example = "결과값 OK or ERR")
+		String result;
+
+		@Schema(description = "reason", required = true, example = "내용")
+		String reason;
+
+		
+
 	}
 
 }

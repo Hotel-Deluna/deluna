@@ -14,28 +14,28 @@ import com.hotel.member.vo.MemberVo.MemberUpdatePwdRequest;
 import io.swagger.v3.oas.annotations.servers.Server;
 
 public interface MemberService {
-    CommonResponseVo MemberSignUp(MemberVo.RegisterMemberRequest memberVo);
-    
-    CommonResponseVo MemberSignIn(MemberVo.LoginMemberRequest memberVo);
-    
-    CommonResponseVo memberSignInKakao(MemberVo.LoginMemberRequestKokao memberVo);
-    
-    CommonResponseVo memberSignInNaver(MemberVo.LoginMemberRequestNaver memberVo);
-    
-    CommonResponseVo memberSignInGoogle(MemberVo.LoginMemberRequestGoogle memberVo);
-    
-    CommonResponseVo MemberEditInfo(MemberVo.MemberUpdateInfo memberInfoVo);
-
-    MemberVo.MemberInfoResponse ViewMemberInfo();
-
-    MemberVo.FindIdRequest FindId(MemberVo.FindIdRequest findIdRequest);
-    
-    CommonResponseVo EditPassword(MemberVo.EditPasswordRequest editPasswordRequest);
-
-    CommonResponseVo MemberWithdraw(MemberVo.MemberDeleteRequest memberWithdrawRequest);
-
-    CommonResponseVo FindPasswdEmail(MemberFindPwdRequest findPwdRequest);
-
-    CommonResponseVo UpdatePasswd(MemberUpdatePwdRequest updatePwdRequest);
+//    CommonResponseVo MemberSignUp(MemberVo.RegisterMemberRequest memberVo);
+//    
+//    CommonResponseVo MemberSignIn(MemberVo.LoginMemberRequest memberVo);
+//    
+//    CommonResponseVo memberSignInKakao(MemberVo.LoginMemberRequestKokao memberVo);
+//    
+//    CommonResponseVo memberSignInNaver(MemberVo.LoginMemberRequestNaver memberVo);
+//    
+//    CommonResponseVo memberSignInGoogle(MemberVo.LoginMemberRequestGoogle memberVo);
+//    
+//    CommonResponseVo MemberEditInfo(MemberVo.MemberUpdateInfo memberInfoVo);
+//
+//    MemberVo.MemberInfoResponse ViewMemberInfo();
+//
+//    MemberVo.FindIdRequest FindId(MemberVo.FindIdRequest findIdRequest);
+//    
+//    CommonResponseVo EditPassword(MemberVo.EditPasswordRequest editPasswordRequest);
+//
+//    CommonResponseVo MemberWithdraw(MemberVo.MemberDeleteRequest memberWithdrawRequest);
+//
+//    CommonResponseVo FindPasswdEmail(MemberFindPwdRequest findPwdRequest);
+//
+//    CommonResponseVo UpdatePasswd(MemberUpdatePwdRequest updatePwdRequest);
 
 }

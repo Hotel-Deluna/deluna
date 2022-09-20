@@ -1,20 +1,14 @@
 package com.hotel.company.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hotel.common.dto.CommonDto;
-import com.hotel.company.vo.HotelInfoVo;
-import io.micrometer.core.lang.Nullable;
 import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
-import java.util.List;
 
 public class HotelDto {
 
@@ -38,10 +32,10 @@ public class HotelDto {
         String address;
 
         @ApiParam(value = "위도 값",  required = true)
-        Float latitude;
+        Double latitude;
 
         @ApiParam(value = "경도 값",  required = true)
-        Float longitude;
+        Double longitude;
 
         @ApiParam(value = "한글 호텔명",  required = true, example = "신라스테이")
         String name;
@@ -127,5 +121,92 @@ public class HotelDto {
         @ApiParam(value = "사진순서", required = true)
         Integer picture_sequence;
     }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "여행지 테이블")
+    public static class TouristSpotTable extends CommonDto {
+
+        @ApiParam(value = "여행지 번호", required = true)
+        Integer tourist_spot_num;
+
+        @ApiParam(value = "여행지 이름", required = true)
+        String name;
+
+        @ApiParam(value = "해당 여행지 호텔 갯수", required = true)
+        Integer count;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "특정 호실 예약날짜")
+    public static class RoomDetailReservationDate {
+        @ApiParam(value = "입실일", required = true)
+        Date st_date;
+
+        @ApiParam(value = "퇴실일", required = true)
+        Date ed_date;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "호텔 예약 리스트")
+    public static class HotelReservationList {
+        @ApiParam(value = "예약 구분번호", required = true)
+        Integer reservation_num;
+
+        @ApiParam(value = "예약자", required = true)
+        String reservation_name;
+
+        @ApiParam(value = "예약자 핸드폰 번호", required = true)
+        String reservation_phone;
+
+        @ApiParam(value = "객실 이름", required = true)
+        String room_name;
+
+        @ApiParam(value = "입실일", required = true)
+        Date st_date;
+
+        @ApiParam(value = "퇴실일", required = true)
+        Date ed_date;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "호텔 검색바 조회 결과")
+    public static class HotelSearchBarData {
+        @ApiParam(value = "호텔명", required = true)
+        String name;
+
+        @ApiParam(value = "영문 호텔명", required = true)
+        String eng_name;
+
+        @ApiParam(value = "주소", required = true)
+        String address;
+
+        @ApiParam(value = "지역코드", required = true)
+        String region_code;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "호텔 검색 - 예약범위 조회")
+    public static class SelectHotelReservationListForSearch {
+        @ApiParam(value = "호텔 구분번호", required = true)
+        Integer hotel_num;
+
+        @ApiParam(value = "예약범위 - 시작일", required = true)
+        Date reservation_start_date;
+
+        @ApiParam(value = "예약범위 - 종료일", required = true)
+        Date reservation_end_date;
+
+    }
+
 
 }

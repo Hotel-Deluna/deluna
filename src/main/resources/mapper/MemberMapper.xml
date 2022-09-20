@@ -45,7 +45,7 @@
 	
 	<select id="viewMemberInfo" resultType="com.hotel.member.vo.MemberVo$MemberInfo" >
 		
-		select email, name, phone_num from d_member where email=#{email}
+		select email, name, phone_num, role, insert_user from d_member where email=#{email}
 		
 	</select>
 	

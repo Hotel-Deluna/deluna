@@ -9,6 +9,8 @@ import com.hotel.reservation.svc.ReservationService;
 import com.hotel.reservation.vo.MemberInfoVo;
 import com.hotel.reservation.vo.UnMemberInfoVo;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListInfo;
+import com.hotel.reservation.vo.MemberInfoVo.MemberReservationResponseDto;
+import com.hotel.reservation.vo.MemberInfoVo.ReservationDeleteContentResponseDto;
 
 import io.swagger.annotations.*;
 
@@ -65,33 +67,26 @@ public class ReservationController {
 			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@DeleteMapping(value = "/unMemberwithdraw", produces = "application/json")
-	public CommonResponseVo UnMemberReservationWithdraw(
+	public MemberReservationResponseDto UnMemberReservationWithdraw(
 			@RequestBody UnMemberInfoVo.UnMemberWithdrawRequest memberWithdrawVo) {
 
-		CommonResponseVo result = new CommonResponseVo();
-		Map<String, Object> map = new HashMap<>();
-		// 예약취소 인터페이스 호출 시 사유를 번저 저장하고 최종 취소를 해야하는거 ?
-		// db를 두 번 호출하는건데 괜찮은건가?
+		MemberReservationResponseDto dto = new MemberReservationResponseDto();
 		if (memberWithdrawVo.getReservation_num() == 0) {
-			map.put("result", "ERR");
-			map.put("reason", "reservation_num Not Found");
-			result.setMap(map);
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("reservation_num Not Found");
+			return dto;
 		} else if (memberWithdrawVo.getMember_num() == 0) {
-			map.put("result", "ERR");
-			map.put("reason", "member_num Not Found");
-			result.setMap(map);
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("member_num Not Found");
+			return dto;
 		} else if (memberWithdrawVo.getPayment_detail_num() == 0) {
-			map.put("result", "ERR");
-			map.put("reason", "payment_detail_num Not Found");
-			result.setMap(map);
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("payment_detail_num Not Found");
+			return dto;
 		} else if (memberWithdrawVo.getContent().equals("")) {
-			map.put("result", "ERR");
-			map.put("reason", "content Not Found");
-			result.setMap(map);
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("content Not Found");
+			return dto;
 		}
 
 		return reservationService.UnMemberReservationWithdraw(memberWithdrawVo);
@@ -111,63 +106,53 @@ public class ReservationController {
 			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PostMapping("/memberReservation")
-	public CommonResponseVo MemberReservation(
+	public MemberReservationResponseDto MemberReservation(
 			@RequestBody MemberInfoVo.MemberReservationRequest memberReservationRequest) {
 
-		CommonResponseVo vo = new CommonResponseVo();
+		MemberReservationResponseDto dto = new MemberReservationResponseDto();
 		Map<String, Object> map = new HashMap<>();
 
 		// 파라미터 밸리데이션 체크
 		if (memberReservationRequest.getEd_date().equals("")) {
-			map.put("result", "ERR");
-			map.put("reason", "end Date Not Found");
-			vo.setMap(map);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("end_date Not Found");
+			return dto;
 		} else if (memberReservationRequest.getMember_num() == 0) {
-			map.put("result", "ERR");
-			map.put("reason", "member_num Not Found");
-			vo.setMap(map);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("member_num Not Found");
+			return dto;
 		} else if (memberReservationRequest.getName().equals("")) {
-			map.put("result", "ERR");
-			map.put("reason", "name Not Found");
-			vo.setMap(map);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("name Not Found");
+			return dto;
 		} else if (memberReservationRequest.getReservation_name().equals("")) {
-			map.put("result", "ERR");
-			map.put("reason", "reservation Name Not Found");
-			vo.setMap(map);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("reservation Name Not Found");
+			return dto;
 		} else if (memberReservationRequest.getReservation_people().equals("")) {
-			map.put("result", "ERR");
-			map.put("reason", "reservation People Not Found");
-			vo.setMap(map);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("reservation_people Not Found");
+			return dto;
 		} else if (memberReservationRequest.getReservation_phone().equals("")) {
-			map.put("result", "ERR");
-			map.put("reason", "reservation Phone Not Found");
-			vo.setMap(map);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("reservation_phone Not Found");
+			return dto;
 		} else if (memberReservationRequest.getReservation_price() == 0) {
-			map.put("result", "ERR");
-			map.put("reason", "reservation Price Not Found");
-			vo.setMap(map);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("reservation_price Not Found");
+			return dto;
 		} else if (memberReservationRequest.getRoom_detail_name().equals("")) {
-			map.put("result", "ERR");
-			map.put("reason", "room Detail Name Not Found");
-			vo.setMap(map);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("room_detail_name Not Found");
+			return dto;
 		} else if (memberReservationRequest.getRoom_detail_num() == 0) {
-			map.put("result", "ERR");
-			map.put("reason", "room Detail Num Not Found");
-			vo.setMap(map);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("room_detail_num Not Found");
+			return dto;
 		} else if (memberReservationRequest.getSt_date().equals("")) {
-			map.put("result", "ERR");
-			map.put("reason", "start Date Not Found");
-			vo.setMap(map);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("start_date Not Found");
+			return dto;
 		}
 		return reservationService.memberReservation(memberReservationRequest);
 	}
@@ -177,36 +162,32 @@ public class ReservationController {
 			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PutMapping(value = "/memberReservationwithdraw", produces = "application/json")
-	public CommonResponseVo MemberReservationWithdraw(
+	public MemberReservationResponseDto MemberReservationWithdraw(
 			@RequestBody MemberInfoVo.MemberWithdrawRequest memberWithdrawVo) {
 
-		CommonResponseVo vo = new CommonResponseVo();
+		MemberReservationResponseDto dto = new MemberReservationResponseDto();
 		Map<String, Object> map = new HashMap<>();
 		if (memberWithdrawVo.getReservation_num() == 0) {
-			map.put("result", "ERR");
-			map.put("reason", "reservation_num Not Found");
-			vo.setMap(map);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("reservation_num Not Found");
+			return dto;
 //		} else if (memberWithdrawVo.getRoom_detail_num() == 0) {
 //			map.put("result", "ERR");
 //			map.put("reason", "room_detail_num Not Found");
 //			vo.setMap(map);
 //			return vo;
 		} else if (memberWithdrawVo.getContent().equals("")) {
-			map.put("result", "ERR");
-			map.put("reason", "getContent Not Found");
-			vo.setMap(map);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("getContent Not Found");
+			return dto;
 		} else if (memberWithdrawVo.getMember_num() == 0) {
-			map.put("result", "ERR");
-			map.put("reason", "member_num Not Found");
-			vo.setMap(map);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("member_num Not Found");
+			return dto;
 		} else if (memberWithdrawVo.getPayment_detail_num() == 0) {
-			map.put("result", "ERR");
-			map.put("reason", "payment_detail_num Not Found");
-			vo.setMap(map);
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("payment_detail_num Not Found");
+			return dto;
 		}
 
 		return reservationService.MemberReservationWithdraw(memberWithdrawVo);
@@ -243,21 +224,23 @@ public class ReservationController {
 
 	@ApiOperation(value = "고객 예약취소 사유 조회")
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PostMapping(value = "/memberDeleteContent", produces = "application/json")
-	public Map<String, Object> MemberReservationDeleteContent(
+	public ReservationDeleteContentResponseDto MemberReservationDeleteContent(
 			@RequestBody MemberInfoVo.MemberReservationDeleteRequest memberInfoRequest) {
-		Map<String, Object> result = new HashMap<>();
+		ReservationDeleteContentResponseDto dto = new ReservationDeleteContentResponseDto();
 
 		if (memberInfoRequest.getMember_num() == 0) {
-			result.put("result", "ERR");
-			result.put("reason", "member_num Not Found");
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("member_num Not Found");
+			dto.setContent("");
+			return dto;
 		} else if (memberInfoRequest.getReservation_num() == 0) {
-			result.put("result", "ERR");
-			result.put("reason", "reservation_num Not Found");
-			return result;
+			dto.setResult("ERR");
+			dto.setReason("reservation_num Not Found");
+			dto.setContent("");
+			return dto;
 		}
 
 		return reservationService.MemberReservationDeleteContent(memberInfoRequest);

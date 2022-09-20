@@ -45,8 +45,5 @@ public class CommonResponseVo {
 
     @Schema(description = "메시지", required = true)
     String message;
-    
-    @Schema(description = "데이터", required = true)
-    Map<String, Object> map;
 
 }

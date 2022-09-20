@@ -5,6 +5,7 @@ import com.hotel.common.svc.CommonService;
 import com.hotel.common.vo.CommonVo;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -92,4 +93,31 @@ public class CommonController {
         return commonService.EncryptConfig(text);
     }
 
+    @ApiOperation(value="공휴일 정보 저장 - 내부 스케쥴러 API")
+    @ResponseBody
+    @GetMapping("/scheduler/crawling/holiday")
+    public String HolidayCrawling(){
+        return commonService.HolidayCrawling();
+    }
+
+    @ApiOperation(value="테스트용 JWT 토큰 생성 - 임시")
+    @ResponseBody
+    @GetMapping("/create/token")
+    public String CreateToken(@RequestParam int user_num, @RequestParam int user_role){
+        return commonService.CreateToken(user_num, user_role);
+    }
+
+    @ApiOperation(value="여행지 호텔 갯수 저장 - 내부 스케쥴러 API")
+    @ResponseBody
+    @GetMapping("/scheduler/tourist-spot-hotel-count")
+    public String SaveTouristSpotHotelCount(){
+        return commonService.SaveTouristSpotHotelCount();
+    }
+
+    @ApiOperation(value="여행지 사진 저장 - 내부 API")
+    @ResponseBody
+    @PostMapping(value = "/tourist/insert/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String InsertTouristSpotImage(@ModelAttribute CommonVo.InsertTouristSpotImageRequest insertTouristSpotImageRequest){
+        return commonService.InsertTouristSpotImage(insertTouristSpotImageRequest);
+    }
 }

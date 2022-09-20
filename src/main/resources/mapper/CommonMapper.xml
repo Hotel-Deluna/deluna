@@ -23,5 +23,27 @@
         INSERT INTO d_phone_auth (phone_num, phone_auth_num, dt_insert) VALUE (#{phone_num}, #{auth_num}, NOW())
     </insert>
 
+    <insert id="insertHoliday">
+        INSERT INTO d_holiday_info (holiday_name, holiday_date, dt_insert) VALUE (#{holiday_name}, #{holiday_date}, NOW())
+    </insert>
+
+    <delete id="deleteHoliday">
+        DELETE FROM d_holiday_info
+    </delete>
+
+    <!-- 여행지별 호텔갯수 카운트 -->
+    <select id="countHotelTouristSpot" resultType="int">
+        <bind name="tourist_spot_name" value="'%' + _parameter.getTourist_spot_name() + '%'" />
+        SELECT count(*)
+        FROM d_hotel
+        WHERE (region_code LIKE #{tourist_spot_name} OR region_address LIKE #{tourist_spot_name})
+    </select>
+
+    <!-- 여행지 호텔갯수 저장 -->
+    <update id="updatecountHotelTouristSpot">
+        UPDATE d_tourist_spot
+        SET count = #{hotel_count}
+        WHERE d_tourist_spot.tourist_spot_num = #{tourist_spot_num}
+    </update>
 
 </mapper>
