@@ -115,18 +115,28 @@ public class MemberServiceImpl implements UserDetailsService {
 	// 이메일 조회
 	@SuppressWarnings("static-access")
 	@Transactional(readOnly = true)
-	public TokenDto getMemberInfo(MemberRequestDto memberRequestDto) {
-
+	public CommonResponseVo getMemberInfo(MemberRequestDto memberRequestDto) {
+		CommonResponseVo result = new CommonResponseVo();
+		Map<String, Object> map = new HashMap<>();
 		TokenDto dto = new TokenDto();
 
 		try {
 			Optional<Member> member = memberRepository.findByEmail(memberRequestDto.getEmail());
-			if (member.get().getEmail().equals(null) || member.get().getEmail().equals("")) {
-				return null;
+			
+			System.out.println("test = " + member.isEmpty()); 
+			
+			if (member.isEmpty() == true) {
+				result.setResult("ERR");
+				result.setMessage("member Not Found");
+				result.setMap(map);
+				return result;
 			}
 			member = memberRepository.findByPassword(memberRequestDto.getPassword());
-			if (member.get().getPassword().equals(null) || member.get().getPassword().equals("")) {
-				return null;
+			if (member.isEmpty() == true) {
+				result.setResult("ERR");
+				result.setMessage("password auth fail");
+				result.setMap(map);
+				return result;
 			}
 			String id = member.get().getEmail();
 			String role = member.get().getRole();
@@ -140,12 +150,16 @@ public class MemberServiceImpl implements UserDetailsService {
 			member.get().builder().email(id).role(role);
 			UsernamePasswordAuthenticationToken authenticationToken = memberRequestDto.toAuthentication();
 			dto = jwtTokenProvider.generateTokenDto(authenticationToken, member.get().getRole());
-
+			
+			map.put("AccessToken", dto.getAccessToken());
+			map.put("RefreshToken", dto.getRefreshToken());
+			map.put("email", id);
+			map.put("role", role);
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-
-		return dto;
+			result.setMap(map);
+		return result;
 	}
 
 	// 현재 SecurityContext 에 있는 유저 정보 가져오기
@@ -313,7 +327,7 @@ public class MemberServiceImpl implements UserDetailsService {
 		return result;
 	}
 
-	public CommonResponseVo UpdatePasswd(MemberUpdatePwdRequest updatePwdRequest) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
+	public CommonResponseVo UpdatePasswd(MemberUpdatePwdRequest updatePwdRequest) throws Exception {
 		CommonResponseVo result = new CommonResponseVo();
 		Map<String, Object> map = new HashMap<>();
 		
@@ -330,7 +344,7 @@ public class MemberServiceImpl implements UserDetailsService {
 			return result;
 		}
 		
-		updatePwdRequest.setPassword(aesUtil.encrypt(updatePwdRequest.getPassword()));
+		updatePwdRequest.setPassword(shaUtil.encryptSHA512(updatePwdRequest.getPassword()));
 		
 		int updatePwd = memberMapper.updatePwdInfo(updatePwdRequest);
 		

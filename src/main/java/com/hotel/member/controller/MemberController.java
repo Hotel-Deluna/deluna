@@ -68,10 +68,10 @@ public class MemberController {
 
 	@ApiOperation(value = "공통 로그인")
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PostMapping("/sign-in")
-	public ResponseEntity<TokenDto> MemberSignIn(@RequestBody MemberRequestDto memberRequestDto,
+	public ResponseEntity<CommonResponseVo> MemberSignIn(@RequestBody MemberRequestDto memberRequestDto,
 			HttpServletResponse res) throws Exception {
 
 		System.out.println("test  = " + memberRequestDto.toString());
@@ -85,10 +85,12 @@ public class MemberController {
 			return ResponseEntity.of(null);
 		}
 		memberRequestDto.setPassword(shaUtil.encryptSHA512(pwd));
-		TokenDto dto = memberServiceImpl.getMemberInfo(memberRequestDto);
-		res.setHeader("AccessToken", dto.getAccessToken());
-		res.setHeader("RefreshToken", dto.getRefreshToken());
-
+		CommonResponseVo dto = memberServiceImpl.getMemberInfo(memberRequestDto);
+		res.setHeader("AccessToken", (String) dto.getMap().get("AccessToken"));
+		res.setHeader("RefreshToken", (String) dto.getMap().get("RefreshToken"));
+		
+		dto.getMap().remove("AccessToken");
+		dto.getMap().remove("RefreshToken");
 		// role 체크 없으면 메세지 리턴
 		return ResponseEntity.ok(dto);
 	}
@@ -229,7 +231,7 @@ public class MemberController {
 	@ResponseBody
 	@PatchMapping("/updatePwd")
 	public CommonResponseVo UpdatePasswd(@RequestBody MemberVo.MemberUpdatePwdRequest updatePwdRequest,
-			HttpServletRequest req) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
+			HttpServletRequest req) throws Exception {
 
 		CommonResponseVo result = new CommonResponseVo();
 		Map<String, Object> map = new HashMap<>();
@@ -252,9 +254,8 @@ public class MemberController {
 		}
 
 		String token = req.getHeader("accessToken");
-		//String email = info.tokenInfo(token);
+		String email = info.tokenInfo(token);
 		
-		String email = "sms44556688@gmail.com";
 
 		if (email.equals("")) {
 			result.setResult("ERR");

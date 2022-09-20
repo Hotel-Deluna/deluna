@@ -53,27 +53,17 @@ public class JwtTokenProvider {
         
         Map<String, Object> test = new HashMap<>();
         test.put("auth", authorities);
-        test.put("id", "1234-567-889");
-        
         long now = (new Date()).getTime();
 
         // Access Token 생성
         Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
-//        String accessToken = Jwts.builder()
-//                .setSubject(authentication.getName())       // payload "sub": "name"
-//                .claim(AUTHORITIES_KEY, authorities)        // payload "auth": "ROLE_USER"
-//                .setExpiration(accessTokenExpiresIn)        // payload "exp": 1516239022 (예시)
-//                .signWith(key, SignatureAlgorithm.HS512)    // header "alg": "HS512"
-//                .compact();
-        
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())       // payload "sub": "name"
                 .claim(AUTHORITIES_KEY, authorities)        // payload "auth": "ROLE_USER"
-                .setId("12345678")
                 .setExpiration(accessTokenExpiresIn)        // payload "exp": 1516239022 (예시)
                 .signWith(key, SignatureAlgorithm.HS512)    // header "alg": "HS512"
                 .compact();
-
+        
         // Refresh Token 생성
         String refreshToken = Jwts.builder()
                 .setExpiration(new Date(now + REFRESH_TOKEN_EXPIRE_TIME))
