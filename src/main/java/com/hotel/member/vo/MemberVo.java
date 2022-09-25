@@ -27,7 +27,7 @@ public class MemberVo {
 	@Id
 	@Column(value = "member_num")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long member_num;
+	private Integer member_num;
 	
 	private String email;
 	
@@ -99,17 +99,15 @@ public class MemberVo {
 		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
 		String email;
 		
-		@Schema(description = "고객 이름", required = true, example = "example@naver.com")
+		@Schema(description = "고객 이름", required = true, example = "이름 or 닉네임")
 		String name;
-
-		@Schema(description = "비밀번호", required = true, example = "필수값이라 필요한데")
-		String password;
-		
-		@Schema(description = "핸드폰번호", required = true, example = "01012345678")
-		String phone_num;
 
 		@Schema(description = "Oauth2", required = true, example = "소셜 인증키")
 		String auth;
+		
+		@Schema(description = "role", required = true, example = "백엔드에서 사용")
+		Integer role;
+		
 	}
 
 	@Data
@@ -121,17 +119,14 @@ public class MemberVo {
 		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
 		String email;
 		
-		@Schema(description = "고객 이름", required = true, example = "example@naver.com")
+		@Schema(description = "고객 이름", required = true, example = "이름 or 닉네임")
 		String name;
-
-		@Schema(description = "비밀번호", required = true, example = "필수값이라 필요한데")
-		String password;
-		
-		@Schema(description = "핸드폰번호", required = true, example = "01012345678")
-		String phone_num;
 
 		@Schema(description = "Oauth2", required = true, example = "소셜 인증키")
 		String auth;
+		
+		@Schema(description = "role", required = true, example = "백엔드에서 사용")
+		Integer role;
 
 	}
 	
@@ -144,17 +139,14 @@ public class MemberVo {
 		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
 		String email;
 		
-		@Schema(description = "고객 이름", required = true, example = "example@naver.com")
+		@Schema(description = "고객 이름", required = true, example = "이름 or 닉네임")
 		String name;
-
-		@Schema(description = "비밀번호", required = true, example = "필수값이라 필요한데")
-		String password;
-		
-		@Schema(description = "핸드폰번호", required = true, example = "01012345678")
-		String phone_num;
 
 		@Schema(description = "Oauth2", required = true, example = "소셜 인증키")
 		String auth;
+		
+		@Schema(description = "role", required = true, example = "백엔드에서 사용")
+		Integer role;
 
 	}
 
@@ -174,7 +166,7 @@ public class MemberVo {
 		String email;
 		
 		@Schema(description = "role", required = true, example = "고객:1, 사업자:2, 비회원:3")
-		String role;
+		Integer role;
 		
 		@Schema(description = "insert_user", required = true, example = "role + PK")
 		String insert_user;
@@ -234,7 +226,7 @@ public class MemberVo {
 	@NoArgsConstructor
 	public static class MemberDeleteVo {
 
-		int member_num;
+		Integer member_num;
 		
 		String email;
 		
@@ -276,7 +268,7 @@ public class MemberVo {
 		String email;
 		
 		@Schema(description = "insert_user", required = true, example = "백엔드사용")
-		String user_num;
+		Integer user_num;
 	}
 	
 	@Data
@@ -284,7 +276,7 @@ public class MemberVo {
 	@NoArgsConstructor
 	public static class MemberEmailAuthInfo {
 
-		String user_num;
+		Integer insert_user;
 
 		String email_auth_num;
 	}
@@ -353,8 +345,8 @@ public class MemberVo {
 		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
 		String email;
 
-		@Schema(description = "role", required = true, example = "고객:1, 사업자:2, 비회원:3")
-		String role;
+		@Schema(description = "role", required = true, example = "고객:1, 사업자:2, 비회원:3, // ERR : 0")
+		Integer role;
 
 	}
 	
@@ -380,7 +372,7 @@ public class MemberVo {
 		String phone_num;
 
 		@Schema(description = "role", required = true, example = "고객:1, 사업자:2, 비회원:3")
-		String role;
+		Integer role;
 		
 		@Schema(description = "insert_user", required = true, example = "role + PK")
 		String insert_user;

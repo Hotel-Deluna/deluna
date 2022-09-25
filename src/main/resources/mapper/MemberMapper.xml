@@ -24,6 +24,39 @@
 	
 	</insert>
 	
+	<insert id="registerKakaoInfo" parameterType="com.hotel.member.vo.MemberVo$LoginMemberRequestKokao">
+		insert into d_member (name, email, role, is_delete, dt_insert, insert_user) 
+		values(#{name},#{email}, #{role}, 'N', NOW(), CONCAT(#{role}+member_num));
+	</insert>
+	
+	<select id="selectKakaoInfo" resultType="com.hotel.member.vo.MemberVo$LoginMemberResponseDto">
+		
+		select role, email from d_member where email = #{email}
+		
+	</select>
+	
+	<insert id="registerNaverInfo" parameterType="com.hotel.member.vo.MemberVo$LoginMemberRequestNaver">
+		insert into d_member (name, email, role, is_delete, dt_insert, insert_user) 
+		values(#{name},#{email}, #{role}, 'N', NOW(), CONCAT(#{role}+member_num));
+	</insert>
+	
+	<select id="selectNaverInfo" resultType="com.hotel.member.vo.MemberVo$LoginMemberResponseDto">
+		
+		select role, email from d_member where email = #{email}
+		
+	</select>
+	
+	<insert id="registerGoogleInfo" parameterType="com.hotel.member.vo.MemberVo$LoginMemberRequestGoogle">
+		insert into d_member (name, email, role, is_delete, dt_insert, insert_user) 
+		values(#{name},#{email}, #{role}, 'N', NOW(), CONCAT(#{role}+member_num));
+	</insert>
+	
+	<select id="selectGoogleInfo" resultType="com.hotel.member.vo.MemberVo$LoginMemberResponseDto">
+		
+		select role, email from d_member where email = #{email}
+		
+	</select>
+	
 	<update id="deleteMember" parameterType="map">
 	
 		update d_member set is_delete='Y', dt_update= NOW(), update_user=#{update_user} where email=#{email}
@@ -61,7 +94,7 @@
 		
 	</select>
 	
-	<select id="selectMemberNum" resultType="String">
+	<select id="selectMemberNum" resultType="string">
 		
 		select insert_user from d_member where email = #{email}
 		
@@ -90,5 +123,6 @@
 		update d_member set password = #{password} where email = #{email} and insert_user = #{user_num}
 	
 	</update>
+	
 
 </mapper>

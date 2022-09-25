@@ -1,13 +1,12 @@
 package com.hotel.mapper;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationDeleteRequest;
-import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListInfo;
+import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListInfoResponseDto;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberWithdrawRequest;
@@ -43,9 +42,9 @@ public interface ReservationMapper {
 
 	int reservationDeleteUpdate(MemberWithdrawRequest memberWithdrawVo);
 
-	int paymentNum(int reservation_num);
+	int paymentNum(String reservation_num);
 
-	List<MemberReservationListInfo> reservationList(MemberReservationListRequest memberInfo);
+	List<MemberReservationListInfoResponseDto> reservationList(MemberReservationListRequest memberInfo);
 
 	String selectReservationCancelContent(MemberReservationDeleteRequest memberInfoRequest);
 
@@ -59,4 +58,16 @@ public interface ReservationMapper {
 	int unReservationCancelUpdate(UnMemberWithdrawRequest unMemberWithdrawVo);
 	
 	int unReservationDeleteUpdate(UnMemberWithdrawRequest unMemberWithdrawVo);
+
+	String selectInsertUser(String email);
+
+	String selectInsertUserInEmail(String email);
+
+	int selectMemberNum(String email);
+
+	String checkMemberInfo(String email);
+
+	int checkMemberNum(String email);
+
+	Integer selectReservationCnt(Integer member_num);
 }

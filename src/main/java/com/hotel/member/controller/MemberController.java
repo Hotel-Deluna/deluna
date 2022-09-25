@@ -45,7 +45,7 @@ public class MemberController {
 
 	@ApiOperation(value = "고객 회원가입")
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PostMapping("/sign-up")
 	public CommonResponseVo MemberSignUp(@RequestBody MemberVo.RegisterMemberRequest registerMemberRequest) {
@@ -86,7 +86,7 @@ public class MemberController {
 
 		if (email.equals("") || email.equals(null) || pwd.equals("") || pwd.equals(null)) {
 			dto.setEmail("");
-			dto.setRole("");
+			dto.setRole(0);
 			return dto; 
 		} 
 		memberRequestDto.setPassword(shaUtil.encryptSHA512(pwd));
@@ -95,7 +95,8 @@ public class MemberController {
 		res.setHeader("RefreshToken", (String) data.get("RefreshToken"));
 		
 		dto.setEmail((String) data.get("email"));
-		dto.setRole((String) data.get("role"));
+		//dto.setRole((String) data.get("role"));
+		dto.setRole((Integer) data.get("role"));
 		
 		return dto;
 	}
@@ -118,10 +119,27 @@ public class MemberController {
 
 	@ApiOperation(value = "카카오 로그인")
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PostMapping("/sign-kakao")
-	public CommonResponseVo MemberSignInKakao(@RequestBody MemberVo.LoginMemberRequestKokao loginMemberRequestKokao) {
+	public LoginMemberResponseDto MemberSignInKakao(@RequestBody MemberVo.LoginMemberRequestKokao loginMemberRequestKokao) throws Exception {
+		
+		LoginMemberResponseDto dto = new LoginMemberResponseDto();
+		
+		if(loginMemberRequestKokao.getEmail().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("email Not Found");
+			return dto;
+		}else if(loginMemberRequestKokao.getName().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("name Not Found");
+			return dto;
+		}else if(loginMemberRequestKokao.getAuth().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("auth Not Found");
+			return dto;
+		}
+		
 		return memberServiceImpl.memberSignInKakao(loginMemberRequestKokao);
 	}
 
@@ -130,17 +148,51 @@ public class MemberController {
 			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PostMapping("/sign-naver")
-	public CommonResponseVo MemberSignInNaver(@RequestBody MemberVo.LoginMemberRequestNaver loginMemberRequestNaver) {
+	public LoginMemberResponseDto MemberSignInNaver(@RequestBody MemberVo.LoginMemberRequestNaver loginMemberRequestNaver) {
+		
+		LoginMemberResponseDto dto = new LoginMemberResponseDto();
+		
+		if(loginMemberRequestNaver.getEmail().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("email Not Found");
+			return dto;
+		}else if(loginMemberRequestNaver.getName().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("name Not Found");
+			return dto;
+		}else if(loginMemberRequestNaver.getAuth().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("auth Not Found");
+			return dto;
+		}
+		
 		return memberServiceImpl.memberSignInNaver(loginMemberRequestNaver);
 	}
 
 	@ApiOperation(value = "구글 로그인")
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PostMapping("/sign-google")
-	public CommonResponseVo MemberSignInGoogle(
+	public LoginMemberResponseDto MemberSignInGoogle(
 			@RequestBody MemberVo.LoginMemberRequestGoogle loginMemberRequestGoogle) {
+		
+		LoginMemberResponseDto dto = new LoginMemberResponseDto();
+		
+		if(loginMemberRequestGoogle.getEmail().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("email Not Found");
+			return dto;
+		}else if(loginMemberRequestGoogle.getName().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("name Not Found");
+			return dto;
+		}else if(loginMemberRequestGoogle.getAuth().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("auth Not Found");
+			return dto;
+		}
+		
 		return memberServiceImpl.memberSignInGoogle(loginMemberRequestGoogle);
 	}
 

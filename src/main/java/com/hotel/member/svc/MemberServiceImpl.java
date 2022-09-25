@@ -13,6 +13,7 @@ import com.hotel.member.vo.MemberVo.FindIdRequest;
 import com.hotel.member.vo.MemberVo.LoginMemberRequestGoogle;
 import com.hotel.member.vo.MemberVo.LoginMemberRequestKokao;
 import com.hotel.member.vo.MemberVo.LoginMemberRequestNaver;
+import com.hotel.member.vo.MemberVo.LoginMemberResponseDto;
 import com.hotel.member.vo.MemberVo.MemberDeleteVo;
 import com.hotel.member.vo.MemberVo.MemberEmailAuthInfo;
 import com.hotel.member.vo.MemberVo.MemberFindPwdRequest;
@@ -137,17 +138,17 @@ public class MemberServiceImpl implements UserDetailsService {
 				return map;
 			}
 			String id = member.get().getEmail();
-			String role = member.get().getRole();
-			if (role.equals("0")) {
-				member.get().setRole("ROLE_USER");
-			} else if (role.equals("1")) {
-				member.get().setRole("ROLE_OWNER");
-			} else if (role.equals("2")) {
-				member.get().setRole("ROLE_UN_USER");
+			int role = member.get().getRole();
+			if (role == 0) {
+				member.get().setRole(Integer.valueOf("ROLE_MEMBER"));
+			} else if (role == 1) {
+				member.get().setRole(Integer.valueOf("ROLE_OWNER"));
+			} else if (role == 2) {
+				member.get().setRole(Integer.valueOf("ROLE_UN_USER"));
 			}
 			member.get().builder().email(id).role(role);
 			UsernamePasswordAuthenticationToken authenticationToken = memberRequestDto.toAuthentication();
-			dto = jwtTokenProvider.generateMemberTokenDto(authenticationToken, member.get().getRole());
+			dto = jwtTokenProvider.generateMemberTokenDto(authenticationToken, member.get().getRole().toString());
 			
 			map.put("AccessToken", dto.getAccessToken());
 			map.put("RefreshToken", dto.getRefreshToken());
@@ -166,25 +167,79 @@ public class MemberServiceImpl implements UserDetailsService {
 				.orElseThrow(() -> new RuntimeException("로그인 유저 정보가 없습니다."));
 	}
 
-	public CommonResponseVo memberSignInKakao(LoginMemberRequestKokao memberVo) {
-		CommonResponseVo result = new CommonResponseVo();
-		result.setMessage("code정보");
-
-		return result;
+	public LoginMemberResponseDto memberSignInKakao(LoginMemberRequestKokao memberVo) throws Exception {
+		LoginMemberResponseDto dto = new LoginMemberResponseDto();
+		
+		memberVo.setRole(4);
+		Integer memberInfo = memberMapper.registerKakaoInfo(memberVo);
+		
+		if(memberInfo.toString().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("member insert fail");
+			return dto;
+		}
+		
+		dto = memberMapper.selectKakaoInfo(memberVo.getEmail());
+		
+		if(dto.getEmail().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("select kakao info fail");
+			return dto;
+		}
+		dto.setResult("OK");
+		dto.setReason("");
+		
+		return dto;
 	}
 
-	public CommonResponseVo memberSignInNaver(LoginMemberRequestNaver memberVo) {
-		CommonResponseVo result = new CommonResponseVo();
-		result.setMessage("code정보");
-
-		return result;
+	public LoginMemberResponseDto memberSignInNaver(LoginMemberRequestNaver memberVo) {
+		LoginMemberResponseDto dto = new LoginMemberResponseDto();
+		
+		memberVo.setRole(4);
+		Integer memberInfo = memberMapper.registerNaverInfo(memberVo);
+		
+		if(memberInfo.toString().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("member insert fail");
+			return dto;
+		}
+		
+		dto = memberMapper.selectNaverInfo(memberVo.getEmail());
+		
+		if(dto.getEmail().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("select kakao info fail");
+			return dto;
+		}
+		dto.setResult("OK");
+		dto.setReason("");
+		
+		return dto;
 	}
 
-	public CommonResponseVo memberSignInGoogle(LoginMemberRequestGoogle memberVo) {
-		CommonResponseVo result = new CommonResponseVo();
-		result.setMessage("code정보, 수정 예정");
-
-		return result;
+	public LoginMemberResponseDto memberSignInGoogle(LoginMemberRequestGoogle memberVo) {
+		LoginMemberResponseDto dto = new LoginMemberResponseDto();
+			
+		memberVo.setRole(4);
+		Integer memberInfo = memberMapper.registerGoogleInfo(memberVo);
+		
+		if(memberInfo.toString().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("member insert fail");
+			return dto;
+		}
+		
+		dto = memberMapper.selectGoogleInfo(memberVo.getEmail());
+		
+		if(dto.getEmail().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("select kakao info fail");
+			return dto;
+		}
+		dto.setResult("OK");
+		dto.setReason("");
+		
+		return dto;
 	}
 
 	public MemberVo.MemberResponseDto MemberEditInfo(MemberVo.MemberUpdateInfo memberInfoVo)
@@ -281,9 +336,9 @@ public class MemberServiceImpl implements UserDetailsService {
 			return dto;
 		}
 
-		String user_num = memberMapper.selectMemberNum(email);
+		Integer insert_user = memberMapper.selectMemberNum(email);
 
-		if (user_num == null) {
+		if (insert_user.toString().equals("")) {
 			dto.setResult("ERR");
 			dto.setReason("member_num Not Found");
 			return dto;
@@ -294,7 +349,7 @@ public class MemberServiceImpl implements UserDetailsService {
 		MemberEmailAuthInfo req = new MemberEmailAuthInfo();
 
 		req.setEmail_auth_num(key);
-		req.setUser_num(user_num);
+		req.setInsert_user(insert_user);
 
 		int data = memberMapper.updateEmailAuthInfo(req);
 
@@ -321,7 +376,7 @@ public class MemberServiceImpl implements UserDetailsService {
 		
 		MemberVo.MemberResponseDto dto = new MemberVo.MemberResponseDto();
 		
-		String user_num = memberMapper.selectMemberNum(updatePwdRequest.getEmail());
+		Integer user_num = memberMapper.selectMemberNum(updatePwdRequest.getEmail());
 		
 		updatePwdRequest.setUser_num(user_num);
 		String auth_num = memberMapper.checkEmailAuthInfo(updatePwdRequest);

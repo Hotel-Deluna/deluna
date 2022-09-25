@@ -39,7 +39,7 @@ public class UnMemberInfoVo {
         String reservation_phone;
 
         @Schema(description = "예약번호", required = true, example = "1108668")
-        int reservation_num;
+        Integer reservation_num;
     }
 
     
@@ -54,15 +54,9 @@ public class UnMemberInfoVo {
 		
 		@Schema(description = "상세내용", required = true, example = "param Not Found")
 		String reason;
-		
-		@Schema(description = "totalSize", required = true, example = "30")
-		int totalCnt;
-		
-		@Schema(description = "페이지 당 출력할 리스트 갯수", required = true, example = "10")
-		int recordSize;
 
         @Schema(description = "예약번호", required = true, example = "1111111")
-        String reservation_num;
+        Integer reservation_num;
         
         @Schema(description = "예약자명", required = true, example = "홍길동")
         String reservation_name;
@@ -86,7 +80,7 @@ public class UnMemberInfoVo {
         String ed_date;
         
         @Schema(description = "결제금액", required = true, example = "300000")
-        BigDecimal reservation_price;
+        Integer reservation_price;
         
         @Schema(description = "예약상태", required = true, example = "0")
         String reservation_status;
@@ -99,7 +93,7 @@ public class UnMemberInfoVo {
     public static class UnMemberReservationInfo {
 
         @Schema(description = "예약번호", required = true, example = "1111111")
-        String reservation_num;
+        Integer reservation_num;
         
         @Schema(description = "예약자명", required = true, example = "홍길동")
         String reservation_name;
@@ -123,7 +117,7 @@ public class UnMemberInfoVo {
         String ed_date;
         
         @Schema(description = "결제금액", required = true, example = "300000")
-        BigDecimal reservation_price;
+        Integer reservation_price;
         
         @Schema(description = "예약상태", required = true, example = "0")
         String reservation_status;
@@ -136,22 +130,22 @@ public class UnMemberInfoVo {
     public static class UnMemberWithdrawRequest {
     	
     	@Schema(description = "회원 예약번호", required = true, example = "1108668")
-		int reservation_num;
+    	Integer reservation_num;
 		
 	//	@Schema(description = "객실 상세정보 번호", required = true, example = "2")
 	//	int room_detail_num;
 		
 		@Schema(description = "고객 번호", required = true, example = "1")
-		int member_num;
+		Integer member_num;
 		
 		@Schema(description = "결제 상세 번호", required = true, example = "1")
-		int payment_detail_num;
+		Integer payment_detail_num;
 
 		@Schema(description = "비회원 탈퇴 사유", required = true, example = "다른호텔 예약")
 		String content;
 		
 		@Schema(description = "update_user", required = true, example = "백엔드에서만 사용")
-		int update_user;
+		String update_user;
     }
 
 

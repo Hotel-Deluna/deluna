@@ -7,7 +7,7 @@ import com.hotel.reservation.vo.MemberInfoVo;
 import com.hotel.reservation.vo.MemberInfoVo.MemberInfoRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationDeleteRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationInfo;
-import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListInfo;
+import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListInfoResponseDto;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationResponseDto;
@@ -44,9 +44,10 @@ public class ReservationServiceImpl implements ReservationService {
 	private final AES256Util aesUtil;
 
 	@Override
-	public UnMemberReservationInfoResponseDto UnMemberReservationInfo(
+	public List<UnMemberReservationInfoResponseDto> UnMemberReservationInfo(
 			UnMemberReservationRequest unMemberReservationInfo) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
 
+		List<UnMemberReservationInfoResponseDto> list = new ArrayList<>();
 		UnMemberReservationInfoResponseDto dto = new UnMemberReservationInfoResponseDto();
 
 		String phone = reservationMapper.selectMemberPhoneInfo(unMemberReservationInfo);
@@ -54,13 +55,14 @@ public class ReservationServiceImpl implements ReservationService {
 		if(phone.equals("")) {
 			dto.setResult("ERR");
 			dto.setReason("reservation_num select fail");
-			return dto;
+			list.add(dto);
+			return list;
 		}
 		
 		//암호화 된 핸드폰 번호 복호화
 		phone = aesUtil.decrypt(phone);
 		String reqPhone = unMemberReservationInfo.getReservation_phone();
-		List<UnMemberReservationInfoResponseDto> list;
+		
 		
 		//예약된 고객 번호와 입력된 고객번호가 맞는지 확인 후
 		if(reqPhone.equals(phone)) {
@@ -68,20 +70,22 @@ public class ReservationServiceImpl implements ReservationService {
 		}else {
 			dto.setResult("ERR");
 			dto.setReason("phone eqaule fail");
-			return dto;
+			list.add(dto);
+			return list;
 		}
 		
 		//예약정보 확인
 		if(list.size() == 0) {
 			dto.setResult("ERR");
 			dto.setReason("unReservation Info select fail");
-			return dto;
+			list.add(dto);
+			return list;
 		}else {
 			dto.setResult("OK");
 			dto.setReason("unReservation select success");
-			dto.setTotalCnt(list.size());
+			
 		}
-		return dto;
+		return list;
 	}
 
 	@Override
@@ -101,7 +105,7 @@ public class ReservationServiceImpl implements ReservationService {
 			return result;
 		} else {
 
-			int reservation_num = unMemberWithdrawVo.getUpdate_user();
+			String reservation_num = unMemberWithdrawVo.getUpdate_user();
 
 			int payment_detail_num = reservationMapper.paymentNum(reservation_num);
 
@@ -232,7 +236,7 @@ public class ReservationServiceImpl implements ReservationService {
 			return dto;
 		} else {
 
-			int reservation_num = memberWithdrawVo.getUpdate_user();
+			String reservation_num = memberWithdrawVo.getUpdate_user();
 
 			int payment_detail_num = reservationMapper.paymentNum(reservation_num);
 
@@ -258,38 +262,76 @@ public class ReservationServiceImpl implements ReservationService {
 	}
 
 	@Override
-	public Map<String, Object> MemberReservationList(MemberReservationListRequest memberInfo)
+	public List<MemberReservationListInfoResponseDto> MemberReservationList(MemberReservationListRequest memberInfo)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
 
-		List<MemberReservationListInfo> list = new ArrayList<>();
-		Map<String, Object> map = new HashMap<>();
-
+		List<MemberReservationListInfoResponseDto> list = new ArrayList<>();
+		MemberReservationListInfoResponseDto dto = new MemberReservationListInfoResponseDto();
+		
+		
+		int memberNum = reservationMapper.checkMemberNum(memberInfo.getEmail());
+		Integer member_num = memberNum;
+		Integer totalCnt;
+		if(member_num.toString().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("member_num select fail");
+			list.add(dto);
+			return list;
+		}else {
+			
+			totalCnt = reservationMapper.selectReservationCnt(member_num);
+			if(totalCnt.toString().equals("")) {
+				dto.setResult("ERR");
+				dto.setReason("totalCnt select fail");
+				list.add(dto);
+				return list;
+			}
+		}
+		memberInfo.setMember_num(member_num);
+		dto.setTotalCnt(totalCnt);
+		
+		//페이징 처리
+		int page = memberInfo.getPage();
+		//총 갯수 30개 일 때
+		
+		if(1 == memberInfo.getPage()) {
+			page = 0;
+		}else if(1 < memberInfo.getPage()){
+			page = memberInfo.getPage_cnt() * memberInfo.getPage();
+			memberInfo.setPage(page);
+		}
 		list = reservationMapper.reservationList(memberInfo);
 		
 		System.out.println("list = " + list.toString());
 		
 		if (list.size() == 0) {
-			map.put("result", "ERR");
-			map.put("message", "data Not Found");
-			map.put("data", list);
+			dto.setResult("ERR");
+			dto.setReason("data Not Found");
+			dto.setTotalCnt(list.size());
+			list.add(dto);
+			return list;
 		} else {
 			//전화번호 복호화
 			for (int i = 0; i < list.size(); i++) {
-				
 				list.get(i).setReservation_phone(aesUtil.decrypt(list.get(i).getReservation_phone()));
 			}
-			map.put("result", "OK");
-			map.put("message", "");
-			map.put("data", list);
+			dto.setResult("OK");
+			dto.setReason("");
+			dto.setTotalCnt(list.size());
+			list.add(dto);
 		}
-		return map;
+		return list;
 	}
 
 	@Override
 	public ReservationDeleteContentResponseDto MemberReservationDeleteContent(MemberReservationDeleteRequest memberInfoRequest) {
 		ReservationDeleteContentResponseDto dto = new ReservationDeleteContentResponseDto();
 		
+		System.out.println("test = " + memberInfoRequest.toString());
+		
 		String data = reservationMapper.selectReservationCancelContent(memberInfoRequest);
+		
+		System.out.println("data = " + data);
 		
 		if(data == null) {
 			dto.setResult("ERR");
@@ -298,10 +340,25 @@ public class ReservationServiceImpl implements ReservationService {
 			return dto;
 			
 		}
-		dto.setResult("ERR");
-		dto.setReason("content Not Found");
+		dto.setResult("OK");
+		dto.setReason("");
 		dto.setContent(data);
 		return dto;
+	}
+
+	@Override
+	public String checkMemberInfo(String email) {
+		
+		String id = reservationMapper.checkMemberInfo(email);
+		if(id.equals("")) {
+			return null;
+		}
+		return id;
+	}
+
+	@Override
+	public int selectMemberNum(String email) {
+		return reservationMapper.checkMemberNum(email);
 	}
 
 //    @Override

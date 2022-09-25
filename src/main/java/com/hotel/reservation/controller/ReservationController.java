@@ -13,7 +13,7 @@ import com.hotel.reservation.vo.MemberInfoVo;
 import com.hotel.reservation.vo.UnMemberInfoVo;
 import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberReservationInfoResponseDto;
 import com.hotel.util.SHA512Util;
-import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListInfo;
+import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListInfoResponseDto;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationResponseDto;
 import com.hotel.reservation.vo.MemberInfoVo.ReservationDeleteContentResponseDto;
 
@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,23 +46,28 @@ public class ReservationController {
 	@ApiOperation(value = "비회원 조회")
 	@ResponseBody
 	@PostMapping("/unMemberInfo")
-	public UnMemberReservationInfoResponseDto UnMemberInfo(
+	public List<UnMemberReservationInfoResponseDto> UnMemberInfo(
 			@RequestBody UnMemberInfoVo.UnMemberReservationRequest unMemberReservationRequest)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
 		UnMemberReservationInfoResponseDto dto = new UnMemberReservationInfoResponseDto();
-
+		
+		List<UnMemberReservationInfoResponseDto> list = new ArrayList<>();
+		
 		if (unMemberReservationRequest.getReservation_name().equals("")) {
 			dto.setResult("ERR");
 			dto.setReason("name Not Found");
-			return dto;
+			list.add(dto);
+			return list;
 		} else if (unMemberReservationRequest.getReservation_phone().equals("")) {
 			dto.setResult("ERR");
 			dto.setReason("phone Not Found");
-			return dto;
+			list.add(dto);
+			return list;
 		} else if (unMemberReservationRequest.getReservation_num() == 0) {
 			dto.setResult("ERR");
 			dto.setReason("reservation_num Not Found");
-			return dto;
+			list.add(dto);
+			return list;
 		}
 
 		return reservationService.UnMemberReservationInfo(unMemberReservationRequest);
@@ -119,7 +125,7 @@ public class ReservationController {
 			dto.setResult("ERR");
 			dto.setReason("end_date Not Found");
 			return dto;
-		} else if (memberReservationRequest.getMember_num() == 0) {
+		} else if (memberReservationRequest.getEmail().equals("")) {
 			dto.setResult("ERR");
 			dto.setReason("member_num Not Found");
 			return dto;
@@ -131,15 +137,17 @@ public class ReservationController {
 			dto.setResult("ERR");
 			dto.setReason("reservation Name Not Found");
 			return dto;
-		} else if (memberReservationRequest.getReservation_people().equals("")) {
+		} else if (memberReservationRequest.getReservation_people().toString().equals("")){
 			dto.setResult("ERR");
 			dto.setReason("reservation_people Not Found");
 			return dto;
 		} else if (memberReservationRequest.getReservation_phone().equals("")) {
 			dto.setResult("ERR");
 			dto.setReason("reservation_phone Not Found");
+			// 없을 경우 에러코드 채워서 보내기 -> 
+			dto.setReservation_phone_yn("N");
 			return dto;
-		} else if (memberReservationRequest.getReservation_price() == 0) {
+		} else if (memberReservationRequest.getReservation_price().toString().equals("")) {
 			dto.setResult("ERR");
 			dto.setReason("reservation_price Not Found");
 			return dto;
@@ -147,7 +155,7 @@ public class ReservationController {
 			dto.setResult("ERR");
 			dto.setReason("room_detail_name Not Found");
 			return dto;
-		} else if (memberReservationRequest.getRoom_detail_num() == 0) {
+		} else if (memberReservationRequest.getRoom_detail_num().toString().equals("")) {
 			dto.setResult("ERR");
 			dto.setReason("room_detail_num Not Found");
 			return dto;
@@ -155,15 +163,43 @@ public class ReservationController {
 			dto.setResult("ERR");
 			dto.setReason("start_date Not Found");
 			return dto;
-		}
-		
-		else if (memberReservationRequest.getRole() == 1 || memberReservationRequest.getRole() == 2) {
-			String token = req.getHeader("accessToken");
-			String email = info.tokenInfo(token);
+		}else if (memberReservationRequest.getRole().toString().equals("")){
+			dto.setResult("ERR");
+			dto.setReason("start_date Not Found");
 			return dto;
+		}else if (memberReservationRequest.getRole() == 1 || memberReservationRequest.getRole() == 2) {
+			String token = req.getHeader("accessToken");
+			String email ;
+			if(token == null) {
+				// 삭제 예정
+				email = "sms44556688@gmail.com";
+			}else {
+				email = info.tokenInfo(token);
+			}
+			email = reservationService.checkMemberInfo(email);
+			if(email == null) {
+				dto.setResult("ERR");
+				dto.setReason("memberInfo fail");
+				return dto;
+			}else {
+				int member_num = reservationService.selectMemberNum(email);
+				if(member_num == 0) {
+					dto.setResult("ERR");
+					dto.setReason("member_num fail");
+					return dto;
+				}
+				memberReservationRequest.setMember_num(member_num);		
+			}
+			dto.setReservation_phone_yn("Y");
+			if(email.equals(memberReservationRequest.getEmail())) {
+			dto = reservationService.memberReservation(memberReservationRequest);
+			}else {
+				dto.setResult("ERR");
+				dto.setReason("param email and db email not match");
+			}
 		}
-		
-		return reservationService.memberReservation(memberReservationRequest);
+				
+		return dto;
 	}
 
 	@ApiOperation(value = "고객 예약 삭제")
@@ -204,54 +240,86 @@ public class ReservationController {
 
 	@ApiOperation(value = "고객 예약내역 조회")
 	@ApiImplicitParams({
-	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "String", paramType = "header") })
 	@ResponseBody
 	@PostMapping(value = "/memberReservationList", produces = "application/json")
-	public Map<String, Object> MemberReservationList(@RequestBody MemberInfoVo.MemberReservationListRequest memberInfo)
-			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
+	public List<MemberReservationListInfoResponseDto> MemberReservationList(@RequestBody MemberInfoVo.MemberReservationListRequest memberInfo,
+			HttpServletRequest req) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
 
-		Map<String, Object> result = new HashMap<>();
-
-		if (memberInfo.getMember_num() == 0) {
-			result.put("result", "ERR");
-			result.put("reason", "member_num Not Found");
-			return result;
-		} else if (memberInfo.getReservation_status() == 0) {
-			result.put("result", "ERR");
-			result.put("reason", "reservation_status Not Found");
-			return result;
-		} else if (memberInfo.getSt_date().equals("")) {
-			result.put("result", "ERR");
-			result.put("reason", "st_date Not Found");
-			return result;
+		List<MemberReservationListInfoResponseDto> list = new ArrayList<>();
+		MemberReservationListInfoResponseDto dto = new MemberReservationListInfoResponseDto();
+		
+		System.out.println("data = " + memberInfo.toString()) ;
+		 
+	    if (memberInfo.getReservation_status() == 0) {
+	    	memberInfo.setReservation_status(1);		
+	    	
+	    } else if (memberInfo.getSt_date().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("st_date Not Found");			
+			list.add(dto);
+			return list;
+		} else if (memberInfo.getEd_date().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("ed_date Not Found");			
+			list.add(dto);
+			return list;
+		} else if (memberInfo.getPage().toString().equals("")){
+			// 수정해야 할 수 있음
+			memberInfo.setPage(0);		
+		}else if (memberInfo.getPage_cnt().toString().equals("")){
+			memberInfo.setPage_cnt(10);		
 		}
+	    
+		String token = req.getHeader("accessToken");
+		String email ;
+		if(token == null) {
+			// 삭제 예정
+			email = "sms44556688@gmail.com";
+//			dto.setResult("ERR");
+//			dto.setReason("token decryption fail");
+//			list.add(dto);
+//			return list;
+		}else {
+			email = info.tokenInfo(token);
+		}
+		memberInfo.setEmail(email);
+		list = reservationService.MemberReservationList(memberInfo);
 
-		result = reservationService.MemberReservationList(memberInfo);
-
-		return result;
+		return list;
 	}
 
 	@ApiOperation(value = "고객 예약취소 사유 조회")
 	@ApiImplicitParams({
-	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, paramType = "header", example = "0")})
 	@ResponseBody
 	@PostMapping(value = "/memberDeleteContent", produces = "application/json")
 	public ReservationDeleteContentResponseDto MemberReservationDeleteContent(
-			@RequestBody MemberInfoVo.MemberReservationDeleteRequest memberInfoRequest) {
+			@RequestBody MemberInfoVo.MemberReservationDeleteRequest memberInfoRequest, HttpServletRequest req) {
 		ReservationDeleteContentResponseDto dto = new ReservationDeleteContentResponseDto();
-
-		if (memberInfoRequest.getMember_num() == 0) {
+		
+		String token = req.getHeader("accessToken");
+		String email;
+		if(token == null) {
+			
 			dto.setResult("ERR");
-			dto.setReason("member_num Not Found");
-			dto.setContent("");
+			dto.setReason("token member info fail");
 			return dto;
-		} else if (memberInfoRequest.getReservation_num() == 0) {
+		}else {
+			email = info.tokenInfo(token);
+		}
+		if (memberInfoRequest.getReservation_num().toString().equals("")){
 			dto.setResult("ERR");
 			dto.setReason("reservation_num Not Found");
 			dto.setContent("");
 			return dto;
+		}else if(email.equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("token find email fail");
+			dto.setContent("");
+			return dto;
 		}
-
+		
 		return reservationService.MemberReservationDeleteContent(memberInfoRequest);
 	}
 

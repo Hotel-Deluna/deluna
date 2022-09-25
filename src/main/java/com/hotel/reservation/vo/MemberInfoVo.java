@@ -43,14 +43,13 @@ public class MemberInfoVo {
 
 	@Data
 	@AllArgsConstructor
-	@NoArgsConstructor
 	@Schema(description = "회원 예약삭제 사유 파라미터")
 	public static class MemberReservationDeleteRequest {
-		@Schema(description = "회원번호", required = true, example = "000001")
-		int member_num;
-
-		@Schema(description = "예약번호", required = true, example = "000001")
-		int reservation_num;
+		public MemberReservationDeleteRequest() {
+			
+		}
+		@Schema(description = "예약번호", required = true, example = "3")
+		Integer reservation_num;
 	}
 
 //	@Data
@@ -68,7 +67,7 @@ public class MemberInfoVo {
 	public static class MemberReservationList {
 
 		@Schema(description = "고객 예약 리스트", required = true)
-		List<MemberReservationListInfo> list;
+		List<MemberReservationListInfoResponseDto> list;
 
 	}
 
@@ -77,30 +76,49 @@ public class MemberInfoVo {
 	@NoArgsConstructor
 	@Schema(description = "예약내역 조회 파라미터")
 	public static class MemberReservationListRequest {
-		@Schema(description = "회원번호", required = true, example = "000001")
-		int member_num;
 		
-		@Schema(description = "예약 상태 코드", required = true, example = "1:전체, 2:예약확정, 3:예약취소, 4:사용완료")
-		int reservation_status;
+		@Schema(description = "보여질 페이지", required = true, example = "0")
+		Integer page;
+		
+		@Schema(description = "페이지 당 출력할 리스트 갯수", required = true, example = "0")
+		Integer page_cnt;
+		
+		@Schema(description = "예약 상태 코드", required = true, example = "0")
+		Integer reservation_status;
 		
 		@Schema(description = "예약 시작일", required = true, example = "2022-08-28")
 		String st_date;
 		
 		@Schema(description = "예약 종료일", required = true, example = "2022-08-28")
 		String ed_date;
+		
+		@Schema(description = "member_num", required = true, example = "백엔드에서 사용")
+		Integer member_num;
+		
+		@Schema(description = "토큰 이메일", required = true, example = "백엔드에서 사용")
+		String email;
 
 	}
 
 	@Data
 	@NoArgsConstructor
-	@Schema(description = "고객 예약 리스트 조회")
-	public static class MemberReservationListInfo {
+	@Schema(description = "회원 예약 리스트 조회 response")
+	public static class MemberReservationListInfoResponseDto {
+		
+		@Schema(description = "api 결과값", required = true, example = "OK or ERR")
+		String result;
+		
+		@Schema(description = "상세내용", required = true, example = "param Not Found")
+		String reason;
+		
+		@Schema(description = "totalSize", required = true, example = "30")
+		Integer totalCnt;
 
 		@Schema(description = "예약번호", required = true, example = "1")
-		String reservation_num;
+		Integer reservation_num;
 
 		@Schema(description = "객실상세번호", required = true, example = "2")
-		String room_detail_num;
+		Integer room_detail_num;
 
 		@Schema(description = "예약자명", required = true, example = "예약자명")
 		String reservation_name;
@@ -124,7 +142,7 @@ public class MemberInfoVo {
 		String ed_date;
 
 		@Schema(description = "결제금액", required = true, example = "300000")
-		String reservation_price;
+		Integer reservation_price;
 
 		@Schema(description = "예약상태", required = true, example = "0")
 		String reservation_status;
@@ -136,11 +154,8 @@ public class MemberInfoVo {
 	@Schema(description = "회원 예약하기")
 	public static class MemberReservationRequest {
 
-		@Schema(description = "회원번호", required = true, example = "000001")
-		int member_num;
-
 		@Schema(description = "객실상세번호", required = true, example = "000002")
-		int room_detail_num;
+		Integer room_detail_num;
 
 		@Schema(description = "예약자명", required = true, example = "예약자명")
 		String reservation_name;
@@ -164,13 +179,19 @@ public class MemberInfoVo {
 		String ed_date;
 
 		@Schema(description = "결제금액", required = true, example = "300000")
-		int reservation_price;
+		Integer reservation_price;
 		
 		@Schema(description = "role", required = true, example = "고객:1, 사업자:2, 비회원:3")
-		int role;
+		Integer role;
 		
 		@Schema(description = "insert_user", required = true, example = "백엔드에서만 사용")
 		String insert_user;
+		
+		@Schema(description = "회원번호", required = true, example = "백엔드에서만 사용")
+		Integer member_num;
+		
+		@Schema(description = "email", required = true, example = "test@test.com")
+		String email;
 		
 	}
 
@@ -180,9 +201,9 @@ public class MemberInfoVo {
 	@NoArgsConstructor
 	public static class ReservationPaymentsRequest {
 
-		int reservation_num;
+		Integer reservation_num;
 		
-		int payment_detail_num;
+		Integer payment_detail_num;
 		
 		String insert_user;
 		
@@ -193,7 +214,7 @@ public class MemberInfoVo {
 	@NoArgsConstructor
 	public static class ReservationDetailPaymentsRequest {
 
-		int payment_price;
+		Integer payment_price;
 		
 		String insert_user;
 		
@@ -207,22 +228,22 @@ public class MemberInfoVo {
 	public static class MemberWithdrawRequest {
 
 		@Schema(description = "회원 예약번호", required = true, example = "1108668")
-		int reservation_num;
+		Integer reservation_num;
 		
 	//	@Schema(description = "객실 상세정보 번호", required = true, example = "2")
 	//	int room_detail_num;
 		
 		@Schema(description = "고객 번호", required = true, example = "1")
-		int member_num;
+		Integer member_num;
 		
 		@Schema(description = "결제 상세 번호", required = true, example = "1")
-		int payment_detail_num;
+		Integer payment_detail_num;
 
 		@Schema(description = "비회원 탈퇴 사유", required = true, example = "다른호텔 예약")
 		String content;
 		
 		@Schema(description = "update_user", required = true, example = "백엔드에서만 사용")
-		int update_user;
+		String update_user;
 
 	}
 	
@@ -237,6 +258,9 @@ public class MemberInfoVo {
 		
 		@Schema(description = "상세내용", required = true, example = "param Not Found")
 		String reason;
+		
+		@Schema(description = "핸드폰 체크", required = true, example = "Y or N")
+		String reservation_phone_yn;
 		
 	}
 	

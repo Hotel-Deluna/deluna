@@ -30,16 +30,16 @@ public class Member implements UserDetails{
     @Id
     @Column(name = "member_num")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long member_num;
+    private Integer member_num;
 
     private String email;
 
     private String password;
     
-    private String role;
+    private Integer role;
     
     @Builder
-    public Member(String email, String password, String role) {
+    public Member(String email, String password, Integer role) {
         this.email = email;
         this.password = password;
         this.role = role;
@@ -50,7 +50,7 @@ public class Member implements UserDetails{
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		Collection<GrantedAuthority> authorities = new ArrayList<>();
 
-        for(String role : role.split(",")){
+        for(String role : role.toString().split(",")){
             authorities.add(new SimpleGrantedAuthority(role));
         }
         return authorities;

@@ -108,28 +108,28 @@
 
 	</select>
 
-	<select id="reservationList" resultType="com.hotel.reservation.vo.MemberInfoVo$MemberReservationListInfo">
-
-		select 
-			reservation_num, member_num, room_detail_num,
-			reservation_phone, reservation_name,reservation_people,
-			reservation_price, reservation_status, st_date, ed_date
+	<select id="reservationList" resultType="com.hotel.reservation.vo.MemberInfoVo$MemberReservationListInfoResponseDto">
 		
-		from d_reservation
+		select 
+			a.reservation_num, a.member_num, a.room_detail_num,
+			a.reservation_phone, a.reservation_name, a.reservation_people,
+			a.reservation_price, a.reservation_status, a.st_date, a.ed_date,
+			d.name
+		from d_reservation a inner join d_room_detail b ON a.room_detail_num = b.room_detail_num
+		inner join d_room c ON c.room_num = b.room_num  inner join d_hotel d ON c.hotel_num = d.hotel_num
 		
 		where member_num = #{member_num} 
-		
 			and reservation_status = #{reservation_status}
 		
 			and st_date LIKE CONCAT(#{st_date},'%') 
 		
 			and ed_date LIKE CONCAT(#{ed_date},'%')
+		ORDER BY reservation_num DESC
+		LIMIT #{page_cnt} OFFSET #{page};
 		
-		ORDER BY reservation_num DESC;
-
 	</select>
 	
-	<select id="selectReservationCancelContent" resultType="com.hotel.reservation.vo.MemberInfoVo$MemberReservationDeleteRequest">
+	<select id="selectReservationCancelContent" resultType="string">
 
 		select content from d_reservation_delete where reservation_num=#{reservation_num}
 
@@ -160,10 +160,8 @@
 	
 	
 	<select id="selectInsertUnUser" resultType="string">
-
 		select insert_user from d_reservation where reservation_num =
 		#{reservation_num}
-
 	</select>
 	
 	<update id="unReservationCancelUpdate"
@@ -184,5 +182,34 @@
 
 	</insert>
 	
+	<select id="selectInsertUserInEmail" resultType="string">
+
+		select insert_user from d_reservation where member_num = #{member_num}
+
+	</select>
+	
+	<select id="checkMemberInfo" resultType="string">
+
+		select email from d_member where email = #{email}
+
+	</select>
+	
+	<select id="checkMemberNum" resultType="Integer">
+
+		select member_num from d_member where email = #{email}
+
+	</select>
+	
+	<select id="selectReservationCnt" resultType="int">
+
+		select count(*) as totalCnt from d_reservation where member_num = #{member_num}
+
+	</select>
+	
+	<select id="selectMemberNum" resultType="string">
+		
+		select insert_user from d_member where email = #{email}
+		
+	</select>
 	
 </mapper>

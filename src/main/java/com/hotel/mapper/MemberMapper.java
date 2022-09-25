@@ -7,6 +7,10 @@ import org.springframework.stereotype.Repository;
 
 import com.hotel.member.vo.MemberVo;
 import com.hotel.member.vo.MemberVo.FindIdRequest;
+import com.hotel.member.vo.MemberVo.LoginMemberRequestGoogle;
+import com.hotel.member.vo.MemberVo.LoginMemberRequestKokao;
+import com.hotel.member.vo.MemberVo.LoginMemberRequestNaver;
+import com.hotel.member.vo.MemberVo.LoginMemberResponseDto;
 import com.hotel.member.vo.MemberVo.MemberDeleteRequest;
 import com.hotel.member.vo.MemberVo.MemberDeleteVo;
 import com.hotel.member.vo.MemberVo.MemberEmailAuthInfo;
@@ -37,12 +41,24 @@ public interface MemberMapper {
 
 	String checkEmailByPwd(MemberFindPwdRequest findPwdRequest);
 
-	String selectMemberNum(String email);
+	int selectMemberNum(String email);
 
 	int updateEmailAuthInfo(MemberEmailAuthInfo req);
 
 	String checkEmailAuthInfo(MemberUpdatePwdRequest updatePwdRequest);
 
 	int updatePwdInfo(MemberUpdatePwdRequest updatePwdRequest);
+
+	int registerKakaoInfo(LoginMemberRequestKokao memberVo);
+
+	LoginMemberResponseDto selectKakaoInfo(String string);
+
+	Integer registerNaverInfo(LoginMemberRequestNaver memberVo);
+
+	LoginMemberResponseDto selectNaverInfo(String email);
+
+	Integer registerGoogleInfo(LoginMemberRequestGoogle memberVo);
+
+	LoginMemberResponseDto selectGoogleInfo(String email);
 
 }
