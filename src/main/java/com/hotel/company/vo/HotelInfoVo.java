@@ -132,19 +132,19 @@ public class HotelInfoVo {
 
         // 호텔 등록시 insert에 필요한 정보
         @JsonIgnore
-        @ApiParam(value = "사업자 번호",  required = false)
+        @ApiParam(value = "사업자 번호",  required = false, hidden = true)
         Integer business_user_num;
 
         @JsonIgnore
-        @ApiParam(value = "위도 값",  required = false)
+        @ApiParam(value = "위도 값",  required = false, hidden = true)
         Double latitude;
 
         @JsonIgnore
-        @ApiParam(value = "경도 값",  required = false)
+        @ApiParam(value = "경도 값",  required = false, hidden = true)
         Double longitude;
 
         @JsonIgnore
-        @ApiParam(value = "공휴일 가격 상태", required = false)
+        @ApiParam(value = "공휴일 가격 상태", required = false, hidden = true)
         Integer holiday_price_status;
 
     }
@@ -200,30 +200,30 @@ public class HotelInfoVo {
         @ApiParam(value = "호텔 규정", required = true, example = "대욕장 이용안내...")
         String rule;
 
-        @ApiParam(value = "태그(부가시설/서비스) 리스트", required = true, example = "[1,2,3]")
+        @ApiParam(value = "태그(부가시설/서비스) 리스트", required = false, example = "[1,2,3]")
         List<Integer> tags;
 
-        @ApiParam(value = "성수기 리스트", required = true)
+        @ApiParam(value = "성수기 리스트", required = false)
         List<PeakSeason> peak_season_list;
 
-        @ApiParam(value = "이미지 리스트 - 이미지 멀티파트 파일 리스트", required = true, example = "[멀티파트 파일 이미지1 , 멀티파트 파일 이미지2]")
+        @ApiParam(value = "이미지 리스트 - 이미지 멀티파트 파일 리스트", required = false, example = "[멀티파트 파일 이미지1 , 멀티파트 파일 이미지2]")
         List<MultipartFile> image;
 
         // 호텔 수정시 update에 필요한 정보
         @JsonIgnore
-        @ApiParam(value = "사업자 번호",  required = false)
+        @ApiParam(value = "사업자 번호",  required = false, hidden = true)
         Integer business_user_num;
 
         @JsonIgnore
-        @ApiParam(value = "위도 값",  required = false)
+        @ApiParam(value = "위도 값",  required = false, hidden = true)
         Double latitude;
 
         @JsonIgnore
-        @ApiParam(value = "경도 값",  required = false)
+        @ApiParam(value = "경도 값",  required = false, hidden = true)
         Double longitude;
 
         @JsonIgnore
-        @ApiParam(value = "변경자",  required = false)
+        @ApiParam(value = "변경자",  required = false, hidden = true)
         String update_user;
     }
 
@@ -289,19 +289,19 @@ public class HotelInfoVo {
 
         // DB
         @JsonIgnore
-        @ApiParam(value = "사업자 번호",  required = false)
+        @ApiParam(value = "사업자 번호",  required = false, hidden = true)
         Integer business_user_num;
 
         @JsonIgnore
-        @ApiParam(value = "위도 값",  required = false)
+        @ApiParam(value = "위도 값",  required = false, hidden = true)
         Double latitude;
 
         @JsonIgnore
-        @ApiParam(value = "경도 값",  required = false)
+        @ApiParam(value = "경도 값",  required = false, hidden = true)
         Double longitude;
 
         @JsonIgnore
-        @ApiParam(value = "공휴일 가격 상태", required = false)
+        @ApiParam(value = "공휴일 가격 상태", required = false, hidden = true)
         Integer holiday_price_status;
 
     }
@@ -409,20 +409,20 @@ public class HotelInfoVo {
     @Schema(description = "호텔의 성수기 정보")
     public static class PeakSeason {
 
-        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd", timezone="Asia/Seoul")
         @Schema(description = "성수기 시작일", required = false)
         Date peak_season_start;
 
-        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd", timezone= "Asia/Seoul")
         @Schema(description = "성수기 종료일", required = false)
         Date peak_season_end;
 
         @JsonIgnore
-        @Schema(description = "성수기 번호", required = false)
+        @Schema(description = "성수기 번호", required = false, hidden = true)
         Integer peak_num;
 
         @JsonIgnore
-        @Schema(description = "호텔 번호", required = false)
+        @Schema(description = "호텔 번호", required = false, hidden = true)
         Integer hotel_num;
 
     }
@@ -531,7 +531,7 @@ public class HotelInfoVo {
         @ApiParam(value = "객실명",  required = true, example = "신라스테이")
         String name;
 
-        @ApiParam(value = "이미지 리스트 - 이미지 멀티파트 파일 리스트", required = true, example = "[멀티파트 파일 이미지1 , 멀티파트 파일 이미지2]")
+        @ApiParam(value = "이미지 리스트 - 이미지 멀티파트 파일 리스트", required = false, example = "[멀티파트 파일 이미지1 , 멀티파트 파일 이미지2]")
         List<MultipartFile> image;
 
         @ApiParam(value = "객실 최소인원", required = true, example = "2")
@@ -564,7 +564,7 @@ public class HotelInfoVo {
         @ApiParam(value = "가격정보 - 주말", required = true, example = "250000")
         Integer weekend_price;
 
-        @ApiParam(value = "객실 태그", required = true, example = "[1,3,5]")
+        @ApiParam(value = "객실 태그", required = false, example = "[1,3,5]")
         List<Integer> tags;
 
         @ApiParam(value = "공휴일 가격 상태 - 공휴일을 성수기 가격취급할건지 결정. 1: 비성수기 주말가격, 2: 성수기 주말가격",  required = true, example = "1")
@@ -583,11 +583,11 @@ public class HotelInfoVo {
         @Schema(description = "호실명", required = true, example = "101호")
         String name;
 
-        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd", timezone="Asia/Seoul")
         @Schema(description = "호실 사용금지 시작일", required = false, example = "2022/08/01")
         Date room_closed_start;
 
-        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd", timezone="Asia/Seoul")
         @Schema(description = "호실 사용금지 해제일", required = false, example = "2022/08/03")
         Date room_closed_end;
 
@@ -703,11 +703,11 @@ public class HotelInfoVo {
         @Schema(description = "호실 구분번호", required = true, example = "12345")
         Integer room_detail_num;
 
-        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd", timezone="Asia/Seoul")
         @Schema(description = "호실 사용금지 시작일", required = true, example = "2022/08/01")
         Date room_closed_start;
 
-        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd", timezone="Asia/Seoul")
         @Schema(description = "호실 사용금지 해제일", required = true, example = "2022/08/03")
         Date room_closed_end;
 

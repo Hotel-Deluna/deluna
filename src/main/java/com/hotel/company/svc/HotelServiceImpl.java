@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -63,6 +65,7 @@ public class HotelServiceImpl implements HotelService {
         int total_cnt = 0;
 
         try{
+            log.info("사업자 소유 호텔리스트 조회 시작");
             List<HotelInfoVo.HotelDetailInfo> ownerHotelList = new ArrayList<>();
             int business_user_num = getPk(jwtToken);
             Integer page = ownerHotelListRequest.getPage();
@@ -74,25 +77,20 @@ public class HotelServiceImpl implements HotelService {
             Pattern pattern = Pattern.compile(".*"+ownerHotelListRequest.getText()+".*");
 
             for(int hotel_num : ownerHotelNumList){
-                HotelInfoVo.HotelDetailInfoResponse hotelDetailInfoResponse = HotelDetailInfo(hotel_num);
+                HotelInfoVo.HotelDetailInfoResponse hotelDetailInfoResponse = getHotelInfo(hotel_num);
                 HotelInfoVo.HotelDetailInfo hotelDetailInfo = hotelDetailInfoResponse.getData();
 
-                if(isResultError(hotelDetailInfoResponse)){
+                if(hotelDetailInfoResponse.getData() == null){
                     continue;
                 }
 
                 // 만약 검색어가 존재하면 해당 사업자 소유 호텔들 중 검색어에 해당하는 호텔만 리턴
-                if(ownerHotelListRequest.getText() != null){
+                if(ownerHotelListRequest.getText() != null || !"".equals(ownerHotelListRequest.getText())){
                     if(! (pattern.matcher(hotelDetailInfo.getName()).matches() || pattern.matcher(hotelDetailInfo.getEng_name()).matches())){
                         continue;
                     }
                 }
                 ownerHotelList.add(hotelDetailInfo);
-            }
-
-            if(ownerHotelList.size() <= 0){
-                noSearchResult(result);
-                return result;
             }
 
             total_cnt = ownerHotelList.size();
@@ -141,12 +139,12 @@ public class HotelServiceImpl implements HotelService {
             hotelMapper.insertHotelInfo(registerHotelRequest);
 
             // Image Resizing & S3 Upload & DB insert
-            if(registerHotelRequest.getImage() != null){
+            if(!CollectionUtils.isEmpty(registerHotelRequest.getImage())){
                 insertImage(registerHotelRequest.getImage(), CommonEnum.ImageType.HOTEL.getCode(), hotelNum,  userPk);
             }
 
             // 성수기정보 저장
-            if(registerHotelRequest.getPeak_season_list() != null){
+            if(!CollectionUtils.isEmpty(registerHotelRequest.getPeak_season_list())){
                 for(HotelInfoVo.PeakSeason peakSeason : registerHotelRequest.getPeak_season_list()) {
                     HotelDto.PeekSeasonTable peekSeasonTable = new HotelDto.PeekSeasonTable();
                     peekSeasonTable.setPeak_season_std(peakSeason.getPeak_season_start());
@@ -159,7 +157,7 @@ public class HotelServiceImpl implements HotelService {
             }
 
             // 호텔 태그 저장
-            if(registerHotelRequest.getTags() != null){
+            if(!CollectionUtils.isEmpty(registerHotelRequest.getTags())){
                 for(int tag : registerHotelRequest.getTags()){
                     HotelInfoVo.Tags tags = new HotelInfoVo.Tags();
                     tags.setPk_num(hotelNum);
@@ -186,19 +184,22 @@ public class HotelServiceImpl implements HotelService {
         int total_cnt = 0;
 
         try{
+            log.info("여행지 정보 조회 시작");
             Integer page = touristSpotInfoRequest.getPage();
             Integer pageCnt = touristSpotInfoRequest.getPage_cnt();
 
             List<HotelSearchVo.TouristSpotInfo> touristSpotList = hotelMapper.selectTouristSpotList();
 
-            total_cnt = touristSpotList.size();
-
-            //pagination
-            touristSpotList = PageUtil.paginationList(page, pageCnt, total_cnt, touristSpotList);
+            if(!CollectionUtils.isEmpty(touristSpotList)){
+                total_cnt = touristSpotList.size();
+                //pagination
+                touristSpotList = PageUtil.paginationList(page, pageCnt, total_cnt, touristSpotList);
+            }
 
             result.setMessage("여행지 정보 조회 완료");
             result.setData(touristSpotList);
             result.setTotal_cnt(total_cnt);
+
         }catch (Exception e){
             e.printStackTrace();
 
@@ -219,7 +220,7 @@ public class HotelServiceImpl implements HotelService {
         Set<String> place_list = new HashSet<>();
 
         try{
-
+            log.info("검색바 조회 시작");
             hotel_name_list = hotelMapper.selectHotelSearchBarName(dbLikeSearchText);
             hotel_address_list = hotelMapper.selectHotelSearchBarAddress(dbLikeSearchText);
             region_list = hotelMapper.selectHotelSearchBarRegionCode(dbLikeSearchText);
@@ -258,7 +259,9 @@ public class HotelServiceImpl implements HotelService {
 
             } else {
                 log.info("카카오 API 연동에 실패하였습니다");
-                throw new Exception();
+                result.setMessage("카카오 API 연동에 실패하였습니다");
+                result.setResult("ERROR");
+                return result;
             }
 
             HotelSearchData.setHotel_name_list(hotel_name_list);
@@ -270,6 +273,8 @@ public class HotelServiceImpl implements HotelService {
             result.setData(HotelSearchData);
         }catch (Exception e){
             e.printStackTrace();
+            ErrorResult(result);
+            return result;
         }
         return result;
     }
@@ -280,6 +285,7 @@ public class HotelServiceImpl implements HotelService {
         List<HotelSearchVo.HotelSearchInfo> hotelSearchList = new ArrayList<>();
 
         try{
+            log.info("검색하기 - 사용자가 요청한 검색어, 조건에 일치하는 호텔조회 시작");
             String text = searchBarVoSearchBarRequest.getText();
             String dbText = searchBarVoSearchBarRequest.getText();
             int page = searchBarVoSearchBarRequest.getPage();
@@ -294,7 +300,7 @@ public class HotelServiceImpl implements HotelService {
                 try{
                     // 카카오 키워드 검색 API호출 가장 위에있는 검색결과의 address_name의 첫번째 소절 (서울, 경기등 시,도정보임) 위도,경도정보 추출
                     JSONArray jsonArrayData = KaKaoUtil.getKeywordMapData(text);
-                    if(jsonArrayData != null){
+                    if(CollectionUtils.isEmpty(jsonArrayData)){
                         JSONObject jsonObject = (JSONObject) jsonArrayData.get(0);
                         String kakaoRegion = (String) jsonObject.get("address_name");
                         kakaoRegion = kakaoRegion.substring(0, 1);
@@ -314,8 +320,12 @@ public class HotelServiceImpl implements HotelService {
                                 hotel_num_list.add(hotelDetailInfo.getHotel_num());
                             }
                         }
+                    }else {
+                        // 검색된 장소없음
+                        log.info("카카오 API 키워드검색에 검색된 장소가 존재하지 않습니다");
                     }
                 }catch (Exception e){
+                    log.info("카카오 API 호출 에러");
                     throw new Exception();
                 }
             }
@@ -329,7 +339,7 @@ public class HotelServiceImpl implements HotelService {
                 List<Integer> priceList = new ArrayList<>();
                 List<Integer> room_detail_num_list = new ArrayList<>();
                 HotelSearchVo.HotelSearchInfo hotelSearchInfo = new HotelSearchVo.HotelSearchInfo();
-                HotelInfoVo.HotelDetailInfoResponse hotelDetailInfoResponse = HotelDetailInfo(hotel_num);
+                HotelInfoVo.HotelDetailInfoResponse hotelDetailInfoResponse = getHotelInfo(hotel_num);
                 HotelInfoVo.HotelDetailInfo hotelDetailInfo = hotelDetailInfoResponse.getData();
                 List<HotelInfoVo.RoomInfo> roomInfoList = hotelDetailInfo.getRoom_list();
                 for(HotelInfoVo.RoomInfo roomInfo : roomInfoList){
@@ -391,7 +401,7 @@ public class HotelServiceImpl implements HotelService {
                 hotelSearchInfo.setEng_name(hotelDetailInfo.getEng_name());
                 hotelSearchInfo.setStar(hotelDetailInfo.getStar());
                 hotelSearchInfo.setTags(hotelDetailInfo.getTags());
-                if(hotelDetailInfo.getImage() != null && hotelDetailInfo.getImage().size() > 0){
+                if(!CollectionUtils.isEmpty(hotelDetailInfo.getImage())){
                     hotelSearchInfo.setImage(hotelDetailInfo.getImage().get(0)); // 메인이미지만 제공
                 }
                 hotelSearchInfo.setAvailable_yn(available_yn);
@@ -400,15 +410,11 @@ public class HotelServiceImpl implements HotelService {
                 }else {
                     hotelSearchInfo.setMinimum_price(Collections.min(priceList)); // 객실들 가격중 최저가
                 }
+                hotelSearchInfo.setLocation(hotelDetailInfo.getLocation()); // 경도, 위도 정보
                 hotelSearchList.add(hotelSearchInfo);
             }
 
             total_cnt = hotelSearchList.size();
-
-            if(total_cnt <= 0){
-                noSearchResult(result);
-                return result;
-            }
 
             // pagination
             hotelSearchList = PageUtil.paginationList(page, pageCnt, total_cnt, hotelSearchList);
@@ -422,6 +428,8 @@ public class HotelServiceImpl implements HotelService {
 
         }catch (Exception e){
             e.printStackTrace();
+            ErrorResult(result);
+            return result;
         }
 
         return result;
@@ -433,8 +441,10 @@ public class HotelServiceImpl implements HotelService {
         HotelSearchVo.SearchListResponse result = new HotelSearchVo.SearchListResponse();
         List<HotelSearchVo.HotelSearchInfo> hotelSearchList = new ArrayList<>();
         int total_cnt = 0;
+        log.info("검색한 호텔 리스트 필터 조회 시작");
 
         try{
+
             // 페이지
             int page = hotelSearchListFilterRequest.getPage();
             int pageCnt = hotelSearchListFilterRequest.getPage_cnt();
@@ -470,7 +480,7 @@ public class HotelServiceImpl implements HotelService {
                 List<Integer> room_detail_num_list = new ArrayList<>();
                 List<List<Integer>> roomTagList = new ArrayList<>();
                 HotelSearchVo.HotelSearchInfo hotelSearchInfo = new HotelSearchVo.HotelSearchInfo();
-                HotelInfoVo.HotelDetailInfoResponse hotelDetailInfoResponse = HotelDetailInfo(hotel_num);
+                HotelInfoVo.HotelDetailInfoResponse hotelDetailInfoResponse = getHotelInfo(hotel_num);
                 HotelInfoVo.HotelDetailInfo hotelDetailInfo = hotelDetailInfoResponse.getData();
                 List<HotelInfoVo.RoomInfo> roomInfoList = hotelDetailInfo.getRoom_list();
 
@@ -521,16 +531,21 @@ public class HotelServiceImpl implements HotelService {
                     }
                 }
                 // 호텔 태그 조건 있고 호텔 태그도 존재하면 호텔태그 필터 체크
-                if(hotel_tags != null && hotelDetailInfo.getTags() != null){
-                    // 호탤 태그가 요청 태그조건을 모두 만족하면 그대로 진행, 아니면 패스
-                    if(!hotelDetailInfo.getTags().containsAll(hotel_tags)){
+                if(!CollectionUtils.isEmpty(hotel_tags)){
+                    if(!CollectionUtils.isEmpty(hotelDetailInfo.getTags())){
+                        // 호텔 태그가 요청 태그조건을 모두 만족하면 그대로 진행, 아니면 패스
+                        if(!hotelDetailInfo.getTags().containsAll(hotel_tags)){
+                            continue;
+                        }
+                    }else {
                         continue;
-                    }
+                    } // 호텔 태그가 null 이면 필터조건에 맞지 않는걸로 간주
+
                 }
 
                 // 객실 태그 필터 조건 체크
-                if(room_tags != null){
-                    if(roomTagList.size() > 0){
+                if(!CollectionUtils.isEmpty(room_tags)){
+                    if(!CollectionUtils.isEmpty(roomTagList)){
                         // 객실중 해당 객실 필터 조건에 해당되는 객실이 1개라도 있으면 true
                         roomTagList = roomTagList
                                 .stream()
@@ -565,7 +580,7 @@ public class HotelServiceImpl implements HotelService {
                 hotelSearchInfo.setEng_name(hotelDetailInfo.getEng_name());
                 hotelSearchInfo.setStar(hotelDetailInfo.getStar());
                 hotelSearchInfo.setTags(hotelDetailInfo.getTags());
-                if(hotelDetailInfo.getImage() != null && hotelDetailInfo.getImage().size() > 0){
+                if(!CollectionUtils.isEmpty(hotelDetailInfo.getImage())){
                     hotelSearchInfo.setImage(hotelDetailInfo.getImage().get(0)); // 메인이미지만 제공
                 }
                 hotelSearchInfo.setAvailable_yn(available_yn);
@@ -574,16 +589,12 @@ public class HotelServiceImpl implements HotelService {
                 }else {
                     hotelSearchInfo.setMinimum_price(Collections.min(priceList)); // 객실들 가격중 최저가
                 }
+                hotelSearchInfo.setLocation(hotelDetailInfo.getLocation()); // 경도, 위도 정보
 
                 hotelSearchList.add(hotelSearchInfo);
             }
 
             total_cnt = hotelSearchList.size();
-
-            if(total_cnt <= 0){
-                noSearchResult(result);
-                return result;
-            }
 
             // pagination
             hotelSearchList = PageUtil.paginationList(page, pageCnt, total_cnt, hotelSearchList);
@@ -625,9 +636,11 @@ public class HotelServiceImpl implements HotelService {
 
             // 호텔정보 조회
             HotelInfoVo.HotelDetailInfo hotelDetailInfo = hotelMapper.selectHotelInfo(hotelNum);
+
+            // 조회된 호텔정보 없으면 빈값 리턴
             if(hotelDetailInfo == null){
-                result.setResult("ERROR");
-                result.setMessage("조회된 호텔 정보가 없습니다");
+                result.setMessage("호텔 상세정보 조회 완료");
+                result.setData(null);
                 return result;
             }
 
@@ -640,19 +653,19 @@ public class HotelServiceImpl implements HotelService {
 
             // 호텔 이미지 조회
             List<String> hotelImageList = selectImage(CommonEnum.ImageType.HOTEL.getCode() ,hotelNum);
-            if (hotelImageList != null){
+            if (!CollectionUtils.isEmpty(hotelImageList)){
                 hotelDetailInfo.setImage(hotelImageList);
             }
 
             // 성수기 정보 조회
             List<HotelInfoVo.PeakSeason> peakSeasonList = hotelMapper.selectPeakSeasonList(hotelNum);
-            if(peakSeasonList != null){
+            if(!CollectionUtils.isEmpty(peakSeasonList)){
                 hotelDetailInfo.setPeak_season_list(peakSeasonList);
             }
 
             // 호텔 태그 정보 조회
             List<Integer> hotelTagList = hotelMapper.selectHotelTags(hotelNum);
-            if(hotelTagList != null){
+            if(!CollectionUtils.isEmpty(hotelTagList)){
                 hotelDetailInfo.setTags(hotelTagList);
             }
 
@@ -679,12 +692,16 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public CommonResponseVo DeleteHotel(HotelInfoVo.DeleteHotelRequest deleteHotelRequest, String jwtToken) {
         CommonResponseVo result = new CommonResponseVo();
+        log.info("호텔 삭제 시작");
+
         try{
             int hotel_num = deleteHotelRequest.getHotel_num();
             // 호텔 상세 정보 조회
-            HotelInfoVo.HotelDetailInfoResponse HotelDetailInfo = HotelDetailInfo(hotel_num);
-            if(isResultError(HotelDetailInfo)){
-                noSearchResult(result);
+            HotelInfoVo.HotelDetailInfoResponse HotelDetailInfo = getHotelInfo(hotel_num);
+            if(HotelDetailInfo.getData() == null){
+                log.info("호텔 삭제 - 조회된 호텔 없음");
+                result.setResult("ERROR");
+                result.setMessage("조회된 호텔 없음");
                 return result;
             }
 
@@ -701,7 +718,7 @@ public class HotelServiceImpl implements HotelService {
             List<Integer> room_detail_num_list = new ArrayList<>();
 
             // 객실과 호실 pk저장 & 삭제테이블에 저장
-            if(roomInfoList != null){
+            if(!CollectionUtils.isEmpty(roomInfoList)){
                 for(HotelInfoVo.RoomInfo roomInfo : roomInfoList){
                     HotelInfoVo.DeleteTable roomDeleteTable = new HotelInfoVo.DeleteTable();
                     roomDeleteTable.setPk(roomInfo.getRoom_num());
@@ -772,18 +789,20 @@ public class HotelServiceImpl implements HotelService {
             editHotelRequest.setUpdate_user(userPk);
             hotelMapper.updateHotelInfo(editHotelRequest);
 
-            // Image Resizing & S3 Upload & DB insert
-            if(editHotelRequest.getImage() != null){
-                // 현재 DB에 저장된 호텔 이미지 정보 전부 Delete & AWS에 저장된 이미지 삭제
-                deleteImage(CommonEnum.ImageType.HOTEL.getCode(), hotelNum);
+            // 태그, 이미지, 성수기가 null 이거나 배열 사이즈가 0 이면 DB, AWS 에 저장된 데이터 삭제처리만 진행됨
 
+            // 이미지 정보 저장
+            // 현재 DB에 저장된 호텔 이미지 정보 전부 Delete & AWS에 저장된 이미지 삭제
+            deleteImage(CommonEnum.ImageType.HOTEL.getCode(), hotelNum);
+            if(!CollectionUtils.isEmpty(editHotelRequest.getImage())){
                 // Image Resizing & S3 Upload & DB insert
                 insertImage(editHotelRequest.getImage(), CommonEnum.ImageType.HOTEL.getCode(), hotelNum,  userPk);
             }
 
-            if(editHotelRequest.getPeak_season_list() != null){
-                // 현재 DB에 저장된 성수기정보 전부 soft Delete
-                hotelMapper.softDeletePeakSeason(hotelNum);
+            // 성수기정보 저장
+            // 현재 DB에 저장된 성수기정보 전부 soft Delete
+            hotelMapper.softDeletePeakSeason(hotelNum);
+            if(!CollectionUtils.isEmpty(editHotelRequest.getPeak_season_list())){
                 for(HotelInfoVo.PeakSeason peakSeason : editHotelRequest.getPeak_season_list()){
                     HotelDto.PeekSeasonTable peekSeasonTable = new HotelDto.PeekSeasonTable();
                     peekSeasonTable.setPeak_season_std(peakSeason.getPeak_season_start());
@@ -795,11 +814,10 @@ public class HotelServiceImpl implements HotelService {
                 }
             }
 
-            if(editHotelRequest.getTags() != null){
-                // 현재 DB에 저장된 호텔 태그 정보 전부 Delete
-                hotelMapper.deleteHotelTags(hotelNum);
-
-                // 호텔 태그 저장
+            // 호텔 태그 저장
+            // 현재 DB에 저장된 호텔 태그 정보 전부 Delete
+            hotelMapper.deleteHotelTags(hotelNum);
+            if(!CollectionUtils.isEmpty(editHotelRequest.getTags())){
                 for(int tag : editHotelRequest.getTags()){
                     HotelInfoVo.Tags tags = new HotelInfoVo.Tags();
                     tags.setPk_num(hotelNum);
@@ -841,12 +859,12 @@ public class HotelServiceImpl implements HotelService {
             hotelMapper.insertRoomInfo(registerRoomRequest);
 
             // 이미지 등록
-            if(registerRoomRequest.getImage() != null){
+            if(!CollectionUtils.isEmpty(registerRoomRequest.getImage())){
                 insertImage(registerRoomRequest.getImage(), CommonEnum.ImageType.ROOM.getCode(), roomNum,  userPk);
             }
 
             // 객실 태그 등록
-            if(registerRoomRequest.getTags() != null){
+            if(!CollectionUtils.isEmpty(registerRoomRequest.getTags())){
                 for(int tag : registerRoomRequest.getTags()){
                     HotelInfoVo.Tags tags = new HotelInfoVo.Tags();
                     tags.setPk_num(roomNum);
@@ -858,7 +876,7 @@ public class HotelServiceImpl implements HotelService {
             }
 
             // 객실 호실 등록
-            if(registerRoomRequest.getRoom_detail_list() != null){
+            if(!CollectionUtils.isEmpty(registerRoomRequest.getRoom_detail_list())){
                 for(HotelInfoVo.RegisterRoomDetailRequest roomDetail : registerRoomRequest.getRoom_detail_list()){
                     roomDetail.setRoom_num(roomNum);
                     // 만약 호실 사용금지 날짜가 존재하면 호실 상태값 = 예약불가 (2) 아니면 예약가능
@@ -889,18 +907,20 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     public HotelInfoVo.RoomInfoResponse RoomInfo(int room_num) {
+        log.info("객실 상세정보 조회 시작");
         HotelInfoVo.RoomInfoResponse result = new HotelInfoVo.RoomInfoResponse();
 
         try {
             HotelInfoVo.RoomInfo roomInfo = hotelMapper.selectRoomInfo(room_num);
 
-            // 호실정보등 필요한 정보 추가
-            if(roomInfo != null){
-                addRoomInfoData(roomInfo);
-            }else {
-                noSearchResult(result);
+            if(roomInfo == null){
+                result.setMessage("객실 상세 정보 조회 완료");
+                result.setData(null);
                 return result;
             }
+
+            // 호실정보등 필요한 정보 추가
+            addRoomInfoData(roomInfo);
 
             result.setMessage("객실 상세 정보 조회 완료");
             result.setData(roomInfo);
@@ -917,6 +937,7 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public CommonResponseVo EditRoom(HotelInfoVo.EditRoomRequest editRoomRequest, String jwtToken) {
         CommonResponseVo result = new CommonResponseVo();
+        log.info("객실 수정 시작");
 
         try{
             String userRole = String.valueOf(CommonEnum.UserRole.OWNER.getCode());
@@ -930,20 +951,20 @@ public class HotelServiceImpl implements HotelService {
             editRoomRequest.setUpdate_user(userPk);
             hotelMapper.updateRoomInfo(editRoomRequest);
 
-            // 이미지 업데이트
-            if(editRoomRequest.getImage() != null){
-                // 현재 DB에 저장된 객실 이미지 정보 전부 Delete & AWS에 저장된 이미지 삭제
-                deleteImage(CommonEnum.ImageType.ROOM.getCode(), hotelNum);
+            // 태그, 이미지가 null 이거나 배열 사이즈가 0 이면 DB, AWS 에 저장된 데이터 삭제처리만 진행됨
 
+            // 이미지 업데이트
+            // 현재 DB에 저장된 객실 이미지 정보 전부 Delete & AWS에 저장된 이미지 삭제
+            deleteImage(CommonEnum.ImageType.ROOM.getCode(), hotelNum);
+            if(!CollectionUtils.isEmpty(editRoomRequest.getImage())){
                 // Image Resizing & S3 Upload & DB insert
                 insertImage(editRoomRequest.getImage(), CommonEnum.ImageType.HOTEL.getCode(), hotelNum,  userPk);
             }
 
             // 객실 태그 업데이트
-            if(editRoomRequest.getTags() != null){
-                // 현재 DB에 저장된 객실 태그 정보 전부 Delete
-                hotelMapper.deleteRoomTags(roomNum);
-
+            // 현재 DB에 저장된 객실 태그 정보 전부 Delete
+            hotelMapper.deleteRoomTags(roomNum);
+            if(!CollectionUtils.isEmpty(editRoomRequest.getTags())){
                 for(int tag : editRoomRequest.getTags()){
                     HotelInfoVo.Tags tags = new HotelInfoVo.Tags();
                     tags.setPk_num(roomNum);
@@ -975,6 +996,7 @@ public class HotelServiceImpl implements HotelService {
     public HotelInfoVo.CheckDuplicateRoomNameResponse CheckDuplicateRoomName(HotelInfoVo.CheckDuplicateRoomNameRequest checkDuplicateRoomNameRequest) {
         HotelInfoVo.CheckDuplicateRoomNameResponse result = new HotelInfoVo.CheckDuplicateRoomNameResponse();
         boolean CheckDuplicateResult = false;
+        log.info("객실명 중복조회 시작");
         try{
             String selectDuplicateRoomName = hotelMapper.selectDuplicateRoomName(checkDuplicateRoomNameRequest);
 
@@ -996,6 +1018,7 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public CommonResponseVo DeleteRoom(HotelInfoVo.DeleteRoomRequest deleteRoomRequest, String jwtToken) {
         CommonResponseVo result = new CommonResponseVo();
+        log.info("객실 삭제 시작");
         try{
             int business_user_num = getPk(jwtToken);
             String insert_user = Integer.toString(CommonEnum.UserRole.OWNER.getCode())+business_user_num;
@@ -1065,13 +1088,15 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public HotelInfoVo.DeleteRoomInfoResponse DeleteRoomInfo(HotelInfoVo.DeleteRoomRequest deleteRoomRequest, String jwtToken) {
         HotelInfoVo.DeleteRoomInfoResponse result = new HotelInfoVo.DeleteRoomInfoResponse();
-
+        log.info("객실 삭제추가정보 조회 시작");
         try{
             // 해당 객실정보 조회
             HotelInfoVo.RoomInfoResponse roomInfoResponse = RoomInfo(deleteRoomRequest.getRoom_num());
 
             if(roomInfoResponse.getData() == null){
-                noSearchResult(result);
+                log.info("해당 객실정보 없음");
+                result.setMessage("객실 삭제추가정보 조회 완료");
+                result.setData(null);
                 return result;
             }
 
@@ -1104,7 +1129,7 @@ public class HotelServiceImpl implements HotelService {
         HotelInfoVo.RoomInfoListResponse result = new HotelInfoVo.RoomInfoListResponse();
         List<HotelInfoVo.RoomInfo> RoomInfoListData = new ArrayList<>();
         int total_cnt = 0;
-
+        log.info("객실 리스트 조회 시작");
         try{
             List<HotelInfoVo.RoomInfo> roomInfoList = hotelMapper.selectRoomInfoList(roomInfoRequest.getHotel_num());
             Integer page = roomInfoRequest.getPage();
@@ -1112,10 +1137,6 @@ public class HotelServiceImpl implements HotelService {
             for(HotelInfoVo.RoomInfo roomInfo : roomInfoList){
                 addRoomInfoData(roomInfo); // 객실, 호실정보등 필요한 데이터 추가
                 RoomInfoListData.add(roomInfo);
-            }
-            if(RoomInfoListData.size() <= 0){
-                noSearchResult(result);
-                return result;
             }
 
             total_cnt = RoomInfoListData.size();
@@ -1138,6 +1159,7 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public CommonResponseVo AddRoomDetail(HotelInfoVo.RegisterRoomDetailRequest registerRoomDetailRequest, String jwtToken) {
         CommonResponseVo result = new CommonResponseVo();
+        log.info("호실 추가 시작");
         try{
             int business_user_num = getPk(jwtToken);
             String insert_user = Integer.toString(CommonEnum.UserRole.OWNER.getCode())+Integer.toString(business_user_num);
@@ -1152,6 +1174,7 @@ public class HotelServiceImpl implements HotelService {
             }
 
             hotelMapper.insertRoomDetailInfo(registerRoomDetailRequest);
+
             result.setMessage("호실 추가 완료");
 
         }catch (Exception e){
@@ -1166,6 +1189,7 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public CommonResponseVo DisableSettingRoomDetail(HotelInfoVo.DisableSettingRoomDetailRequest disableSettingRoomDetailRequest, String jwtToken) {
         CommonResponseVo result = new CommonResponseVo();
+        log.info("호실 이용불가 처리 시작");
 
         try{
             int room_detail_num = disableSettingRoomDetailRequest.getRoom_detail_num();
@@ -1188,6 +1212,10 @@ public class HotelServiceImpl implements HotelService {
                         return result;
                     }
                 }
+            }else {
+                // 호실존재하지않으면 결과없음 리턴
+                noSearchResult(result);
+                return result;
             }
 
             // 호실 이용불가 처리
@@ -1206,6 +1234,7 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public CommonResponseVo DeleteRoomDetail(HotelInfoVo.DeleteRoomDetailRequest deleteRoomDetailRequest, String jwtToken) {
         CommonResponseVo result = new CommonResponseVo();
+        log.info("호실 삭제 시작");
 
         try {
             int business_user_num = getPk(jwtToken);
@@ -1259,6 +1288,7 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public HotelInfoVo.DeleteRoomDetailInfoResponse DeleteRoomDetailInfo(HotelInfoVo.DeleteRoomDetailRequest deleteRoomDetailRequest, String jwtToken) {
         HotelInfoVo.DeleteRoomDetailInfoResponse result = new HotelInfoVo.DeleteRoomDetailInfoResponse();
+        log.info("호실 삭제 추가정보 조회 시작");
 
         try{
             // 해당 호실정보 조회
@@ -1268,7 +1298,8 @@ public class HotelServiceImpl implements HotelService {
             HotelInfoVo.RoomDetailInfo roomDetailInfo = hotelMapper.selectRoomDetailByDetailNum(room_detail_num);
 
             if(roomDetailInfo == null){
-                noSearchResult(result);
+                result.setData(null);
+                result.setMessage("호실 삭제 추가정보 조회 완료");
                 return result;
             }
 
@@ -1301,16 +1332,19 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public HotelInfoVo.HotelReservationListResponse HotelReservationList(HotelInfoVo.HotelReservationListRequest hotelReservationListRequest, String jwtToken) {
         HotelInfoVo.HotelReservationListResponse result = new HotelInfoVo.HotelReservationListResponse();
+        log.info("호텔 예약정보 조회 시작");
 
         try{
 //            HotelInfoVo.HotelReservationInfo hotelReservationInfo = new HotelInfoVo.HotelReservationInfo();
             // 해당 호텔 조회
             int hotel_num = hotelReservationListRequest.getHotel_num();
-            HotelInfoVo.HotelDetailInfoResponse hotelDetailInfoResponse = HotelDetailInfo(hotel_num);
+            HotelInfoVo.HotelDetailInfoResponse hotelDetailInfoResponse = getHotelInfo(hotel_num);
             int total_cnt = 0;
 
-            if(isResultError(hotelDetailInfoResponse)){
-                noSearchResult(result);
+            if(hotelDetailInfoResponse.getData() == null){
+                result.setMessage("호텔 예약정보 조회 완료");
+                result.setData(null);
+                result.setTotal_cnt(total_cnt);
                 return result;
             }
             // rank_num = default 1
@@ -1568,7 +1602,7 @@ public class HotelServiceImpl implements HotelService {
             List<Integer> tags = new ArrayList<>();
             tags = hotelMapper.selectRoomTags(roomInfo.getRoom_num());
 
-            if(imageList != null){
+            if(!CollectionUtils.isEmpty(imageList)){
                 roomInfo.setImage(imageList);
             }
 
@@ -1620,9 +1654,72 @@ public class HotelServiceImpl implements HotelService {
         return result;
     }
 
+    private CommonResponseVo notMyHotel (CommonResponseVo result){
+        result.setResult("ERROR");
+        result.setMessage("해당 사업자는 이 정보를 수정/삭제할 권한이 없습니다");
+        return result;
+    }
+
     private CommonResponseVo ErrorResult (CommonResponseVo result){
         result.setResult("ERROR");
         result.setMessage("");
+        return result;
+    }
+
+    /**
+     * 호텔 상세정보 조회 - 호텔정보, 객실정보, 호실정보
+     * @param hotelNum
+     * @return
+     */
+    private HotelInfoVo.HotelDetailInfoResponse getHotelInfo(int hotelNum) throws Exception{
+        HotelInfoVo.HotelDetailInfoResponse result = new HotelInfoVo.HotelDetailInfoResponse();
+        // 호텔정보 조회
+        HotelInfoVo.HotelDetailInfo hotelDetailInfo = hotelMapper.selectHotelInfo(hotelNum);
+
+        // 조회된 호텔정보 없으면 빈값 리턴
+        if(hotelDetailInfo == null){
+            result.setMessage("호텔 상세정보 조회 완료");
+            result.setData(null);
+            return result;
+        }
+
+        // 위도 경도값 / 호텔 전화번호 복호화
+        List<Double> location = new ArrayList<>();
+        location.add(hotelDetailInfo.getLongitude());
+        location.add(hotelDetailInfo.getLatitude());
+        hotelDetailInfo.setLocation(location);
+        hotelDetailInfo.setPhone_num(aes256Util.decrypt(hotelDetailInfo.getPhone_num()));
+
+        // 호텔 이미지 조회
+        List<String> hotelImageList = selectImage(CommonEnum.ImageType.HOTEL.getCode() ,hotelNum);
+        if (!CollectionUtils.isEmpty(hotelImageList)){
+            hotelDetailInfo.setImage(hotelImageList);
+        }
+
+        // 성수기 정보 조회
+        List<HotelInfoVo.PeakSeason> peakSeasonList = hotelMapper.selectPeakSeasonList(hotelNum);
+        if(!CollectionUtils.isEmpty(peakSeasonList)){
+            hotelDetailInfo.setPeak_season_list(peakSeasonList);
+        }
+
+        // 호텔 태그 정보 조회
+        List<Integer> hotelTagList = hotelMapper.selectHotelTags(hotelNum);
+        if(!CollectionUtils.isEmpty(hotelTagList)){
+            hotelDetailInfo.setTags(hotelTagList);
+        }
+
+        // 객실정보
+        List<HotelInfoVo.RoomInfo> roomInfoList = hotelMapper.selectRoomInfoList(hotelNum);
+        List<HotelInfoVo.RoomInfo> RoomInfoListData = new ArrayList<>();
+        for(HotelInfoVo.RoomInfo roomInfo : roomInfoList){
+            addRoomInfoData(roomInfo); // 객실, 호실정보등 필요한 데이터 추가
+            RoomInfoListData.add(roomInfo);
+        }
+
+        hotelDetailInfo.setRoom_list(RoomInfoListData);
+        result.setData(hotelDetailInfo);
+        result.setMessage("호텔 상세정보 조회 완료");
+
         return result;
     }
 

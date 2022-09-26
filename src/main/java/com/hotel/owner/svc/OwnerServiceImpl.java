@@ -104,7 +104,7 @@ public class OwnerServiceImpl implements OwnerService {
 
             if(currentOwnerInfo == null){
                 result.setResult("ERROR");
-                result.setMessage("해당 사용자에 대한 정보가 없습니다");
+                result.setMessage("해당 사업자에 대한 정보가 없습니다");
                 return result;
             }
 
@@ -149,16 +149,14 @@ public class OwnerServiceImpl implements OwnerService {
             int business_user_num = getPk(jwt);
             OwnerVo.OwnerInfo ownerInfo = ownerMapper.selectOwnerInfo(business_user_num);
 
-            if(ownerInfo != null){
-                OwnerVo.OwnerInfo resultData = ownerMapper.selectOwnerInfo(business_user_num);
-                resultData.setPhone_num(aes256Util.decrypt(resultData.getPhone_num())); // 휴대폰번호 복호화
-                result.setData(resultData);
+            if(ownerInfo == null){
+                result.setData(null);
                 result.setMessage("사업자 정보 조회 완료");
             }
-            else {
-                result.setResult("ERROR");
-                result.setMessage("해당 사업자 정보가 존재하지 않습니다");
-            }
+            ownerInfo.setPhone_num(aes256Util.decrypt(ownerInfo.getPhone_num())); // 휴대폰번호 복호화
+
+            result.setData(ownerInfo);
+            result.setMessage("사업자 정보 조회 완료");
 
         }catch (Exception e){
             e.printStackTrace();
@@ -183,14 +181,18 @@ public class OwnerServiceImpl implements OwnerService {
             // 소프트 삭제 처리
             isDeleteCnt = ownerMapper.ownerWithdraw(business_user_num);
 
+            if(isDeleteCnt <=0 ){
+                result.setResult("ERROR");
+                result.setMessage("해당 사업자가 존재하지 않습니다");
+                return result;
+            }
+
             // 사유 코드 저장
             ownerWithdrawRequest.setBusiness_user_num(business_user_num);
             ownerWithdrawRequest.setInsert_user(CommonEnum.UserRole.OWNER.getCode()+Integer.toString(business_user_num));
             insertReasonCnt = ownerMapper.insertOwnerWithdrawReason(ownerWithdrawRequest);
 
-            if(isDeleteCnt > 0 && insertReasonCnt > 0){
-                result.setMessage("사업자 회원 탈퇴 완료");
-            }
+            result.setMessage("사업자 회원 탈퇴 완료");
 
         }catch (Exception e){
             e.printStackTrace();
@@ -215,7 +217,7 @@ public class OwnerServiceImpl implements OwnerService {
             List<Map<String, String>> businesses = new ArrayList<>();
 
             // Date 형식인 개업일 사업자 진위확인 API 형식에 맞춰 형변환
-            String start_dt = dateUtil.dateToStringForAPI(ownerVerifyRequest.getOpening_day());
+            String start_dt = DateUtil.dateToStringForAPI(ownerVerifyRequest.getOpening_day());
 
             // 사업자 진위확인 API 파라미터 형식에 맞춰 데이터 가공
             Map<String, String> ownerInfo = new HashMap<>();

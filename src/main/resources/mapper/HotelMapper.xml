@@ -175,7 +175,7 @@
     <select id="selectHotelReservationList" resultType="com.hotel.company.vo.HotelInfoVo$HotelReservationDetailInfo">
         SELECT
             re.reservation_num,
-            re.resrvation_name AS customer_name,
+            re.reservation_name AS customer_name,
             re.reservation_phone AS customer_phone_num,
             re.reservation_status,
             re.st_date,
@@ -196,7 +196,7 @@
             </when>
 
             <when test="customer_name !=null">
-                AND re.resrvation_name = #{customer_name}
+                AND re.reservation_name = #{customer_name}
             </when>
 
             <when test="customer_phone_num !=null">
@@ -240,7 +240,7 @@
             </when>
 
             <when test="customer_name !=null">
-                AND re.resrvation_name = #{customer_name}
+                AND re.reservation_name = #{customer_name}
             </when>
 
             <when test="customer_phone_num !=null">
@@ -278,6 +278,7 @@
         FROM d_image
         WHERE select_type = #{select_type}
           AND primary_key = #{primary_key}
+        ORDER BY picture_sequence
     </select>
 
     <!-- 성수기 등록 -->

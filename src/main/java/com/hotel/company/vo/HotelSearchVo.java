@@ -124,11 +124,11 @@ public class HotelSearchVo {
                 "4: 검색어에 해당되는 장소 리스트 \t ", example = "1")
         Integer search_type;
 
-        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd" , timezone="Asia/Seoul")
         @ApiParam(value = "예약범위 - 시작일", example = "2022/07/01", required = false)
         Date reservation_start_date;
 
-        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd")
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd", timezone="Asia/Seoul")
         @ApiParam(value = "예약범위 - 종료일", example = "2022/07/03", required = false)
         Date reservation_end_date;
 
@@ -170,6 +170,9 @@ public class HotelSearchVo {
 
         @Schema(description = "호텔 사용 가능 여부 - 해당 호텔의 모든 객실중 사용가능한 방이 0이면 false", required = true)
         Boolean available_yn;
+
+        @Schema(description = "경도, 위도 값. 0번째 배열 : x, 1번째 배열 : y",  required = true, example = "[123.546, 10.48]")
+        List<Double> location;
     }
 
     @Data
