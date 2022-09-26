@@ -3,28 +3,31 @@ package com.hotel.member.controller;
 import com.hotel.common.CommonResponseVo;
 import com.hotel.common.vo.JwtTokenDto;
 import com.hotel.common.vo.JwtTokenDto.TokenDto;
+import com.hotel.jwt.CheckTokenInfo;
+import com.hotel.jwt.JwtTokenProvider;
 import com.hotel.member.dto.MemberRequestDto;
-import com.hotel.member.dto.MemberResponseDto;
-import com.hotel.member.svc.MemberService;
 import com.hotel.member.svc.MemberServiceImpl;
 import com.hotel.member.vo.MemberVo;
+import com.hotel.member.vo.MemberVo.LoginMemberResponseDto;
+import com.hotel.member.vo.MemberVo.MemberDeleteVo;
+import com.hotel.member.vo.MemberVo.ViewMemberInfoResponseDto;
+import com.hotel.util.SHA512Util;
 
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -33,125 +36,314 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
 	private final MemberServiceImpl memberServiceImpl;
-	
-    @ApiOperation(value="고객 회원가입")
-    @ApiImplicitParams({@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header")})
-    @ResponseBody
-    @PostMapping("/sign-up")
-    public CommonResponseVo MemberSignUp(@RequestBody MemberVo.RegisterMemberRequest registerMemberRequest){
-    	
-    	CommonResponseVo vo = new CommonResponseVo();
-    	
-    	if(registerMemberRequest.getEmail().equals("")) {
-    		vo.setMessage("이메일이 없습니다.");
-    		return vo;
-    	}else if(registerMemberRequest.getName().equals("")) {
-    		vo.setMessage("이름이 없습니다.");
-    		return vo;
-    	}else if(registerMemberRequest.getPassword().equals("")) {
-    		vo.setMessage("비밀번호가 없습니다.");
-    		return vo;
-    	}else if(registerMemberRequest.getPhone_num().equals("")) {
-    		vo.setMessage("핸드폰번호가 없습니다.");
-    		return vo;
-    	}
-    	
-        return memberServiceImpl.MemberSignUp(registerMemberRequest);
-    }
+
+	private final SHA512Util shaUtil;
+
+	private final JwtTokenProvider jwtTokenProvider;
+
+	private final CheckTokenInfo info;
+
+	@ApiOperation(value = "고객 회원가입")
+	@ApiImplicitParams({
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ResponseBody
+	@PostMapping("/sign-up")
+	public CommonResponseVo MemberSignUp(@RequestBody MemberVo.RegisterMemberRequest registerMemberRequest) {
+
+		CommonResponseVo vo = new CommonResponseVo();
+
+		if (registerMemberRequest.getEmail().equals("")) {
+			vo.setMessage("이메일이 없습니다.");
+			return vo;
+		} else if (registerMemberRequest.getName().equals("")) {
+			vo.setMessage("이름이 없습니다.");
+			return vo;
+		} else if (registerMemberRequest.getPassword().equals("")) {
+			vo.setMessage("비밀번호가 없습니다.");
+			return vo;
+		} else if (registerMemberRequest.getPhone_num().equals("")) {
+			vo.setMessage("핸드폰번호가 없습니다.");
+			return vo;
+		} else if (registerMemberRequest.getRole().toString().equals("")) {
+			vo.setMessage("권한 정보가 없습니다.");
+			return vo;
+		}
+		return memberServiceImpl.MemberSignUp(registerMemberRequest);
+	}
 
 	@ApiOperation(value = "공통 로그인")
 	@ApiImplicitParams({
 	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PostMapping("/sign-in")
-	public ResponseEntity<TokenDto> MemberSignIn(@RequestBody MemberRequestDto memberRequestDto, HttpServletResponse res) {
-		
+	public LoginMemberResponseDto MemberSignIn(@RequestBody MemberRequestDto memberRequestDto,
+			HttpServletResponse res) throws Exception {
+		LoginMemberResponseDto dto = new LoginMemberResponseDto();
 		System.out.println("test  = " + memberRequestDto.toString());
-		
+
 		String email = memberRequestDto.getEmail();
+		String pwd = memberRequestDto.getPassword();
+
+		if (email.equals("") || email.equals(null) || pwd.equals("") || pwd.equals(null)) {
+			dto.setEmail("");
+			dto.setRole(0);
+			return dto; 
+		} 
+		memberRequestDto.setPassword(shaUtil.encryptSHA512(pwd));
+		Map<String, Object> data = memberServiceImpl.getMemberInfo(memberRequestDto);
+		res.setHeader("AccessToken", (String) data.get("AccessToken"));
+		res.setHeader("RefreshToken", (String) data.get("RefreshToken"));
 		
-		if (email.equals("") || email.equals(null)) {
-			return ResponseEntity.of(null);
+		dto.setEmail((String) data.get("email"));
+		//dto.setRole((String) data.get("role"));
+		dto.setRole((Integer) data.get("role"));
+		
+		return dto;
+	}
+//	@ResponseBody
+//	@PostMapping("/token")
+//	public Map<String, Object> MemberTest(@RequestBody Map<String, Object> map, HttpServletRequest req) throws Exception {
+//		
+//		Map<String, Object> result = new HashMap<>();
+//		
+//		String token = req.getHeader("accessToken");
+//		
+//		System.out.println("token =" + token);
+//		
+//		
+//		String email = info.tokenInfo(token);
+//		
+//		
+//		return result;
+//	}
+
+	@ApiOperation(value = "카카오 로그인")
+	@ApiImplicitParams({
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ResponseBody
+	@PostMapping("/sign-kakao")
+	public LoginMemberResponseDto MemberSignInKakao(@RequestBody MemberVo.LoginMemberRequestKokao loginMemberRequestKokao) throws Exception {
+		
+		LoginMemberResponseDto dto = new LoginMemberResponseDto();
+		
+		if(loginMemberRequestKokao.getEmail().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("email Not Found");
+			return dto;
+		}else if(loginMemberRequestKokao.getName().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("name Not Found");
+			return dto;
+		}else if(loginMemberRequestKokao.getAuth().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("auth Not Found");
+			return dto;
 		}
 		
-		TokenDto dto = memberServiceImpl.getMemberInfo(memberRequestDto);
-		res.setHeader("AccessToken", dto.getAccessToken());
-		res.setHeader("RefreshToken", dto.getRefreshToken());
-
-		// role 체크 없으면 메세지 리턴
-		return ResponseEntity.ok(dto);
+		return memberServiceImpl.memberSignInKakao(loginMemberRequestKokao);
 	}
 
-//	@ApiOperation(value = "카카오 로그인")
-//	@ApiImplicitParams({
-//			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
-//	@ResponseBody
-//	@PostMapping("/sign-kakao")
-//	public CommonResponseVo MemberSignInKakao(@RequestBody MemberVo.LoginMemberRequestKokao loginMemberRequestKokao) {
-//		return memberService.memberSignInKakao(loginMemberRequestKokao);
-//	}
-//
-//	@ApiOperation(value = "네이버 로그인")
-//	@ApiImplicitParams({
-//			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
-//	@ResponseBody
-//	@PostMapping("/sign-naver")
-//	public CommonResponseVo MemberSignInNaver(@RequestBody MemberVo.LoginMemberRequestNaver loginMemberRequestNaver) {
-//		return memberService.memberSignInNaver(loginMemberRequestNaver);
-//	}
-//
-//	@ApiOperation(value = "구글 로그인")
-//	@ApiImplicitParams({
-//			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
-//	@ResponseBody
-//	@PostMapping("/sign-google")
-//	public CommonResponseVo MemberSignInGoogle(
-//			@RequestBody MemberVo.LoginMemberRequestGoogle loginMemberRequestGoogle) {
-//		return memberService.memberSignInGoogle(loginMemberRequestGoogle);
-//	}
-//
-//	@ApiOperation(value = "고객 정보조회")
-//	@ApiImplicitParams({
-//			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
-//	@ResponseBody
-//	@PostMapping("/view-info")
-//	public MemberVo.MemberInfoResponse ViewMemberInfo() {
-//		return memberService.ViewMemberInfo();
-//	}
-//
-//	@ApiOperation(value = "고객 정보수정")
-//	@ApiImplicitParams({
-//			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
-//	@ResponseBody
-//	@PatchMapping("/edit-info")
-//	public CommonResponseVo MemberEditInfo(@RequestBody MemberVo.MemberUpdateInfo memberInfo) {
-//		return memberService.MemberEditInfo(memberInfo);
-//	}
-//
-//	@ApiOperation(value = "공통 비밀번호 찾기")
-//	@ApiImplicitParams({
-//			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
-//	@ResponseBody
-//	@PostMapping("/findPwd")
-//	public CommonResponseVo FindPasswdEmail(@RequestBody MemberVo.MemberFindPwdRequest findPwdRequest) {
-//		return memberService.FindPasswdEmail(findPwdRequest);
-//	}
-//
-//	@ApiOperation(value = "공통 비밀번호 재설정")
-//	@ApiImplicitParams({
-//			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
-//	@ResponseBody
-//	@PatchMapping("/updatePwd")
-//	public CommonResponseVo UpdatePasswd(@RequestBody MemberVo.MemberUpdatePwdRequest updatePwdRequest) {
-//		return memberService.UpdatePasswd(updatePwdRequest);
-//	}
-//
-//	@ApiOperation(value = "공통 아이디 찾기")
-//	@ResponseBody
-//	@PostMapping("/find/id")
-//	public MemberVo.FindIdResponse FindId(@RequestBody MemberVo.FindIdRequest findIdRequest) {
-//		return memberService.FindId(findIdRequest);
-//	}
+	@ApiOperation(value = "네이버 로그인")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ResponseBody
+	@PostMapping("/sign-naver")
+	public LoginMemberResponseDto MemberSignInNaver(@RequestBody MemberVo.LoginMemberRequestNaver loginMemberRequestNaver) {
+		
+		LoginMemberResponseDto dto = new LoginMemberResponseDto();
+		
+		if(loginMemberRequestNaver.getEmail().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("email Not Found");
+			return dto;
+		}else if(loginMemberRequestNaver.getName().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("name Not Found");
+			return dto;
+		}else if(loginMemberRequestNaver.getAuth().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("auth Not Found");
+			return dto;
+		}
+		
+		return memberServiceImpl.memberSignInNaver(loginMemberRequestNaver);
+	}
+
+	@ApiOperation(value = "구글 로그인")
+	@ApiImplicitParams({
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ResponseBody
+	@PostMapping("/sign-google")
+	public LoginMemberResponseDto MemberSignInGoogle(
+			@RequestBody MemberVo.LoginMemberRequestGoogle loginMemberRequestGoogle) {
+		
+		LoginMemberResponseDto dto = new LoginMemberResponseDto();
+		
+		if(loginMemberRequestGoogle.getEmail().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("email Not Found");
+			return dto;
+		}else if(loginMemberRequestGoogle.getName().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("name Not Found");
+			return dto;
+		}else if(loginMemberRequestGoogle.getAuth().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("auth Not Found");
+			return dto;
+		}
+		
+		return memberServiceImpl.memberSignInGoogle(loginMemberRequestGoogle);
+	}
+
+	@ApiOperation(value = "고객 정보조회")
+	@ApiImplicitParams({
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ResponseBody
+	@PostMapping("/view-info")
+	public ViewMemberInfoResponseDto ViewMemberInfo(HttpServletRequest req)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
+		ViewMemberInfoResponseDto dto = new ViewMemberInfoResponseDto();
+		String token = req.getHeader("accessToken");
+		String email = info.tokenInfo(token);
+
+		System.out.println("email = " + email);
+
+		if (email.equals("") || email.equals(null)) {
+			dto.setResult("ERR");
+			dto.setReason("token Fail");
+			return dto;
+		}
+
+		return memberServiceImpl.ViewMemberInfo(email);
+	}
+
+	@ApiOperation(value = "고객 정보수정")
+	@ApiImplicitParams({
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ResponseBody
+	@PatchMapping("/edit-info")
+	public MemberVo.MemberResponseDto MemberEditInfo(@RequestBody MemberVo.MemberUpdateInfo memberInfo, HttpServletRequest req)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
+		
+		MemberVo.MemberResponseDto dto = new MemberVo.MemberResponseDto();
+		
+		String token = req.getHeader("accessToken");
+		String email = info.tokenInfo(token);
+
+		if (memberInfo.getEmail().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("token Not Found");
+			
+			if(!memberInfo.getEmail().equals(email)) {
+				dto.setReason("email deference fail");
+			}
+			return dto;
+		} else if (memberInfo.getName().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("name Not Found");
+			return dto;
+		} else if (memberInfo.getPhone_num().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("phone_num Not Found");
+			return dto;
+		}
+
+		return memberServiceImpl.MemberEditInfo(memberInfo);
+	}
+
+	@ApiOperation(value = "공통 비밀번호 찾기")
+	@ApiImplicitParams({
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ResponseBody
+	@PostMapping("/findPwd")
+	public MemberVo.MemberResponseDto FindByPasswd(@RequestBody MemberVo.MemberFindPwdRequest findPwdRequest,
+			HttpServletResponse res)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
+
+		MemberVo.MemberResponseDto dto = new MemberVo.MemberResponseDto();
+		
+		if (findPwdRequest.getEmail().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("name Not Found");
+			return dto;
+		} else if (findPwdRequest.getName().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("name Not Found");
+			return dto;
+		} else if (findPwdRequest.getPhone_num().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("phone_num Not Found");
+			return dto;
+		}
+		
+		dto = memberServiceImpl.FindByPasswd(findPwdRequest);
+		
+		//토큰 전달
+		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(findPwdRequest.getEmail(), findPwdRequest.getPhone_num());
+		TokenDto token = new TokenDto();
+		token = jwtTokenProvider.generateMemberTokenDto(authenticationToken, "ROLE_UPDATE_MEMBER");
+		res.setHeader("AccessToken", token.getAccessToken());
+		res.setHeader("RefreshToken", token.getRefreshToken());
+		
+		return dto; 
+	}
+
+	@ApiOperation(value = "공통 비밀번호 재설정")
+	@ApiImplicitParams({
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ResponseBody
+	@PatchMapping("/updatePwd")
+	public  MemberVo.MemberResponseDto UpdatePasswd(@RequestBody MemberVo.MemberUpdatePwdRequest updatePwdRequest,
+			HttpServletRequest req) throws Exception {
+
+		MemberVo.MemberResponseDto dto = new  MemberVo.MemberResponseDto();
+		 
+		if (updatePwdRequest.getEmail_auth_num().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("auth_num Not Found");
+			return dto;
+		} else if (updatePwdRequest.getPassword().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("password Not Found");
+			return dto;
+		} 
+
+		String token = req.getHeader("accessToken");
+		String email = info.tokenInfo(token);
+
+		if (email.equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("token Not Found");
+			return dto;
+		}
+		
+		updatePwdRequest.setEmail(email);
+
+		return memberServiceImpl.UpdatePasswd(updatePwdRequest);
+	}
+
+	@ApiOperation(value = "공통 아이디 찾기")
+	@ResponseBody
+	@PostMapping("/find/id")
+	public Map<String, Object> FindId(@RequestBody MemberVo.FindIdRequest findIdRequest)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
+
+		Map<String, Object> map = new HashMap<>();
+
+		if (findIdRequest.getName().equals("")) {
+			map.put("result", "ERR");
+			map.put("reason", "name Not found");
+			return map;
+		} else if (findIdRequest.getPhone_num().equals("")) {
+			map.put("result", "ERR");
+			map.put("reason", "phone_num Not found");
+			return map;
+		}
+
+		return memberServiceImpl.FindId(findIdRequest);
+	}
+
 //
 //	@ApiOperation(value = "공통 비밀번호 변경")
 //	@ApiImplicitParams({
@@ -162,13 +354,35 @@ public class MemberController {
 //		return memberService.EditPassword(editPasswordRequest);
 //	}
 //
-//	@ApiOperation(value = "고객 회원탈퇴")
-//	@ApiImplicitParams({
-//			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
-//	@ResponseBody
-//	@DeleteMapping(value = "/withdraw", produces = "application/json")
-//	public CommonResponseVo MemberWithdraw(@RequestBody MemberVo.MemberDeleteRequest memberWithdrawReasonVo) {
-//		return memberService.MemberWithdraw(memberWithdrawReasonVo);
-//	}
+	@ApiOperation(value = "고객 회원탈퇴")
+	@ApiImplicitParams({
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ResponseBody
+	@DeleteMapping(value = "/withdraw", produces = "application/json")
+	public MemberVo.MemberResponseDto MemberWithdraw(@RequestBody MemberVo.MemberDeleteRequest memberWithdrawReasonVo,
+			HttpServletRequest req) {
+
+		MemberVo.MemberResponseDto dto = new MemberVo.MemberResponseDto();
+		if (Integer.toString(memberWithdrawReasonVo.getReason()).equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("reason Not Found");
+			return dto;
+		}
+
+		String token = req.getHeader("accessToken");
+		String email = info.tokenInfo(token);
+		if (email.equals("") || email.equals(null)) {
+			dto.setResult("ERR");
+			dto.setReason("token Fail");
+			return dto;
+		}
+
+		MemberVo.MemberDeleteVo deleteVo = new MemberVo.MemberDeleteVo();
+
+		deleteVo.setEmail(email);
+		deleteVo.setContent(memberWithdrawReasonVo.getReason());
+
+		return memberServiceImpl.MemberWithdraw(deleteVo);
+	}
 
 }
