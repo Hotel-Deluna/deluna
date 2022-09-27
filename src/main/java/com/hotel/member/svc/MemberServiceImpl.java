@@ -14,6 +14,7 @@ import com.hotel.member.vo.MemberVo.LoginMemberRequestGoogle;
 import com.hotel.member.vo.MemberVo.LoginMemberRequestKokao;
 import com.hotel.member.vo.MemberVo.LoginMemberRequestNaver;
 import com.hotel.member.vo.MemberVo.LoginMemberResponseDto;
+import com.hotel.member.vo.MemberVo.MemberChangePwdRequest;
 import com.hotel.member.vo.MemberVo.MemberDeleteVo;
 import com.hotel.member.vo.MemberVo.MemberEmailAuthInfo;
 import com.hotel.member.vo.MemberVo.MemberFindPwdRequest;
@@ -71,41 +72,51 @@ public class MemberServiceImpl implements UserDetailsService {
 	@Value("{aes.256.key}")
 	String aesKey;
 
-	public CommonResponseVo MemberSignUp(MemberVo.RegisterMemberRequest memberVo) {
+	public com.hotel.member.vo.MemberVo.MemberResponseDto MemberSignUp(MemberVo.RegisterMemberRequest memberVo) {
 
-		CommonResponseVo result = new CommonResponseVo();
+		MemberVo.MemberResponseDto dto = new MemberVo.MemberResponseDto();
 
 		String checkByEmail = memberMapper.checkByEmail(memberVo.getEmail());
 
 		// 이메일 중복여부 체크
+		// 핸드폰 중복여부 체크
 		// 비밀번호 암호화 후 db 인서트
 		try {
 			if (checkByEmail == null) {
-				// 비밀번호 암호화
-				// 추가 예정
-				System.out.println("memberVo = " + memberVo.toString());
+				//핸드폰 중복 확인
+				String phone = memberMapper.checkPhoneNum(aesUtil.encrypt(memberVo.getPhone_num()));
+				
+				if(phone == null) {
+					// 비밀번호 암호화
+					// 추가 예정
+					// 핸드폰 암호화
+					memberVo.setPhone_num(aesUtil.encrypt(memberVo.getPhone_num()));
+					// 비밀번호 암호화
+					memberVo.setPassword(shaUtil.encryptSHA512(memberVo.getPassword()));
 
-				// 핸드폰 암호화
-				memberVo.setPhone_num(aesUtil.encrypt(memberVo.getPhone_num()));
+					int registerMember = memberMapper.registerMemberInfo(memberVo);
 
-				// 비밀번호 암호화
-				memberVo.setPassword(shaUtil.encryptSHA512(memberVo.getPassword()));
-
-				System.out.println("pwd = " + memberVo.getPassword());
-				int registerMember = memberMapper.registerMemberInfo(memberVo);
-
-				System.out.println("registerMember = " + registerMember);
-
-				if (registerMember > 0) {
-					result.setMessage("회원가입이 완료되었습니다.");
+					if (registerMember > 0) {
+						dto.setResult("OK");
+						dto.setReason("");
+					}
+				}else {
+					dto.setResult("ERR");
+					dto.setReason("select phone_num overlap");
+					return dto;
 				}
+			}else {
+				dto.setResult("ERR");
+				dto.setReason("select email overlap");
+				return dto;
 			}
 
 		} catch (Exception e) {
 			// TODO: handle exception
+			e.getStackTrace();
 		}
 
-		return result;
+		return dto;
 	}
 
 	@Override
@@ -338,11 +349,13 @@ public class MemberServiceImpl implements UserDetailsService {
 
 		Integer insert_user = memberMapper.selectMemberNum(email);
 
-		if (insert_user.toString().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("member_num Not Found");
-			return dto;
-		}
+		System.out.println("insert_user = " + insert_user);
+		
+//		if (insert_user.toString().equals("")) {
+//			dto.setResult("ERR");
+//			dto.setReason("member_num Not Found");
+//			return dto;
+//		}
 
 		String key = authUtil.CreateAuthNum();
 
@@ -423,14 +436,42 @@ public class MemberServiceImpl implements UserDetailsService {
 		return result;
 	}
 
-	public CommonResponseVo EditPassword(MemberVo.EditPasswordRequest editPasswordRequest) {
-		CommonResponseVo result = new CommonResponseVo();
-		// 기존비밀번호 암호화 이후 DB 비밀번호와 비교
-		// 만약 일치하지 않으면 일치하지 않는다는 에러값 리턴
-
-		result.setMessage("비밀번호 변경 완료");
-
-		return result;
+	public MemberVo.MemberResponseDto MemberUpdatePasswd(MemberChangePwdRequest updatePwdRequest) throws Exception {
+		
+		MemberVo.MemberResponseDto dto = new MemberVo.MemberResponseDto(); 
+		
+		updatePwdRequest.setPassword(shaUtil.encryptSHA512(updatePwdRequest.getPassword()));
+		
+		//고객정보 확인
+		Map<String, Object> memberInfo = memberMapper.updateCheckEmailByPwd(updatePwdRequest);
+		
+		if(memberInfo.get("email").equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("select member check fail");
+			return dto;
+		}
+		
+		int update_user = Integer.parseInt((String) memberInfo.get("insert_user"));
+		
+		updatePwdRequest.setUpdate_user(update_user);
+		
+		System.out.println("data = " + updatePwdRequest.getUpdate_user());
+		
+		// 체크 됬다면 변경 진행
+		updatePwdRequest.setUpdate_password(shaUtil.encryptSHA512(updatePwdRequest.getUpdate_password()));
+		
+		int update = memberMapper.updateMemberPwd(updatePwdRequest);
+		
+		if(update == 0) {
+			dto.setResult("ERR");
+			dto.setReason("update member password fail");
+			return dto;
+		}
+		
+		dto.setResult("OK");
+		dto.setReason("");
+		
+		return dto;
 	}
 
 }

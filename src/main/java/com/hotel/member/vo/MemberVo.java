@@ -67,7 +67,7 @@ public class MemberVo {
 		@Schema(description = "비밀번호", required = true, example = "비밀번호 입력")
 		String password;
 		
-		@Schema(description = "회원상태여부", required = true, example = "0:고객,1:사업자")
+		@Schema(description = "회원상태여부", required = true, example = "1:고객,2:사업자")
 		Integer role;
 
 	}
@@ -274,6 +274,25 @@ public class MemberVo {
 	@Data
 	@AllArgsConstructor
 	@NoArgsConstructor
+	@Schema(description = "고객 비밀번호 재설정 파라미터")
+	public static class MemberChangePwdRequest {
+
+		@Schema(description = "현재 비밀번호", required = true, example = "1234")
+		String password;
+
+		@Schema(description = "변경할 비밀번호", required = true, example = "a1234")
+		String update_password;
+		
+		@Schema(description = "이메일", required = true, example = "백엔드사용")
+		String email;
+		
+		@Schema(description = "update_user", required = true, example = "백엔드사용")
+		Integer update_user;
+	}
+	
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
 	public static class MemberEmailAuthInfo {
 
 		Integer insert_user;
@@ -315,18 +334,6 @@ public class MemberVo {
 //		@Schema(description = "이메일", required = true, example = "abc@hotel.com")
 //		String email;
 //	}
-
-	@Data
-	@AllArgsConstructor
-	@NoArgsConstructor
-	@Schema(description = "비밀번호 변경 파라미터")
-	public static class EditPasswordRequest {
-		@Schema(description = "기존 비밀번호",  required = true, example = "Abc123456!!")
-		String original_password;
-
-		@Schema(description = "변경할 비밀번호",  required = true, example = "!!123456abC")
-		String edit_password;
-	}
 	
 	
 	@Data

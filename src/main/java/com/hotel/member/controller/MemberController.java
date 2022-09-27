@@ -10,6 +10,7 @@ import com.hotel.member.svc.MemberServiceImpl;
 import com.hotel.member.vo.MemberVo;
 import com.hotel.member.vo.MemberVo.LoginMemberResponseDto;
 import com.hotel.member.vo.MemberVo.MemberDeleteVo;
+import com.hotel.member.vo.MemberVo.MemberResponseDto;
 import com.hotel.member.vo.MemberVo.ViewMemberInfoResponseDto;
 import com.hotel.util.SHA512Util;
 
@@ -48,25 +49,30 @@ public class MemberController {
 	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PostMapping("/sign-up")
-	public CommonResponseVo MemberSignUp(@RequestBody MemberVo.RegisterMemberRequest registerMemberRequest) {
+	public MemberResponseDto MemberSignUp(@RequestBody MemberVo.RegisterMemberRequest registerMemberRequest) {
 
-		CommonResponseVo vo = new CommonResponseVo();
+		MemberResponseDto dto = new MemberResponseDto();
 
 		if (registerMemberRequest.getEmail().equals("")) {
-			vo.setMessage("이메일이 없습니다.");
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("email not Found");
+			return dto;
 		} else if (registerMemberRequest.getName().equals("")) {
-			vo.setMessage("이름이 없습니다.");
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("name not Found");
+			return dto;
 		} else if (registerMemberRequest.getPassword().equals("")) {
-			vo.setMessage("비밀번호가 없습니다.");
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("password not Found");
+			return dto;
 		} else if (registerMemberRequest.getPhone_num().equals("")) {
-			vo.setMessage("핸드폰번호가 없습니다.");
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("phone_num not Found");
+			return dto;
 		} else if (registerMemberRequest.getRole().toString().equals("")) {
-			vo.setMessage("권한 정보가 없습니다.");
-			return vo;
+			dto.setResult("ERR");
+			dto.setReason("role not Found");
+			return dto;
 		}
 		return memberServiceImpl.MemberSignUp(registerMemberRequest);
 	}
@@ -321,6 +327,42 @@ public class MemberController {
 		updatePwdRequest.setEmail(email);
 
 		return memberServiceImpl.UpdatePasswd(updatePwdRequest);
+	}
+	
+	@ApiOperation(value = "고객 비밀번호 변경")
+	@ApiImplicitParams({
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ResponseBody
+	@PatchMapping("/memberUpdatePwd")
+	public  MemberVo.MemberResponseDto MemberUpdatePasswd(@RequestBody MemberVo.MemberChangePwdRequest updatePwdRequest,
+			HttpServletRequest req) throws Exception {
+
+		MemberVo.MemberResponseDto dto = new  MemberVo.MemberResponseDto();
+		 
+		if (updatePwdRequest.getUpdate_password().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("update_pwd Not Found");
+			return dto;
+		} else if (updatePwdRequest.getPassword().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("password Not Found");
+			return dto;
+		} 
+
+		String token = req.getHeader("accessToken");
+		String email = info.tokenInfo(token);
+		
+		if (email == null) {
+			dto.setResult("ERR");
+			dto.setReason("token Not Found");
+			return dto;
+		}
+		
+		updatePwdRequest.setEmail(email);
+		
+		
+
+		return memberServiceImpl.MemberUpdatePasswd(updatePwdRequest);
 	}
 
 	@ApiOperation(value = "공통 아이디 찾기")
