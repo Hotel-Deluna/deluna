@@ -22,6 +22,7 @@ import com.hotel.member.vo.MemberVo.MemberUpdatePwdRequest;
 import com.hotel.member.vo.MemberVo.ViewMemberInfoResponseDto;
 import com.hotel.util.AES256Util;
 import com.hotel.util.AuthUtil;
+import com.hotel.util.DBUtil;
 import com.hotel.util.MailUtil;
 import com.hotel.util.SHA512Util;
 import com.hotel.util.SecurityUtil;
@@ -68,6 +69,9 @@ public class MemberServiceImpl implements UserDetailsService {
 	private final MailUtil mailUtil;
 
 	private final AuthUtil authUtil;
+	
+	private final DBUtil dbUtil;
+	
 
 	@Value("{aes.256.key}")
 	String aesKey;
@@ -117,12 +121,6 @@ public class MemberServiceImpl implements UserDetailsService {
 		}
 
 		return dto;
-	}
-
-	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	// 이메일 조회
@@ -472,6 +470,12 @@ public class MemberServiceImpl implements UserDetailsService {
 		dto.setReason("");
 		
 		return dto;
+	}
+
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

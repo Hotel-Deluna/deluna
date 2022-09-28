@@ -17,16 +17,18 @@
 		
 	</select>
 	
-	<insert id="registerMemberInfo" parameterType="map">
-	
+	<insert id="registerMemberInfo" parameterType="map" >
+		<selectKey resultType="int"  order="BEFORE" keyProperty="member_num">	
+			select max(member_num + 1) from d_member
+		</selectKey>	
 		insert into d_member (name, phone_num, email, password, role, is_delete, dt_insert, insert_user) 
-		values(#{name},#{phone_num},#{email},#{password}, #{role}, 'N', NOW(), CONCAT(#{role}+member_num));
+		values(#{name},#{phone_num},#{email},#{password}, #{role}, 'N', NOW(), CONCAT(#{role}, #{member_num}))
 	
 	</insert>
 	
 	<insert id="registerKakaoInfo" parameterType="com.hotel.member.vo.MemberVo$LoginMemberRequestKokao">
 		insert into d_member (name, email, role, is_delete, dt_insert, insert_user) 
-		values(#{name},#{email}, #{role}, 'N', NOW(), CONCAT(#{role}+member_num));
+		values(#{name},#{email}, #{role}, 'N', NOW(), CONCAT(#{role}+Auto_increment));
 	</insert>
 	
 	<select id="selectKakaoInfo" resultType="com.hotel.member.vo.MemberVo$LoginMemberResponseDto">
