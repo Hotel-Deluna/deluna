@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -1340,10 +1339,12 @@ public class HotelServiceImpl implements HotelService {
             int hotel_num = hotelReservationListRequest.getHotel_num();
             HotelInfoVo.HotelDetailInfoResponse hotelDetailInfoResponse = getHotelInfo(hotel_num);
             int total_cnt = 0;
+            int page = hotelReservationListRequest.getPage();
+            int pageCnt = hotelReservationListRequest.getPage_cnt();
 
             if(hotelDetailInfoResponse.getData() == null){
                 result.setMessage("호텔 예약정보 조회 완료");
-                result.setData(null);
+                result.setData(new ArrayList<>());
                 result.setTotal_cnt(total_cnt);
                 return result;
             }
@@ -1352,19 +1353,30 @@ public class HotelServiceImpl implements HotelService {
                 hotelReservationListRequest.setRank_num(1);
             }
 
-            HotelInfoVo.HotelDetailInfo hotelDetailInfo = hotelDetailInfoResponse.getData();
-            List<HotelInfoVo.RoomInfo> roomInfoList = hotelDetailInfo.getRoom_list();
-            List<Integer> room_detail_num_list = new ArrayList<>();
+//            HotelInfoVo.HotelDetailInfo hotelDetailInfo = hotelDetailInfoResponse.getData();
+//            List<HotelInfoVo.RoomInfo> roomInfoList = hotelDetailInfo.getRoom_list();
+//            List<Integer> room_detail_num_list = new ArrayList<>();
+//
+//            // 호실 번호 수집
+//            for(HotelInfoVo.RoomInfo roomInfo : roomInfoList){
+//                for(HotelInfoVo.RoomDetailInfo roomDetailInfo : roomInfo.getRoom_detail_info()){
+//                    room_detail_num_list.add(roomDetailInfo.getRoom_detail_num());
+//                }
+//            }
 
-            // 호실 번호 수집
-            for(HotelInfoVo.RoomInfo roomInfo : roomInfoList){
-                for(HotelInfoVo.RoomDetailInfo roomDetailInfo : roomInfo.getRoom_detail_info()){
-                    room_detail_num_list.add(roomDetailInfo.getRoom_detail_num());
-                }
+            // 해당 호텔의 호실정보 조회. 이미 삭제된 호실도 조회해서 예약정보 있으면 정보 리턴
+            List<Integer> room_detail_num_list = hotelMapper.selectRoomDetailNumForAll(hotel_num);
+
+            // 해당 호텔의 예약이 없을경우 예외처리
+            if(CollectionUtils.isEmpty(room_detail_num_list)){
+                result.setMessage("호텔 예약정보 조회 완료");
+                result.setData(new ArrayList<>());
+                result.setTotal_cnt(total_cnt);
+                return result;
             }
 
-            // MySql offset이 0부터 시작이므로 page값에 -1
-            hotelReservationListRequest.setPage(hotelReservationListRequest.getPage()-1);
+//            // MySql offset이 0부터 시작이므로 page값에 -1
+//            hotelReservationListRequest.setPage(hotelReservationListRequest.getPage()-1);
 
            //휴대폰번호 요청 존재하면 휴대폰번호 암호화해서 비교
             if(hotelReservationListRequest.getCustomer_phone_num() != null){
@@ -1373,7 +1385,7 @@ public class HotelServiceImpl implements HotelService {
 
             hotelReservationListRequest.setRoom_detail_num_list(room_detail_num_list);
             List<HotelInfoVo.HotelReservationDetailInfo> hotelReservationList = hotelMapper.selectHotelReservationList(hotelReservationListRequest);
-            total_cnt = hotelMapper.selectHotelReservationListCount(hotelReservationListRequest);
+//            total_cnt = hotelMapper.selectHotelReservationListCount(hotelReservationListRequest);
 
             for(HotelInfoVo.HotelReservationDetailInfo hotelReservationDetailInfo : hotelReservationList){
                 hotelReservationDetailInfo.setCustomer_phone_num(aes256Util.decrypt(hotelReservationDetailInfo.getCustomer_phone_num())); //휴대폰 복호화
@@ -1382,11 +1394,91 @@ public class HotelServiceImpl implements HotelService {
                         + " ~ "
                         + DateUtil.dateToString(hotelReservationDetailInfo.getEd_date())); // 예약일 넣어줌 yyyy/MM/dd ~ yyyy/MM/dd
             }
+
+            //pagination
+            if(!CollectionUtils.isEmpty(hotelReservationList)){
+                total_cnt = hotelReservationList.size();
+                hotelReservationList = PageUtil.paginationList(page, pageCnt, total_cnt, hotelReservationList);
+            }
+
 //            hotelReservationInfo.setHotel_reservation_info_list(hotelReservationList);
 //            hotelReservationInfo.setTotal_cnt(total_cnt);
 
             result.setMessage("호텔 예약정보 조회 완료");
             result.setData(hotelReservationList);
+            result.setTotal_cnt(total_cnt);
+        }catch (Exception e){
+            e.printStackTrace();
+            ErrorResult(result);
+            return result;
+        }
+
+        return result;
+    }
+
+    /**
+     * 사업자가 소유한 모든 호텔 예약정보 제공 - 사업자 예약관리페이지 처음 진입시 필요
+     *
+     * @param ownerReservationListRequest
+     * @param jwtToken
+     * @return
+     */
+    @Override
+    public HotelInfoVo.HotelReservationListResponse OwnerReservationList(HotelInfoVo.OwnerReservationListRequest ownerReservationListRequest, String jwtToken) {
+        HotelInfoVo.HotelReservationListResponse result = new HotelInfoVo.HotelReservationListResponse();
+        List<HotelInfoVo.HotelReservationDetailInfo> ownerHotelReservationList = new ArrayList<>();
+        log.info("사업자가 소유한 모든 호텔 예약정보 조회 시작");
+        int total_cnt = 0;
+
+        try{
+            int business_user_num = getPk(jwtToken);
+            int page = ownerReservationListRequest.getPage();
+            int pageCnt = ownerReservationListRequest.getPage_cnt();
+
+            // 해당 사업자 소유 호텔번호 조회
+            List<Integer> ownerHotelNumList = hotelMapper.selectOwnerHotelList(business_user_num);
+
+            if(CollectionUtils.isEmpty(ownerHotelNumList)){
+                result.setMessage("호텔 예약정보 조회 완료");
+                result.setData(new ArrayList<>());
+                result.setTotal_cnt(total_cnt);
+                return result;
+            }
+
+            for(Integer hotel_num : ownerHotelNumList){
+                // 해당 호텔의 호실정보 조회. 이미 삭제된 호실도 조회해서 예약정보 있으면 정보 리턴
+                List<Integer> room_detail_num_list = hotelMapper.selectRoomDetailNumForAll(hotel_num);
+
+                // 예약정보 없을경우 예외처리
+                if(CollectionUtils.isEmpty(room_detail_num_list)){
+                    continue;
+                }
+
+                // sql 재활용을 위한..
+                HotelInfoVo.HotelReservationListRequest hotelReservationListRequest = new HotelInfoVo.HotelReservationListRequest();
+                hotelReservationListRequest.setRoom_detail_num_list(room_detail_num_list);
+                hotelReservationListRequest.setRank_num(1);
+
+                List<HotelInfoVo.HotelReservationDetailInfo> hotelReservationList = hotelMapper.selectHotelReservationList(hotelReservationListRequest);
+
+                for(HotelInfoVo.HotelReservationDetailInfo hotelReservationDetailInfo : hotelReservationList){
+                    hotelReservationDetailInfo.setCustomer_phone_num(aes256Util.decrypt(hotelReservationDetailInfo.getCustomer_phone_num())); //휴대폰 복호화
+                    hotelReservationDetailInfo.setReservation_date(
+                            DateUtil.dateToString(hotelReservationDetailInfo.getSt_date())
+                                    + " ~ "
+                                    + DateUtil.dateToString(hotelReservationDetailInfo.getEd_date())); // 예약일 넣어줌 yyyy/MM/dd ~ yyyy/MM/dd
+                    ownerHotelReservationList.add(hotelReservationDetailInfo);
+                }
+            }
+
+            //pagination
+            if(!CollectionUtils.isEmpty(ownerHotelReservationList)){
+                total_cnt = ownerHotelReservationList.size();
+                ownerHotelReservationList = PageUtil.paginationList(page, pageCnt, total_cnt, ownerHotelReservationList);
+            }
+
+            result.setMessage("사업자가 소유한 모든 호텔 예약정보 조회 완료");
+            result.setData(ownerHotelReservationList);
             result.setTotal_cnt(total_cnt);
         }catch (Exception e){
             e.printStackTrace();

@@ -48,4 +48,6 @@ public interface HotelService {
     HotelInfoVo.DeleteRoomDetailInfoResponse DeleteRoomDetailInfo(HotelInfoVo.DeleteRoomDetailRequest deleteRoomDetailRequest, String jwtToken);
 
     HotelInfoVo.HotelReservationListResponse HotelReservationList(HotelInfoVo.HotelReservationListRequest hotelReservationListRequest, String jwtToken);
+
+    HotelInfoVo.HotelReservationListResponse OwnerReservationList(HotelInfoVo.OwnerReservationListRequest ownerReservationListRequest, String jwtToken);
 }

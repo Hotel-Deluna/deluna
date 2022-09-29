@@ -95,6 +95,8 @@ public interface HotelMapper {
 
     void updateDisableRoomDetail(HotelInfoVo.DisableSettingRoomDetailRequest disableSettingRoomDetailRequest) throws Exception;
 
+    List<Integer> selectRoomDetailNumForAll(int hotel_num) throws Exception;// 해당 호실 삭제여부와 상관없이 호텔번호로 해당 호텔의 모든 호실정보 가져옴 예약정보등 조회용.
+
     // 공휴일
     String selectHoliday(Date today);
 

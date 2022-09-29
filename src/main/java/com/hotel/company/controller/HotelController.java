@@ -179,4 +179,12 @@ public class HotelController {
         return hotelService.HotelReservationList(hotelReservationListRequest, jwtToken);
     }
 
+    @ApiOperation(value="사업자가 소유한 모든 호텔 예약정보 조회 - 사업자 예약관리페이지 처음 진입시 필요")
+    @ApiImplicitParams({@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header")})
+    @ResponseBody
+    @PostMapping("/owner-reservation-list")
+    public HotelInfoVo.HotelReservationListResponse OwnerReservationList(@RequestBody HotelInfoVo.OwnerReservationListRequest ownerReservationListRequest, @RequestHeader(value="Authorization") String jwtToken){
+        return hotelService.OwnerReservationList(ownerReservationListRequest, jwtToken);
+    }
+
 }
