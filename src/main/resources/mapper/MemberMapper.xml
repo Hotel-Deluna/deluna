@@ -17,16 +17,18 @@
 		
 	</select>
 	
-	<insert id="registerMemberInfo" parameterType="map">
-	
+	<insert id="registerMemberInfo" parameterType="map" >
+		<selectKey resultType="int"  order="BEFORE" keyProperty="member_num">	
+			select max(member_num + 1) from d_member
+		</selectKey>	
 		insert into d_member (name, phone_num, email, password, role, is_delete, dt_insert, insert_user) 
-		values(#{name},#{phone_num},#{email},#{password}, #{role}, 'N', NOW(), 'member');
+		values(#{name},#{phone_num},#{email},#{password}, #{role}, 'N', NOW(), CONCAT(#{role}, #{member_num}))
 	
 	</insert>
 	
 	<insert id="registerKakaoInfo" parameterType="com.hotel.member.vo.MemberVo$LoginMemberRequestKokao">
 		insert into d_member (name, email, role, is_delete, dt_insert, insert_user) 
-		values(#{name},#{email}, #{role}, 'N', NOW(), CONCAT(#{role}+member_num));
+		values(#{name},#{email}, #{role}, 'N', NOW(), CONCAT(#{role}+Auto_increment));
 	</insert>
 	
 	<select id="selectKakaoInfo" resultType="com.hotel.member.vo.MemberVo$LoginMemberResponseDto">
@@ -94,7 +96,7 @@
 		
 	</select>
 	
-	<select id="selectMemberNum" resultType="string">
+	<select id="selectMemberNum" resultType="int">
 		
 		select insert_user from d_member where email = #{email}
 		
@@ -124,5 +126,22 @@
 	
 	</update>
 	
+	<select id="updateCheckEmailByPwd" resultType="map">
+		
+		select email, insert_user from d_member where email = #{email} and password = #{password}
+		
+	</select>
+	
+	<update id="updateMemberPwd" parameterType="com.hotel.member.vo.MemberVo$MemberChangePwdRequest">
+	
+		update d_member set password = #{update_password} , dt_update = NOW() , update_user=#{update_user} where email = #{email}
+	
+	</update>
+	
+	<select id="checkPhoneNum" resultType="string">
+		
+		select phone_num from d_member where phone_num = #{phone_num}
+		
+	</select>
 
 </mapper>

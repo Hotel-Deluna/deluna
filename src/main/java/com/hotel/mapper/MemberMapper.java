@@ -11,6 +11,7 @@ import com.hotel.member.vo.MemberVo.LoginMemberRequestGoogle;
 import com.hotel.member.vo.MemberVo.LoginMemberRequestKokao;
 import com.hotel.member.vo.MemberVo.LoginMemberRequestNaver;
 import com.hotel.member.vo.MemberVo.LoginMemberResponseDto;
+import com.hotel.member.vo.MemberVo.MemberChangePwdRequest;
 import com.hotel.member.vo.MemberVo.MemberDeleteRequest;
 import com.hotel.member.vo.MemberVo.MemberDeleteVo;
 import com.hotel.member.vo.MemberVo.MemberEmailAuthInfo;
@@ -60,5 +61,12 @@ public interface MemberMapper {
 	Integer registerGoogleInfo(LoginMemberRequestGoogle memberVo);
 
 	LoginMemberResponseDto selectGoogleInfo(String email);
+
+	//고객 비빌번호 변경 전용
+	Map<String, Object> updateCheckEmailByPwd(MemberChangePwdRequest updatePwdRequest);
+
+	int updateMemberPwd(MemberChangePwdRequest updatePwdRequest);
+
+	String checkPhoneNum(String phone_num);
 
 }

@@ -795,6 +795,18 @@ public class HotelInfoVo {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @Schema(description = "사업자가 소유한 호텔 예약정보 리스트 조회 파라미터")
+    public static class OwnerReservationListRequest {
+        @Schema(description = "페이지당 데이터 갯수", required = false, example = "5")
+        Integer page_cnt;
+
+        @Schema(description = "요청 페이지", required = false, example = "3")
+        Integer page;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Schema(description = "호텔 예약정보")
     public static class HotelReservationInfo {
         @Schema(description = "조회된 데이터 총 갯수", required = true, example = "5")
