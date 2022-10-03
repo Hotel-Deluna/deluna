@@ -148,16 +148,25 @@ public class MemberServiceImpl implements UserDetailsService {
 			}
 			String id = member.get().getEmail();
 			int role = member.get().getRole();
-			if (role == 0) {
-				member.get().setRole(Integer.valueOf("ROLE_MEMBER"));
-			} else if (role == 1) {
-				member.get().setRole(Integer.valueOf("ROLE_OWNER"));
+			String auth = null ;
+			if (role == 1) {
+				//member.get().setRole(Integer.valueOf("ROLE_MEMBER"));
+				auth = "ROLE_MEMBER";
 			} else if (role == 2) {
-				member.get().setRole(Integer.valueOf("ROLE_UN_USER"));
+				//member.get().setRole(Integer.valueOf("ROLE_OWNER"));
+				auth = "ROLE_OWNER";
+			} else if (role == 3) {
+				//member.get().setRole(Integer.valueOf("ROLE_UN_USER"));
+				auth = "ROLE_UN_USER";
+			}else if(role == 4) {
+				//member.get().setRole(Integer.valueOf("ROLE_SOCIAL_USER"));
+				auth = "ROLE_SOCIAL_USER";
 			}
+			
+			
 			member.get().builder().email(id).role(role);
 			UsernamePasswordAuthenticationToken authenticationToken = memberRequestDto.toAuthentication();
-			dto = jwtTokenProvider.generateMemberTokenDto(authenticationToken, member.get().getRole().toString());
+			dto = jwtTokenProvider.generateMemberTokenDto(authenticationToken, auth);
 			
 			map.put("AccessToken", dto.getAccessToken());
 			map.put("RefreshToken", dto.getRefreshToken());
