@@ -3,6 +3,7 @@ package com.hotel.util;
 import org.springframework.beans.support.PagedListHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -24,6 +25,13 @@ public class PageUtil {
         pagedListHolder.setPage(page-1); // 페이지가 0부터 시작이라 1빼줌
         pagedListHolder.setPageSize(pageCnt);
         pagedListHolder.setMaxLinkedPages(totalCnt);
+
+        int lastPage = (totalCnt % pageCnt) == 0 ? totalCnt/pageCnt : (totalCnt/pageCnt)+1;
+
+        // 마지막 페이지의 다음 페이지 요청 들어오면 빈 배열 리턴
+        if(lastPage < page){
+            return new ArrayList<>();
+        }
 
         return pagedListHolder.getPageList();
     }
