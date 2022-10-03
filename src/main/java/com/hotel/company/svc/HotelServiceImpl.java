@@ -84,7 +84,7 @@ public class HotelServiceImpl implements HotelService {
                 }
 
                 // 만약 검색어가 존재하면 해당 사업자 소유 호텔들 중 검색어에 해당하는 호텔만 리턴
-                if(ownerHotelListRequest.getText() != null || !"".equals(ownerHotelListRequest.getText())){
+                if(ownerHotelListRequest.getText() != null && !"".equals(ownerHotelListRequest.getText())){
                     if(! (pattern.matcher(hotelDetailInfo.getName()).matches() || pattern.matcher(hotelDetailInfo.getEng_name()).matches())){
                         continue;
                     }
@@ -95,7 +95,7 @@ public class HotelServiceImpl implements HotelService {
             total_cnt = ownerHotelList.size();
 
             // pagination
-            ownerHotelList = PageUtil.paginationList(page, pageCnt,total_cnt, ownerHotelList);
+            ownerHotelList = PageUtil.paginationList(page, pageCnt, total_cnt, ownerHotelList);
 
             result.setMessage("사업자 소유 호텔 리스트 조회 완료");
             result.setTotal_cnt(total_cnt);
@@ -335,6 +335,7 @@ public class HotelServiceImpl implements HotelService {
                 boolean available_yn = true;
                 boolean isPeopleCountAvailable = false;
                 int isAllRoomNotAvailable = 0;
+                List<Integer> roomDetailAvailableList = new ArrayList<>();
                 List<Integer> priceList = new ArrayList<>();
                 List<Integer> room_detail_num_list = new ArrayList<>();
                 HotelSearchVo.HotelSearchInfo hotelSearchInfo = new HotelSearchVo.HotelSearchInfo();
@@ -342,7 +343,7 @@ public class HotelServiceImpl implements HotelService {
                 HotelInfoVo.HotelDetailInfo hotelDetailInfo = hotelDetailInfoResponse.getData();
                 List<HotelInfoVo.RoomInfo> roomInfoList = hotelDetailInfo.getRoom_list();
                 for(HotelInfoVo.RoomInfo roomInfo : roomInfoList){
-                    boolean isRoomDetailAvailable = false; // 호실 전부 사용불가인지 체크용
+                    int roomDetailAvailableCnt = 0; // 사용가능한 호실 수 체크
 
                     // 투숙인원 조건이 있으면 투숙인원 체크. 조건에 해당되는 방이 한개라도 있으면 true
                     if(searchBarVoSearchBarRequest.getPeople_count() != null){
@@ -353,18 +354,21 @@ public class HotelServiceImpl implements HotelService {
                     }
                     List<HotelInfoVo.RoomDetailInfo> roomDetailInfoList = roomInfo.getRoom_detail_info();
                     for(HotelInfoVo.RoomDetailInfo roomDetailInfo : roomDetailInfoList){
-                        // 사용가능한 호실이 1개라도 있으면 isRoomDetailAvailable = ture
+                        // 사용가능한 호실수 체크
                         if(roomDetailInfo.getAvailable_yn()){
-                            isRoomDetailAvailable = true;
+                            roomDetailAvailableCnt += 1;
                         }
                     }
 
-                    if(!isRoomDetailAvailable){ // 모든 호실이 사용불가인 객실 카운트
+                    if(roomDetailAvailableCnt == 0){ // 모든 호실이 사용불가인 객실 카운트
                         isAllRoomNotAvailable += 1;
                     }
 
                     // 객실 가격 수집
                     priceList.add(roomInfo.getPrice());
+
+                    // 사용가능한 호실 갯수 수집
+                    roomDetailAvailableList.add(roomDetailAvailableCnt);
                 }
 
                 // 해당 호텔의 모든 객실이 사용불가능 이라면 available_yn = false
@@ -391,6 +395,20 @@ public class HotelServiceImpl implements HotelService {
                     List<Integer> hotelReservationAvailableList =
                             hotelMapper.selectHotelReservationListForSearch(param);
                     if(hotelReservationAvailableList == null){
+                        continue;
+                    }
+                }
+
+                // 호실 수 조건이 존재하는데 모든 객실의 사용가능한 호실이 요청한 호실수보다 적으면 해당 호텔 패스
+                if(searchBarVoSearchBarRequest.getRoom_count() != null){
+                    boolean isRoomCountAvailable = false;
+                    for(int availableRoomDetailCnt : roomDetailAvailableList){
+                        if(searchBarVoSearchBarRequest.getRoom_count() <= availableRoomDetailCnt){
+                            isRoomCountAvailable = true;
+                            break;
+                        }
+                    }
+                    if(!isRoomCountAvailable){
                         continue;
                     }
                 }
