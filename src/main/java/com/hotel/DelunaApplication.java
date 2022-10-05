@@ -15,14 +15,6 @@ public class DelunaApplication implements WebMvcConfigurer{
 		System.setProperty("com.amazonaws.sdk.disableEc2Metadata", "true");
 	}
 
-	@Override
-	public void addCorsMappings(CorsRegistry registry) {
-		registry.addMapping("/member/sign-in")
-		.exposedHeaders("X-AUTH-TOKEN")
-		.allowCredentials(true)
-		.allowedOrigins("http://localhost:8080");
-	}
-	
 	public static void main(String[] args) {
 		SpringApplication.run(DelunaApplication.class, args);
 	}

@@ -41,8 +41,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		web.httpFirewall(defaultHttpFirewall());
 
 		// swagger
-		web.ignoring()
-				.antMatchers("/v3/api-docs", "/configuration/ui", "/swagger-resources", "/configuration/security",
+		web.ignoring().antMatchers("/v3/api-docs", "/configuration/ui", "/swagger-resources", "/configuration/security",
 				"/swagger-ui.html", "/webjars/", "/swagger/");
 	}
 
@@ -55,30 +54,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		// 시큐리티는 기본적으로 세션을 사용 여기서는 세션을 사용하지 않기 때문에 세션 설정을 Stateless 로 설정
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-		http
-				.cors().configurationSource(corsConfigurationSource()) // CORS 설정 적용
-				.and()
-					.httpBasic().disable() // httpBasic disable
-					.csrf().disable() // CSRF Disable
-				.exceptionHandling()
-				.authenticationEntryPoint(jwtAuthenticationEntryPoint) // exception Handling
-				.and()
-				.sessionManagement()
-				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-					.and()
-					.authorizeRequests()
-					.antMatchers("/owner/**").permitAll()
-					.antMatchers("/hotel/**").permitAll()
-					.antMatchers("/reservation/**").permitAll()
-					.antMatchers("/common/**").permitAll()
-					.antMatchers("/swagger-resources/**").permitAll()
-					.antMatchers("/member/sign-up", "/member/sign-in").permitAll()
-					.antMatchers("/owner/sign-up").permitAll()
+		http.cors().configurationSource(corsConfigurationSource()) // CORS 설정 적용
+				.and().httpBasic().disable() // httpBasic disable
+				.csrf().disable() // CSRF Disable
+				.exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint) // exception Handling
+				.and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+				.authorizeRequests().antMatchers("/owner/**").permitAll().antMatchers("/hotel/**").permitAll()
+				.antMatchers("/reservation/**").permitAll().antMatchers("/common/**").permitAll()
+				.antMatchers("/swagger-resources/**").permitAll().antMatchers("/member/sign-up", "/member/sign-in")
+				.permitAll().antMatchers("/owner/sign-up").permitAll()
 				// JwtSecurityConfig 클래스에서 선언된 필터 적용
-				.and()
-					.apply(new JwtSecurityConfig(tokenProvider))
-				.and()
-					.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+				.and().apply(new JwtSecurityConfig(tokenProvider)).and()
+				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
 	}
 
@@ -88,12 +75,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		CorsConfiguration configuration = new CorsConfiguration();
 		configuration.addAllowedOriginPattern(CorsConfiguration.ALL);
 		configuration.setAllowedMethods(List.of(CorsConfiguration.ALL));
-		configuration.setAllowedHeaders(Arrays.asList("Authorization", "content-type", "x-auth-token"));
+		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
+		configuration.setAllowedHeaders(
+				Arrays.asList("X-Requested-With", "Origin", "AccessToken", "RefreshToken" ,"Content-Type", "Accept", "Authorization"));
 
 		configuration.setAllowCredentials(true);
+		configuration.setExposedHeaders(Arrays.asList("Access-Control-Allow-Headers",
+				"Authorization, AccessToken, RefreshToken, x-xsrf-token, Access-Control-Allow-Headers, Origin, Accept, X-Requested-With, "
+						+ "Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers"));
+
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration.applyPermitDefaultValues()); // 전역적용. 나중에 수정필요
 		return source;
 	}
-	
+
 }
