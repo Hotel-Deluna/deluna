@@ -36,6 +36,9 @@ public class HotelSearchVo {
 
         @Schema(description = "조회된 데이터 총 갯수", required = true, example = "5")
         Integer total_cnt;
+
+        @Schema(description = "검색된 호텔 전체 번호 리스트",  required = true, example = "[1, 2]")
+        List<Integer> hotel_num_list;
     }
 
     @Data
@@ -121,7 +124,7 @@ public class HotelSearchVo {
                 "1: 검색어에 해당되는 지역(시,도) 리스트 \t " +
                 "2: 검색어에 해당되는 호텔의 주소 리스트 \t " +
                 "3: 검색어에 해당되는 호텔명 리스트 \t "+
-                "4: 검색어에 해당되는 장소 리스트 \t ", example = "1")
+                "4: 검색어에 해당되는 장소 리스트 \t ", required = true, example = "1")
         Integer search_type;
 
         @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd" , timezone="Asia/Seoul")
@@ -134,6 +137,9 @@ public class HotelSearchVo {
 
         @ApiParam(value = "투숙인원", example = "2", required = false)
         Integer people_count;
+
+        @ApiParam(value = "객실 갯수", example = "2", required = false)
+        Integer room_count;
 
         @Schema(description = "페이지당 데이터 갯수", required = false, example = "5")
         Integer page_cnt;
@@ -173,6 +179,7 @@ public class HotelSearchVo {
 
         @Schema(description = "경도, 위도 값. 0번째 배열 : x, 1번째 배열 : y",  required = true, example = "[123.546, 10.48]")
         List<Double> location;
+
     }
 
     @Data

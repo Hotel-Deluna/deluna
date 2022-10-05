@@ -433,15 +433,22 @@ public class HotelServiceImpl implements HotelService {
 
             total_cnt = hotelSearchList.size();
 
-            // pagination
-            hotelSearchList = PageUtil.paginationList(page, pageCnt, total_cnt, hotelSearchList);
+            // 필터조건에 걸러진 호텔 전체리스트
+            List<Integer> result_hotel_num_list = hotelSearchList
+                    .stream()
+                    .map(HotelSearchVo.HotelSearchInfo::getHotel_num)
+                    .toList();
 
             // 호텔 등급순으로 역순 정렬
             hotelSearchList.sort(Comparator.comparing(HotelSearchVo.HotelSearchInfo::getStar).reversed());
 
+            // pagination
+            hotelSearchList = PageUtil.paginationList(page, pageCnt, total_cnt, hotelSearchList);
+
             result.setData(hotelSearchList);
             result.setTotal_cnt(total_cnt);
             result.setMessage("호텔 검색 리스트 조회 완료");
+            result.setHotel_num_list(result_hotel_num_list); // 필터조건에 걸러진 호텔 전체리스트 추가
 
         }catch (Exception e){
             e.printStackTrace();
