@@ -77,6 +77,7 @@ public class MemberController {
 		return memberServiceImpl.MemberSignUp(registerMemberRequest);
 	}
 
+	@CrossOrigin()
 	@ApiOperation(value = "공통 로그인")
 	@ApiImplicitParams({
 	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })

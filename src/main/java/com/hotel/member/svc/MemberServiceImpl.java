@@ -163,7 +163,6 @@ public class MemberServiceImpl implements UserDetailsService {
 				auth = "ROLE_SOCIAL_USER";
 			}
 			
-			
 			member.get().builder().email(id).role(role);
 			UsernamePasswordAuthenticationToken authenticationToken = memberRequestDto.toAuthentication();
 			dto = jwtTokenProvider.generateMemberTokenDto(authenticationToken, auth);
