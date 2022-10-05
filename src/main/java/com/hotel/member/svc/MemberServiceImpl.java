@@ -128,26 +128,28 @@ public class MemberServiceImpl implements UserDetailsService {
 	@Transactional(readOnly = true)
 	public Map<String, Object> getMemberInfo(MemberRequestDto memberRequestDto) {
 		Map<String, Object> map = new HashMap<>();
+		MemberRequestDto vo = new MemberRequestDto();
 		TokenDto dto = new TokenDto();
 
 		try {
 			Optional<Member> member = memberRepository.findByEmail(memberRequestDto.getEmail());
 			
-			System.out.println("test = " + member.isEmpty()); 
+			System.out.println("test = " + member.isEmpty());
+			System.out.println("test = " + member.toString());
 			
 			if (member.isEmpty() == true) {
 				map.put("result", "ERR");
 				map.put("reason", "member Not Found");
 				return map;
 			}
-			member = memberRepository.findByPassword(memberRequestDto.getPassword());
-			if (member.isEmpty() == true) {
+			vo = memberMapper.findByPassword(memberRequestDto);
+			if (vo.getPassword() == null) {
 				map.put("result", "ERR");
 				map.put("reason", "memberPwd Not Found");
 				return map;
 			}
-			String id = member.get().getEmail();
-			int role = member.get().getRole();
+			String id = vo.getEmail();
+			int role = vo.getRole();
 			String auth = null ;
 			if (role == 1) {
 				//member.get().setRole(Integer.valueOf("ROLE_MEMBER"));
@@ -344,9 +346,11 @@ public class MemberServiceImpl implements UserDetailsService {
 		MemberVo.MemberResponseDto dto = new MemberVo.MemberResponseDto();
 		
 		findPwdRequest.setPhone_num(aesUtil.encrypt(findPwdRequest.getPhone_num()));
-
+		
+		//String phone = memberMapper.findByPasswd(findPwdRequest.getEmail());
+		//String phone_data = aesUtil.decrypt(phone);
 		String email = memberMapper.checkEmailByPwd(findPwdRequest);
-
+		
 		if (email == null) {
 			dto.setResult("ERR");
 			dto.setReason("email Not Found");

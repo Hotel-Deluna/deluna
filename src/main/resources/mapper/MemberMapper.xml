@@ -110,7 +110,7 @@
 	
 	<insert id="updateEmailAuthInfo" parameterType="com.hotel.member.vo.MemberVo$MemberEmailAuthInfo">
 	
-		insert into d_email_auth values(0, #{email_auth_num},#{user_num}, NOW())
+		insert into d_email_auth values(0, #{email_auth_num},#{insert_user}, NOW())
 		
 	</insert>
 	
@@ -143,5 +143,18 @@
 		select phone_num from d_member where phone_num = #{phone_num}
 		
 	</select>
+	
+	<select id="findByPasswd" resultType="string">
+		
+		select phone_num from d_member where email = #{email}
+		
+	</select>
+	
+	<select id="findByPassword" resultType="com.hotel.member.dto.MemberRequestDto">
+		
+		select email, password, role from d_member where email = #{email} and password = #{password}
+		
+	</select>
+	
 
 </mapper>

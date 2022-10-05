@@ -77,7 +77,7 @@ public class MemberController {
 		return memberServiceImpl.MemberSignUp(registerMemberRequest);
 	}
 
-	@CrossOrigin()
+	@CrossOrigin("*")
 	@ApiOperation(value = "공통 로그인")
 	@ApiImplicitParams({
 	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
@@ -100,10 +100,19 @@ public class MemberController {
 		Map<String, Object> data = memberServiceImpl.getMemberInfo(memberRequestDto);
 		res.setHeader("AccessToken", (String) data.get("AccessToken"));
 		res.setHeader("RefreshToken", (String) data.get("RefreshToken"));
-		
 		dto.setEmail((String) data.get("email"));
-		//dto.setRole((String) data.get("role"));
 		dto.setRole((Integer) data.get("role"));
+		
+		if(!dto.getEmail().equals("")) {
+			dto.setResult("OK");
+			dto.setReason("");
+		}else {
+			dto.setResult("fail");
+			dto.setReason("");
+			dto.setEmail("");
+			dto.setRole(0);
+		}
+		
 		
 		return dto;
 	}
