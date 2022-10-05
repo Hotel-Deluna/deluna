@@ -275,11 +275,11 @@ public class ReservationController {
 		String email ;
 		if(token == null) {
 			// 삭제 예정
-			email = "sms44556688@gmail.com";
-//			dto.setResult("ERR");
-//			dto.setReason("token decryption fail");
-//			list.add(dto);
-//			return list;
+		//	email = "sms44556688@gmail.com";
+			dto.setResult("ERR");
+			dto.setReason("token decryption fail");
+			list.add(dto);
+			return list;
 		}else {
 			email = info.tokenInfo(token);
 		}

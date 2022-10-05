@@ -302,8 +302,6 @@ public class ReservationServiceImpl implements ReservationService {
 		}
 		list = reservationMapper.reservationList(memberInfo);
 		
-		System.out.println("list = " + list.toString());
-		
 		if (list.size() == 0) {
 			dto.setResult("ERR");
 			dto.setReason("data Not Found");
