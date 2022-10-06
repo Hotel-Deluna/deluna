@@ -78,4 +78,6 @@ public interface MemberMapper {
 
 	String loginByEmail(String email);
 
+	Map<String, Object> updateCheckOwnerEmailByPwd(MemberChangePwdRequest updatePwdRequest);
+
 }

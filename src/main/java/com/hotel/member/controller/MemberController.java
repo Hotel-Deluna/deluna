@@ -102,7 +102,7 @@ public class MemberController {
 		dto.setEmail((String) data.get("email"));
 		dto.setRole((Integer) data.get("role"));
 		
-		if(!dto.getEmail().equals("")) {
+		if(!dto.getEmail().equals("") || !dto.getEmail().equals(null)) {
 			dto.setResult("OK");
 			dto.setReason("");
 		}else {
@@ -111,7 +111,6 @@ public class MemberController {
 			dto.setEmail("");
 			dto.setRole(0);
 		}
-		
 		
 		return dto;
 	}
@@ -360,8 +359,6 @@ public class MemberController {
 
 		String token = req.getHeader("accessToken");
 		String email = info.tokenInfo(token);
-		
-		System.out.println("사업자 토큰 발급 되나요!!!? = " + email);
 		
 		if (email == null) {
 			dto.setResult("ERR");

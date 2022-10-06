@@ -132,9 +132,21 @@
 		
 	</select>
 	
+	<select id="updateCheckOwnerEmailByPwd" resultType="map">
+		
+		select email, insert_user from d_member where email = #{email}
+		
+	</select>
+	
 	<update id="updateMemberPwd" parameterType="com.hotel.member.vo.MemberVo$MemberChangePwdRequest">
 	
 		update d_member set password = #{update_password} , dt_update = NOW() , update_user=#{update_user} where email = #{email}
+	
+	</update>
+	
+	<update id="updateOwnerPwd" parameterType="com.hotel.member.vo.MemberVo$MemberChangePwdRequest">
+	
+		update d_business_member set password = #{update_password} , dt_update = NOW() , update_user=#{update_user} where email = #{email}
 	
 	</update>
 	
