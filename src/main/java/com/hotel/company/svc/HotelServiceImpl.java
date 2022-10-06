@@ -51,8 +51,8 @@ public class HotelServiceImpl implements HotelService {
     @Autowired
     JwtTokenProvider jwtTokenProvider;
 
-   @Value("${kakao.secretKey}")
-   String kakaoKey;
+    @Value("${kakao.secretKey}")
+    String kakaoKey;
 
     @Value("${search.distance}")
     Integer allowedDistance;
