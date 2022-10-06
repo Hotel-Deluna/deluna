@@ -391,7 +391,7 @@
         SELECT name
         FROM d_room
         WHERE name = #{name}
-        AND room_num = #{room_num}
+        AND hotel_num = #{hotel_num}
     </select>
 
     <!-- 객실 정보 수정 -->
@@ -424,6 +424,14 @@
 
     <!-- 호실 등록 -->
     <insert id="insertRoomDetailInfo">
+        INSERT INTO d_room_detail (room_num, room_detail_name, room_detail_status, room_closed_start, room_closed_end,
+                                   is_delete, dt_insert, dt_update, insert_user, update_user)
+            VALUE (#{room_num}, #{name}, #{room_detail_status}, #{room_closed_start}, #{room_closed_end},
+                   'N', NOW(), NOW(), #{insert_user}, #{update_user})
+    </insert>
+
+    <!-- 객실 등록시 호실 등록 -->
+    <insert id="insertRoomDetailInfoForRoom">
         INSERT INTO d_room_detail (room_num, room_detail_name, room_detail_status, room_closed_start, room_closed_end,
                                    is_delete, dt_insert, dt_update, insert_user, update_user)
             VALUE (#{room_num}, #{name}, #{room_detail_status}, #{room_closed_start}, #{room_closed_end},

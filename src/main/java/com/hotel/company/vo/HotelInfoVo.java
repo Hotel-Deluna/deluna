@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hotel.common.CommonResponseVo;
 import com.hotel.common.dto.CommonDto;
 import io.micrometer.core.lang.Nullable;
+import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -511,7 +513,7 @@ public class HotelInfoVo {
         List<Integer> tags;
 
         @ApiParam(value = "호실 정보", required = true)
-        List<RegisterRoomDetailRequest> room_detail_list;
+        List<RegisterRoomDetailForRoom> room_detail_list;
 
         @ApiParam(value = "공휴일 가격 상태 - 공휴일을 성수기 가격취급할건지 결정. 1: 비성수기 주말가격, 2: 성수기 주말가격",  required = true, example = "1")
         Integer holiday_price_status;
@@ -598,6 +600,39 @@ public class HotelInfoVo {
 
         @JsonIgnore
         @Schema(description = "호실 삭제 예정일", required = false, example = "2022/08/03", hidden = true)
+        Date delete_date;
+
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Schema(description = "객실등록시 호실등록 (객실등록시는 객실구분번호나 호실삭제예정이 없어야해서 추가..)")
+    public static class RegisterRoomDetailForRoom extends CommonDto {
+        @ApiModelProperty(hidden = true)
+        @Schema(description = "객실 구분번호", required = false)
+        Integer room_num;
+
+        @Schema(description = "호실명", required = true, example = "101호")
+        String name;
+
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd", timezone="Asia/Seoul")
+        @Schema(description = "호실 사용금지 시작일", required = false, example = "2022/08/01")
+        Date room_closed_start;
+
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd", timezone="Asia/Seoul")
+        @Schema(description = "호실 사용금지 해제일", required = false, example = "2022/08/03")
+        Date room_closed_end;
+
+        // DB
+        @JsonIgnore
+        @ApiModelProperty(hidden = true)
+        @Schema(description = "객실상태값", required = false)
+        Integer room_detail_status;
+
+        @JsonIgnore
+        @ApiModelProperty(hidden = true)
+        @Schema(description = "호실 삭제 예정일", required = false, example = "2022/08/03")
         Date delete_date;
 
     }
