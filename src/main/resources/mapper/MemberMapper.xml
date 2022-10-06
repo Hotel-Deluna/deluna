@@ -152,9 +152,14 @@
 	
 	<select id="findByPassword" resultType="com.hotel.member.dto.MemberRequestDto">
 		
-		select email, password, role from d_member where email = #{email} and password = #{password}
+		select email, password, role from d_member where email = #{email} and password = #{password} and is_delete = 'N'
 		
 	</select>
 	
+	<select id="test" resultType="string">
+		
+		select password from d_member where email = #{email}
+		
+	</select>
 
 </mapper>

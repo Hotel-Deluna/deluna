@@ -174,7 +174,9 @@ public class MemberServiceImpl implements UserDetailsService {
 			map.put("email", id);
 			map.put("role", role);
 		} catch (Exception e) {
-			// TODO: handle exception
+			map.put("result", "ERR");
+			map.put("reason", "delete member");
+			return map;
 		}
 		return map;
 	}

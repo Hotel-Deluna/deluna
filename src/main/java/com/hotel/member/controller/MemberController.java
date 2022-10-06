@@ -323,10 +323,10 @@ public class MemberController {
 			dto.setReason("password Not Found");
 			return dto;
 		} 
-
+		
 		String token = req.getHeader("accessToken");
 		String email = info.tokenInfo(token);
-
+		
 		if (email.equals("")) {
 			dto.setResult("ERR");
 			dto.setReason("token Not Found");
@@ -361,6 +361,8 @@ public class MemberController {
 		String token = req.getHeader("accessToken");
 		String email = info.tokenInfo(token);
 		
+		System.out.println("사업자 토큰 발급 되나요!!!? = " + email);
+		
 		if (email == null) {
 			dto.setResult("ERR");
 			dto.setReason("token Not Found");
@@ -368,8 +370,6 @@ public class MemberController {
 		}
 		
 		updatePwdRequest.setEmail(email);
-		
-		
 
 		return memberServiceImpl.MemberUpdatePasswd(updatePwdRequest);
 	}
