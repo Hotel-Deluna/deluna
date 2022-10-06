@@ -82,7 +82,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		configuration.setAllowCredentials(true);
 		configuration.setExposedHeaders(Arrays.asList("Access-Control-Allow-Headers",
 				"Authorization, AccessToken, RefreshToken, x-xsrf-token, Access-Control-Allow-Headers, Origin, Accept, X-Requested-With, "
-						+ "Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers"));
+						+ "Content-Type, Access-Control-Request-Method, Access-Control-Allow-Origin, Access-Control-Request-Headers"));
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration.applyPermitDefaultValues()); // 전역적용. 나중에 수정필요

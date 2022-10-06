@@ -338,6 +338,7 @@ public class MemberController {
 		return memberServiceImpl.UpdatePasswd(updatePwdRequest);
 	}
 	
+	@CrossOrigin(origins = "http://localhost:8080")
 	@ApiOperation(value = "고객 비밀번호 변경")
 	@ApiImplicitParams({
 	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
