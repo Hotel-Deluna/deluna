@@ -1,5 +1,6 @@
 package com.hotel.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hotel.common.vo.JwtTokenDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -12,10 +13,13 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 import io.jsonwebtoken.*;
@@ -46,20 +50,21 @@ public class JwtTokenProvider {
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
-        
-        Map<String, Object> test = new HashMap<>();
-        test.put("auth", authorities);
+
         long now = (new Date()).getTime();
 
         // Access Token 생성
         Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
+        Map<String, Object> claimMap = (Map<String, Object>) authentication.getDetails();
+
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())       // payload "sub": "name"
                 .claim(AUTHORITIES_KEY, authorities)        // payload "auth": "ROLE_USER"
+                .claim("id", claimMap.get("id"))
                 .setExpiration(accessTokenExpiresIn)        // payload "exp": 1516239022 (예시)
                 .signWith(key, SignatureAlgorithm.HS512)    // header "alg": "HS512"
                 .compact();
-        
+
         // Refresh Token 생성
         String refreshToken = Jwts.builder()
                 .setExpiration(new Date(now + REFRESH_TOKEN_EXPIRE_TIME))
@@ -73,18 +78,18 @@ public class JwtTokenProvider {
                 .refreshToken(refreshToken)
                 .build();
     }
-    
+
     //추가 - 2022/09/21 한동희
     public JwtTokenDto.TokenDto generateMemberTokenDto(Authentication authentication, String role) {
         // 권한들 가져오기
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
-        
+
         if(authorities.equals("")) {
         	authorities = role;
         }
-        
+
         Map<String, Object> test = new HashMap<>();
         test.put("auth", authorities);
         long now = (new Date()).getTime();
@@ -97,7 +102,7 @@ public class JwtTokenProvider {
                 .setExpiration(accessTokenExpiresIn)        // payload "exp": 1516239022 (예시)
                 .signWith(key, SignatureAlgorithm.HS512)    // header "alg": "HS512"
                 .compact();
-        
+
         // Refresh Token 생성
         String refreshToken = Jwts.builder()
                 .setExpiration(new Date(now + REFRESH_TOKEN_EXPIRE_TIME))
@@ -116,7 +121,7 @@ public class JwtTokenProvider {
     public Authentication getAuthentication(String accessToken) {
         // 토큰 복호화
         Claims claims = parseClaims(accessToken);
-        
+
         if (claims.get(AUTHORITIES_KEY) == null) {
             throw new RuntimeException("권한 정보가 없는 토큰입니다.");
         }
@@ -148,7 +153,7 @@ public class JwtTokenProvider {
         }
         return false;
     }
-    
+
     public JwtTokenDto.PayLoadDto getPayload(String accessToken) throws Exception{
         JwtTokenDto.PayLoadDto result = new JwtTokenDto.PayLoadDto();
         // 토큰 복호화

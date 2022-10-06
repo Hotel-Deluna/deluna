@@ -81,6 +81,8 @@ public interface HotelMapper {
     // 호실
     void insertRoomDetailInfo(HotelInfoVo.RegisterRoomDetailRequest registerRoomDetailRequest) throws Exception;
 
+    void insertRoomDetailInfoForRoom(HotelInfoVo.RegisterRoomDetailForRoom registerRoomDetailForRoom) throws Exception; // 객실등록시 호실등록
+
     List<HotelInfoVo.RoomDetailInfo> selectRoomDetailInfo(int room_num) throws Exception;
 
     Date selectLastReservationDate(List<Integer> room_detail_num_list);
