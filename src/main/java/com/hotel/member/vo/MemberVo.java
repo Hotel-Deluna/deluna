@@ -277,7 +277,7 @@ public class MemberVo {
 	@Data
 	@AllArgsConstructor
 	@NoArgsConstructor
-	@Schema(description = "고객 비밀번호 재설정 파라미터")
+	@Schema(description = "공통 비밀번호 변경 파라미터")
 	public static class MemberChangePwdRequest {
 
 		@Schema(description = "현재 비밀번호", required = true, example = "1234")
@@ -288,6 +288,9 @@ public class MemberVo {
 		
 		@Schema(description = "이메일", required = true, example = "백엔드사용")
 		String email;
+		
+		@Schema(description = "일반회원, 사업자 구분값 - 1: 일반회원 2: 사업자",  required = true, example = "1")
+		Integer role;
 		
 		@Schema(description = "update_user", required = true, example = "백엔드사용")
 		Integer update_user;
