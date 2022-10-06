@@ -1,10 +1,13 @@
 package com.hotel.mapper;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
+import com.hotel.member.dto.MemberRequestDto;
+import com.hotel.member.vo.Member;
 import com.hotel.member.vo.MemberVo;
 import com.hotel.member.vo.MemberVo.FindIdRequest;
 import com.hotel.member.vo.MemberVo.LoginMemberRequestGoogle;
@@ -68,5 +71,11 @@ public interface MemberMapper {
 	int updateMemberPwd(MemberChangePwdRequest updatePwdRequest);
 
 	String checkPhoneNum(String phone_num);
+
+	String findByPasswd(String email);
+
+	MemberRequestDto findByPassword(MemberRequestDto memberRequestDto);
+
+	String loginByEmail(String email);
 
 }

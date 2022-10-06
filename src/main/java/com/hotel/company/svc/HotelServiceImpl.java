@@ -901,7 +901,7 @@ public class HotelServiceImpl implements HotelService {
 
             // 객실 호실 등록
             if(!CollectionUtils.isEmpty(registerRoomRequest.getRoom_detail_list())){
-                for(HotelInfoVo.RegisterRoomDetailRequest roomDetail : registerRoomRequest.getRoom_detail_list()){
+                for(HotelInfoVo.RegisterRoomDetailForRoom roomDetail : registerRoomRequest.getRoom_detail_list()){
                     roomDetail.setRoom_num(roomNum);
                     // 만약 호실 사용금지 날짜가 존재하면 호실 상태값 = 예약불가 (2) 아니면 예약가능
                     if(roomDetail.getRoom_closed_start() != null){
@@ -911,7 +911,7 @@ public class HotelServiceImpl implements HotelService {
                     }
                     roomDetail.setInsert_user(userPk);
                     roomDetail.setUpdate_user(userPk);
-                    hotelMapper.insertRoomDetailInfo(roomDetail);
+                    hotelMapper.insertRoomDetailInfoForRoom(roomDetail);
                 }
             }
 

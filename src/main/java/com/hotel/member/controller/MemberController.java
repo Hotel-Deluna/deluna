@@ -99,10 +99,19 @@ public class MemberController {
 		Map<String, Object> data = memberServiceImpl.getMemberInfo(memberRequestDto);
 		res.setHeader("AccessToken", (String) data.get("AccessToken"));
 		res.setHeader("RefreshToken", (String) data.get("RefreshToken"));
-		
 		dto.setEmail((String) data.get("email"));
-		//dto.setRole((String) data.get("role"));
 		dto.setRole((Integer) data.get("role"));
+		
+		if(!dto.getEmail().equals("")) {
+			dto.setResult("OK");
+			dto.setReason("");
+		}else {
+			dto.setResult("fail");
+			dto.setReason("");
+			dto.setEmail("");
+			dto.setRole(0);
+		}
+		
 		
 		return dto;
 	}
