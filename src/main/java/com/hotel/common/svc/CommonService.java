@@ -33,4 +33,6 @@ public interface CommonService {
     String SaveTouristSpotHotelCount();
 
     String InsertTouristSpotImage(CommonVo.InsertTouristSpotImageRequest insertTouristSpotImageRequest);
+
+    String InsertTouristSpot(CommonVo.InsertTouristSpotRequest insertTouristSpotRequest);
 }

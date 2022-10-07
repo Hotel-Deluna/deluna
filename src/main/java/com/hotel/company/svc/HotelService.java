@@ -9,6 +9,8 @@ public interface HotelService {
 
     HotelInfoVo.OwnerHotelListResponse OwnerHotelList(@Nullable HotelInfoVo.OwnerHotelListRequest ownerHotelListRequest, String jwtToken);
 
+    HotelInfoVo.OwnerHotelNameListResponse OwnerHotelNameList(String jwtToken);
+
     CommonResponseVo RegisterHotel(HotelInfoVo.RegisterHotelRequest registerHotelParamVo, String jwtToken);
 
     HotelSearchVo.TouristSpotInfoResponse TouristSpotInfo(HotelSearchVo.TouristSpotInfoRequest touristSpotInfoRequest);
@@ -50,4 +52,5 @@ public interface HotelService {
     HotelInfoVo.HotelReservationListResponse HotelReservationList(HotelInfoVo.HotelReservationListRequest hotelReservationListRequest, String jwtToken);
 
     HotelInfoVo.HotelReservationListResponse OwnerReservationList(HotelInfoVo.OwnerReservationListRequest ownerReservationListRequest, String jwtToken);
+
 }

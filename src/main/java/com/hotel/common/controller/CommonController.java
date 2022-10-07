@@ -79,12 +79,12 @@ public class CommonController {
         return commonService.RegionCode();
     }
 
-    @ApiOperation(value="여행지 코드 - 메인페이지 여행지 목록")
-    @ResponseBody
-    @GetMapping("/code/tourist-spot")
-    public CommonVo.CommonCodeResponse TouristSpotCode(){
-        return commonService.TouristSpotCode();
-    }
+//    @ApiOperation(value="여행지 코드 - 메인페이지 여행지 목록")
+//    @ResponseBody
+//    @GetMapping("/code/tourist-spot")
+//    public CommonVo.CommonCodeResponse TouristSpotCode(){
+//        return commonService.TouristSpotCode();
+//    }
 
     @ApiOperation(value="설정파일 암호화 - 내부 API")
     @ResponseBody
@@ -114,10 +114,17 @@ public class CommonController {
         return commonService.SaveTouristSpotHotelCount();
     }
 
-    @ApiOperation(value="여행지 사진 저장 - 내부 API")
+    @ApiOperation(value="여행지 사진 저장/교체 - 내부 API")
     @ResponseBody
     @PostMapping(value = "/tourist/insert/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String InsertTouristSpotImage(@ModelAttribute CommonVo.InsertTouristSpotImageRequest insertTouristSpotImageRequest){
         return commonService.InsertTouristSpotImage(insertTouristSpotImageRequest);
+    }
+
+    @ApiOperation(value="여행지 정보 저장 - 이미지없어도 등록가능. 내부 API")
+    @ResponseBody
+    @PostMapping(value = "/tourist/insert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String InsertTouristSpot(@ModelAttribute CommonVo.InsertTouristSpotRequest insertTouristSpotRequest){
+        return commonService.InsertTouristSpot(insertTouristSpotRequest);
     }
 }

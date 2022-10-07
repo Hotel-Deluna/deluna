@@ -68,6 +68,9 @@ public class CommonServiceImpl implements CommonService {
     @Autowired
     ImageUtil imageUtil;
 
+    @Autowired
+    DBUtil dbUtil;
+
     @Override
     public CommonResponseVo RequestPhoneAuth(CommonVo.PhoneAuthRequest phoneAuthRequest) {
         CommonResponseVo result = new CommonResponseVo();
@@ -386,5 +389,43 @@ public class CommonServiceImpl implements CommonService {
         }
 
         return "여행지 이미지 등록 완료";
+    }
+
+    @Override
+    public String InsertTouristSpot(CommonVo.InsertTouristSpotRequest insertTouristSpotRequest) {
+        log.info("여행지 정보 저장 시작");
+
+        try{
+            int tourist_spot_num = dbUtil.getAutoIncrementNext(CommonEnum.TableName.D_TOURIST_SPOT.getName());
+            int select_type = CommonEnum.ImageType.TOURIST_SPOT.getCode();
+            String userPk = "0"; // 관리자
+
+            List<MultipartFile> multipartFileList = new ArrayList<>();
+
+            // 이미지 정보 있으면 이미지 등록, 아니면 그냥 여행지 정보만 등록
+            if(insertTouristSpotRequest.getImage() != null){
+                multipartFileList.add(insertTouristSpotRequest.getImage());
+
+                // DB에 저장된 해당 여행지 이미지 모두 삭제
+                imageUtil.deleteImage(select_type, tourist_spot_num);
+
+                // 이미지 파일 저장 & DB에 정보 저장
+                imageUtil.insertImage(multipartFileList, select_type, tourist_spot_num, userPk);
+            }
+
+            if(insertTouristSpotRequest.getName() != null){
+                // 여행지 정보 등록
+                commonMapper.insertTouristSpot(insertTouristSpotRequest.getName());
+            }
+            else {
+                return "여행지명이 존재하지않습니다.";
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return "ERROR";
+        }
+
+        return "여행지 정보 등록 완료";
     }
 }
