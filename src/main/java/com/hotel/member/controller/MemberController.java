@@ -102,7 +102,7 @@ public class MemberController {
 		dto.setEmail((String) data.get("email"));
 		dto.setRole((Integer) data.get("role"));
 		
-		if(!dto.getEmail().equals("")) {
+		if(!dto.getEmail().equals("") || !dto.getEmail().equals(null)) {
 			dto.setResult("OK");
 			dto.setReason("");
 		}else {
@@ -111,7 +111,6 @@ public class MemberController {
 			dto.setEmail("");
 			dto.setRole(0);
 		}
-		
 		
 		return dto;
 	}
@@ -323,10 +322,10 @@ public class MemberController {
 			dto.setReason("password Not Found");
 			return dto;
 		} 
-
+		
 		String token = req.getHeader("accessToken");
 		String email = info.tokenInfo(token);
-
+		
 		if (email.equals("")) {
 			dto.setResult("ERR");
 			dto.setReason("token Not Found");
@@ -338,7 +337,7 @@ public class MemberController {
 		return memberServiceImpl.UpdatePasswd(updatePwdRequest);
 	}
 	
-	@ApiOperation(value = "고객 비밀번호 변경")
+	@ApiOperation(value = "공통 비밀번호 변경")
 	@ApiImplicitParams({
 	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
@@ -368,8 +367,6 @@ public class MemberController {
 		}
 		
 		updatePwdRequest.setEmail(email);
-		
-		
 
 		return memberServiceImpl.MemberUpdatePasswd(updatePwdRequest);
 	}

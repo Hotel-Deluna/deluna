@@ -69,5 +69,5 @@ public interface ReservationMapper {
 
 	int checkMemberNum(String email);
 
-	Integer selectReservationCnt(Integer member_num);
+	Integer selectReservationCnt(MemberReservationListRequest memberInfo);
 }

@@ -26,4 +26,6 @@ public interface CommonMapper {
     int countHotelTouristSpot(HotelSearchVo.TouristSpotInfo touristSpotInfo) throws Exception;
 
     void updatecountHotelTouristSpot(HotelSearchVo.TouristSpotInfo touristSpotInfo);
+
+    void insertTouristSpot(String name)throws Exception;
 }

@@ -115,4 +115,16 @@ public class CommonVo {
         MultipartFile image;
     }
 
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "여행지 등록 파라미터")
+    public static class InsertTouristSpotRequest extends CommonDto {
+        @ApiParam(value = "여행지명", required = true, example = "서울")
+        String name;
+
+        @ApiParam(value = "여행지 이미지", required = false, example = "멀티파트 파일 이미지")
+        MultipartFile image;
+    }
+
 }

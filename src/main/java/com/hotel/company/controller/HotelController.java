@@ -49,6 +49,14 @@ public class HotelController {
         return hotelService.OwnerHotelList(ownerHotelListRequest, jwtToken);
     }
 
+    @ApiOperation(value="사업자가 소유한 호텔명 리스트 - 사업자가 소유한 호텔의 이름, 번호만 있는 리스트")
+    @ApiImplicitParams({@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header")})
+    @ResponseBody
+    @PostMapping(value = "/owner-hotel-name-list")
+    public HotelInfoVo.OwnerHotelNameListResponse OwnerHotelNameList(@RequestHeader(value="Authorization") String jwtToken){
+        return hotelService.OwnerHotelNameList(jwtToken);
+    }
+
     @ApiOperation(value="여행지 정보 - 여행지 목록과 해당 여행지의 호텔 갯수")
     @ResponseBody
     @GetMapping(value = "/tourist")

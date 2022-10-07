@@ -190,7 +190,6 @@ public class ReservationController {
 				}
 				memberReservationRequest.setMember_num(member_num);		
 			}
-			dto.setReservation_phone_yn("Y");
 			if(email.equals(memberReservationRequest.getEmail())) {
 			dto = reservationService.memberReservation(memberReservationRequest);
 			}else {

@@ -174,7 +174,9 @@ public class MemberServiceImpl implements UserDetailsService {
 			map.put("email", id);
 			map.put("role", role);
 		} catch (Exception e) {
-			// TODO: handle exception
+			map.put("result", "ERR");
+			map.put("reason", "delete member");
+			return map;
 		}
 		return map;
 	}
@@ -451,30 +453,43 @@ public class MemberServiceImpl implements UserDetailsService {
 		MemberVo.MemberResponseDto dto = new MemberVo.MemberResponseDto(); 
 		
 		updatePwdRequest.setPassword(shaUtil.encryptSHA512(updatePwdRequest.getPassword()));
+		Map<String, Object> memberInfo = new HashMap<>();
 		
-		//고객정보 확인
-		Map<String, Object> memberInfo = memberMapper.updateCheckEmailByPwd(updatePwdRequest);
-		
-		if(memberInfo.get("email").equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("select member check fail");
-			return dto;
+		if(updatePwdRequest.getRole() == 1) {
+			//고객정보 확인
+			memberInfo = memberMapper.updateCheckEmailByPwd(updatePwdRequest);
+			if(memberInfo.get("email").equals("")) {
+				dto.setResult("ERR");
+				dto.setReason("select member check fail");
+				return dto;
+			}
+		}else if(updatePwdRequest.getRole() == 2) {
+			memberInfo = memberMapper.updateCheckOwnerEmailByPwd(updatePwdRequest);
+			if(memberInfo.get("email").equals("")) {
+				dto.setResult("ERR");
+				dto.setReason("select member check fail");
+				return dto;
+			}
 		}
+		
 		
 		int update_user = Integer.parseInt((String) memberInfo.get("insert_user"));
 		
 		updatePwdRequest.setUpdate_user(update_user);
 		
-		System.out.println("data = " + updatePwdRequest.getUpdate_user());
-		
 		// 체크 됬다면 변경 진행
 		updatePwdRequest.setUpdate_password(shaUtil.encryptSHA512(updatePwdRequest.getUpdate_password()));
 		
-		int update = memberMapper.updateMemberPwd(updatePwdRequest);
+		int update = -1;
+		if(updatePwdRequest.getRole() == 1) {
+			update = memberMapper.updateMemberPwd(updatePwdRequest);
+		}else if(updatePwdRequest.getRole() == 1) {
+			update = memberMapper.updateMemberPwd(updatePwdRequest);
+		}
 		
 		if(update == 0) {
 			dto.setResult("ERR");
-			dto.setReason("update member password fail");
+			dto.setReason("update member or owner password fail");
 			return dto;
 		}
 		

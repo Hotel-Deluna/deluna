@@ -37,6 +37,8 @@ public interface HotelMapper {
 
     List<Integer> selectOwnerHotelList(int business_user_num) throws Exception;
 
+    List<HotelInfoVo.OwnerHotelName> selectOwnerHotelNameList(int business_user_num) throws Exception;
+
     List<HotelInfoVo.HotelReservationDetailInfo> selectHotelReservationList(HotelInfoVo.HotelReservationListRequest hotelReservationListRequest) throws Exception;
 
     int selectHotelReservationListCount(HotelInfoVo.HotelReservationListRequest hotelReservationListRequest) throws Exception;
@@ -118,4 +120,5 @@ public interface HotelMapper {
     List<HotelSearchVo.TouristSpotInfo> selectTouristSpotList() throws Exception;
 
     List<HotelInfoVo.HotelDetailInfo> selectHotelByRegionCode(String kakaoRegion);
+
 }

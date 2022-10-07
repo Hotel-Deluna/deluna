@@ -33,6 +33,15 @@ public class HotelInfoVo {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
+    @Schema(description = "사업자 소유 호텔명 리스트 응답값")
+    public static class OwnerHotelNameListResponse extends CommonResponseVo {
+        @Schema(description = "데이터")
+        List<OwnerHotelName> data;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
     @Schema(description = "호텔 상세정보 응답값")
     public static class HotelDetailInfoResponse extends CommonResponseVo {
         @Schema(description = "데이터")
@@ -241,6 +250,20 @@ public class HotelInfoVo {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @Schema(description = "사업자 소유 호텔명 정보")
+    public static class OwnerHotelName {
+
+        @Schema(description = "호텔구분값", required = true, example = "123456")
+        Integer hotel_num;
+
+        @Schema(description = "호텔명", required = true, example = "신라스테이 강남점")
+        String name;
+
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Schema(description = "호텔 상세 정보")
     public static class HotelDetailInfo extends CommonDto {
 
@@ -373,6 +396,8 @@ public class HotelInfoVo {
         @Schema(description = "최종예약날짜", required = false, example = "2022/08/03")
         Date last_reservation_date;
 
+        @ApiParam(value = "공휴일 가격 상태 - 공휴일을 성수기 가격취급할건지 결정. 1: 비성수기 주말가격, 2: 성수기 주말가격",  required = true, example = "1")
+        Integer holiday_price_status;
     }
 
     @Data
