@@ -49,12 +49,6 @@ public class UnMemberInfoVo {
     @Schema(description = "비회원 예약 조회 response")
     public static class UnMemberReservationInfoResponseDto {
     	
-    	@Schema(description = "api 결과값", required = true, example = "OK or ERR")
-		String result;
-		
-		@Schema(description = "상세내용", required = true, example = "param Not Found")
-		String reason;
-
         @Schema(description = "예약번호", required = true, example = "1111111")
         Integer reservation_num;
         

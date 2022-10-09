@@ -23,7 +23,7 @@ import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberReservationInfoResponseDt
 @Service
 public interface ReservationService {
 
-	List<UnMemberReservationInfoResponseDto> UnMemberReservationInfo(UnMemberInfoVo.UnMemberReservationRequest unMemberReservationInfo) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException;
+	Map<String, Object> UnMemberReservationInfo(UnMemberInfoVo.UnMemberReservationRequest unMemberReservationInfo) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException;
 	
 	MemberReservationResponseDto UnMemberReservationWithdraw(UnMemberInfoVo.UnMemberWithdrawRequest unMemberWithdrawVo);
 

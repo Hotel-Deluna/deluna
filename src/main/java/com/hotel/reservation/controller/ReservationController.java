@@ -47,30 +47,30 @@ public class ReservationController {
 	@ApiOperation(value = "비회원 조회")
 	@ResponseBody
 	@PostMapping("/unMemberInfo")
-	public List<UnMemberReservationInfoResponseDto> UnMemberInfo(
+	public Map<String, Object> UnMemberInfo(
 			@RequestBody UnMemberInfoVo.UnMemberReservationRequest unMemberReservationRequest)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
 		UnMemberReservationInfoResponseDto dto = new UnMemberReservationInfoResponseDto();
 		
+		Map<String, Object> map = new HashMap<>();
 		List<UnMemberReservationInfoResponseDto> list = new ArrayList<>();
-		
+		System.out.println("parameter = " + unMemberReservationRequest.toString());
 		if (unMemberReservationRequest.getReservation_name().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("name Not Found");
-			list.add(dto);
-			return list;
+			map.put("result", "ERR");
+			map.put("reason", "name Not Found");
+			return map;
+			
 		} else if (unMemberReservationRequest.getReservation_phone().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("phone Not Found");
-			list.add(dto);
-			return list;
+			map.put("result", "ERR");
+			map.put("reason", "phone Not Found");
+			return map;
+			
 		} else if (unMemberReservationRequest.getReservation_num() == 0) {
-			dto.setResult("ERR");
-			dto.setReason("reservation_num Not Found");
-			list.add(dto);
-			return list;
+			map.put("result", "ERR");
+			map.put("reason", "reservation_num Not Found");
+			return map;
 		}
-
+		
 		return reservationService.UnMemberReservationInfo(unMemberReservationRequest);
 	}
 

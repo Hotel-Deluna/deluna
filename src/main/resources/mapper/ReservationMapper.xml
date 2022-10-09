@@ -150,11 +150,11 @@
 
 	</select>
 	
-	<select id= "selectMemberPhoneInfo" resultType="string">
+<!-- 	<select id= "selectMemberPhoneInfo" resultType="string">
 	
 		select reservation_phone from d_reservation where reservation_num = #{reservation_num}
 	
-	</select>
+	</select> -->
 	
 	<select id="unMemberReservationInfo" resultType="com.hotel.reservation.vo.UnMemberInfoVo$UnMemberReservationInfoResponseDto">
 	

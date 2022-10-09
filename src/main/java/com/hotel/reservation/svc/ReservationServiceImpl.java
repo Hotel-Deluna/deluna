@@ -49,48 +49,44 @@ public class ReservationServiceImpl implements ReservationService {
 	private final AES256Util aesUtil;
 
 	@Override
-	public List<UnMemberReservationInfoResponseDto> UnMemberReservationInfo(
-			UnMemberReservationRequest unMemberReservationInfo)
-			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
+	public Map<String, Object> UnMemberReservationInfo(UnMemberReservationRequest unMemberReservationInfo) {
 
+		Map<String, Object> map = new HashMap<>();
 		List<UnMemberReservationInfoResponseDto> list = new ArrayList<>();
 		UnMemberReservationInfoResponseDto dto = new UnMemberReservationInfoResponseDto();
 
-		String phone = reservationMapper.selectMemberPhoneInfo(unMemberReservationInfo);
+		try {
+			unMemberReservationInfo.setReservation_phone(aesUtil.encrypt(unMemberReservationInfo.getReservation_phone()));
+		} catch (Exception e) {
+			map.put("result", "ERR");
+			map.put("reason", e);
+			return map;
+		} 
 
-		if (phone.equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("reservation_num select fail");
-			list.add(dto);
-			return list;
-		}
-
-		// 암호화 된 핸드폰 번호 복호화
-		phone = aesUtil.decrypt(phone);
-		String reqPhone = unMemberReservationInfo.getReservation_phone();
-
-		// 예약된 고객 번호와 입력된 고객번호가 맞는지 확인 후
-		if (reqPhone.equals(phone)) {
-			list = reservationMapper.unMemberReservationInfo(unMemberReservationInfo);
-		} else {
-			dto.setResult("ERR");
-			dto.setReason("phone eqaule fail");
-			list.add(dto);
-			return list;
-		}
+		list = reservationMapper.unMemberReservationInfo(unMemberReservationInfo);
 
 		// 예약정보 확인
 		if (list.size() == 0) {
-			dto.setResult("ERR");
-			dto.setReason("unReservation Info select fail");
-			list.add(dto);
-			return list;
+			map.put("result", "ERR");
+			map.put("reason", "unReservation Info select fail");
+			return map;
 		} else {
-			dto.setResult("OK");
-			dto.setReason("unReservation select success");
+			for (int i = 0; i < list.size(); i++) {
+				String phone = list.get(i).getReservation_phone();
+				try {
+					list.get(i).setReservation_phone(aesUtil.decrypt(phone));
+				} catch (Exception e) {
+					map.put("result", "ERR");
+					map.put("reason", e);
+					return map;
+				} 
+			}
+			map.put("result", "OK");
+			map.put("reason", "");
+			map.put("list", list);
 
 		}
-		return list;
+		return map;
 	}
 
 	@Override
@@ -160,9 +156,9 @@ public class ReservationServiceImpl implements ReservationService {
 		Map<String, Object> unMemberMap = new HashMap<>();
 		if (!(memberReservationRequest.getMember_num() == null)) {
 			insert_user = reservationMapper.selectUserInfo(memberReservationRequest.getMember_num());
-			if(insert_user != null) {
+			if (insert_user != null) {
 				memberReservationRequest.setInsert_user(insert_user);
-			}else {
+			} else {
 				dto.setResult("ERR");
 				dto.setReason("insertNum Not Found");
 			}
@@ -174,7 +170,6 @@ public class ReservationServiceImpl implements ReservationService {
 			memberVo.setName(memberReservationRequest.getReservation_name());
 			memberVo.setPhone_num(aesUtil.encrypt(memberReservationRequest.getReservation_phone()));
 			memberVo.setRole(memberReservationRequest.getRole());
-			System.out.println("pass = " + memberVo.getPhone_num());
 			int UnMemberInfo = memberMapper.registerUnMemberInfo(memberVo);
 			if (UnMemberInfo == 0) {
 				// insert 실패 시 에러 처리
@@ -183,16 +178,18 @@ public class ReservationServiceImpl implements ReservationService {
 				return dto;
 			}
 			unMemberMap = reservationMapper.selectUnUserInfo(memberVo.getPhone_num());
-			
-			System.out.println("unMemberMap = " + unMemberMap.toString());
+
 		}
 
 		// 예약자 정보 입력
 		memberReservationRequest.setInsert_user(String.valueOf(unMemberMap.get("insert_user")));
 		memberReservationRequest.setMember_num((Integer) unMemberMap.get("member_num"));
 		// 예약 인서트
-		
+
 		System.out.println("data = " + memberReservationRequest.toString());
+		
+		//암호화 후 저장
+		memberReservationRequest.setReservation_phone(aesUtil.encrypt(memberReservationRequest.getReservation_phone()));
 		int reservation_info = reservationMapper.reservationInfo(memberReservationRequest);
 
 		if (reservation_info == 0) {
@@ -250,15 +247,12 @@ public class ReservationServiceImpl implements ReservationService {
 		}
 		return dto;
 	}
-	
+
 	@Override
 	public MemberReservationResponseDto unMemberReservation(MemberReservationRequest memberReservationRequest) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
-	
-	
 
 	@Override
 	public MemberReservationResponseDto MemberReservationWithdraw(MemberWithdrawRequest memberWithdrawVo) {
@@ -397,8 +391,6 @@ public class ReservationServiceImpl implements ReservationService {
 	public int selectMemberNum(String email) {
 		return reservationMapper.checkMemberNum(email);
 	}
-
-	
 
 //    @Override
 //    public CommonResponseVo RegisterHotel(HotelInfoVo.RegisterHotelRequest registerHotelRequest) {
