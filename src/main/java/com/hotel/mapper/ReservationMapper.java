@@ -75,4 +75,6 @@ public interface ReservationMapper {
 
 	Map<String, Object> selectUnUserInfo(String string);
 
+	void reservationDeleteUnMember(String insert_user);
+
 }

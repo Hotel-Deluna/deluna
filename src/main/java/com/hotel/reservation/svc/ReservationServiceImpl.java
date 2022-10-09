@@ -213,6 +213,7 @@ public class ReservationServiceImpl implements ReservationService {
 
 			if (pay_info == 0) {
 				// 가격 인서트 안될 경우 예약정보도 취소해야 함
+				reservationMapper.reservationDeleteUnMember(memberReservationRequest.getInsert_user());
 				reservationMapper.reservationDelete(memberReservationRequest.getMember_num());
 				dto.setResult("ERR");
 				dto.setReason("payment Info insert fail");

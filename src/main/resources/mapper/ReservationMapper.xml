@@ -57,6 +57,12 @@
 		delete from d_payment_detail where insert_user = #{insert_user}
 
 	</delete>
+	
+	<delete id="reservationDeleteUnMember" parameterType="string">
+
+		delete from d_member where insert_user = #{insert_user}
+
+	</delete>
 
 	<select id="selectReservationNum" resultType="int">
 
@@ -220,5 +226,9 @@
 		select insert_user from d_member where email = #{email}
 		
 	</select>
+	
+	
+	
+	
 	
 </mapper>
