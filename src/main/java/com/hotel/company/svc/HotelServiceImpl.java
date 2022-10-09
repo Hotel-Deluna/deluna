@@ -111,6 +111,34 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
+    public HotelInfoVo.OwnerHotelNameListResponse OwnerHotelNameList(String jwtToken) {
+        HotelInfoVo.OwnerHotelNameListResponse result = new HotelInfoVo.OwnerHotelNameListResponse();
+
+        try{
+            log.info("사업자 소유 호텔명 간략 리스트 조회 시작");
+            List<HotelInfoVo.HotelDetailInfo> ownerHotelList = new ArrayList<>();
+            int business_user_num = getPk(jwtToken);
+
+            // 해당 사업자 소유 호텔번호, 호텔명 조회
+            List<HotelInfoVo.OwnerHotelName> ownerHotelNameList = hotelMapper.selectOwnerHotelNameList(business_user_num);
+
+            if(CollectionUtils.isEmpty(ownerHotelNameList)){
+                ownerHotelNameList = new ArrayList<>();
+            }
+
+            result.setMessage("사업자 소유 호텔명 리스트 조회 완료");
+            result.setData(ownerHotelNameList);
+
+        }catch (Exception e){
+            e.printStackTrace();
+            ErrorResult(result);
+            return result;
+        }
+
+        return result;
+    }
+
+    @Override
     public CommonResponseVo RegisterHotel(HotelInfoVo.RegisterHotelRequest registerHotelRequest, String jwtToken) {
         CommonResponseVo result = new CommonResponseVo();
         int hotelNum = 0;

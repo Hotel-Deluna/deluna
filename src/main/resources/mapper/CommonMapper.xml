@@ -46,4 +46,9 @@
         WHERE d_tourist_spot.tourist_spot_num = #{tourist_spot_num}
     </update>
 
+    <!-- 여행지 정보 저장 -->
+    <insert id="insertTouristSpot">
+        INSERT INTO d_tourist_spot (name, count, dt_insert) VALUE (#{name}, 0, NOW())
+    </insert>
+
 </mapper>

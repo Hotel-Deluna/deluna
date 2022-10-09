@@ -59,6 +59,7 @@
         <result column="weekend_price" property="weekend_price"/>
         <result column="p_weekend_price" property="p_weekend_price"/>
         <result column="delete_date" property="delete_date"/>
+        <result column="holiday_price_status" property="holiday_price_status"/>
     </resultMap>
 
     <resultMap id="selectRoomDetailByDetailNumMap" type="com.hotel.company.vo.HotelInfoVo$RoomDetailInfo">
@@ -169,6 +170,11 @@
     <!-- 사업자 소유 호텔 번호 조회 -->
     <select id="selectOwnerHotelList" resultType="int">
         SELECT hotel_num FROM d_hotel WHERE business_user_num = #{business_user_num}
+    </select>
+
+    <!-- -->
+    <select id="selectOwnerHotelNameList" resultType="com.hotel.company.vo.HotelInfoVo$OwnerHotelName">
+        SELECT name, hotel_num FROM d_hotel WHERE business_user_num = #{business_user_num}
     </select>
 
     <!-- 호텔 예약리스트 조회 -->
@@ -317,18 +323,20 @@
 
     <!-- 객실 리스트 조회 - 호텔번호기준 -->
     <select id="selectRoomInfoList" resultMap="selectRoomInfoListMap">
-        SELECT *
-        FROM d_room
-        WHERE hotel_num = #{hotel_num}
-        AND is_delete = 'N'
+        SELECT r.*, h.holiday_price_status
+        FROM d_room r
+            LEFT JOIN d_hotel h ON r.hotel_num = h.hotel_num
+        WHERE r.hotel_num = #{hotel_num}
+        AND r.is_delete = 'N'
     </select>
 
     <!-- 객실 조회 - 객실번호기준 -->
     <select id="selectRoomInfo" resultMap="selectRoomInfoListMap">
-        SELECT *
-        FROM d_room
-        WHERE room_num = #{room_num}
-        AND is_delete = 'N'
+        SELECT r.*, h.holiday_price_status
+        FROM d_room r
+            LEFT JOIN d_hotel h ON r.hotel_num = h.hotel_num
+        WHERE r.room_num = #{room_num}
+        AND r.is_delete = 'N'
     </select>
 
     <!-- 객실 태그 조회 -->
@@ -599,6 +607,7 @@
                i.bucket_url as image
         FROM d_tourist_spot ts
                  LEFT JOIN d_image i ON ts.tourist_spot_num = i.primary_key AND i.select_type =3
+        ORDER BY ts.tourist_spot_num
     </select>
 
     <!-- 지역코드기준으로 호텔 정보 조회 -->
