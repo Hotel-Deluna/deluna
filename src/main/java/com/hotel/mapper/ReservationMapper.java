@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
 import com.hotel.member.vo.MemberVo.RegisterMemberRequest;
+import com.hotel.reservation.vo.MemberInfoVo;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationDeleteRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListInfoResponseDto;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListRequest;
@@ -22,7 +23,7 @@ import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberWithdrawRequest;
 @Repository
 public interface ReservationMapper {
 
-	int reservationInfo(List<MemberReservationRequest> memberReservationRequest);
+	int reservationInfo(MemberInfoVo.MemberReservationRequest vo);
 
 	int payInfo(ReservationDetailPaymentsRequest payment);
 

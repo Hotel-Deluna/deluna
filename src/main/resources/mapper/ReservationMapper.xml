@@ -16,12 +16,10 @@
 		,reservation_status, is_delete, dt_insert, insert_user
 		)
 		values(
-		<foreach collection="list" item="item" separator=",">
-		#{item.member_num}, #{item.room_detail_num}, #{item.reservation_phone},
-		#{item.reservation_name},#{item.reservation_people}, #{item.reservation_price},
-		#{item.st_date}, #{item.ed_date}
-		,1 , 'N', NOW(), #{item.insert_user}
-		</foreach>
+		#{member_num}, #{room_detail_num}, #{reservation_phone},
+		#{reservation_name},#{reservation_people}, #{reservation_price},
+		#{st_date}, #{ed_date}
+		,1 , 'N', NOW(), #{insert_user}
 		)
 
 	</insert>

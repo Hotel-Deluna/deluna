@@ -57,7 +57,8 @@ public class ReservationServiceImpl implements ReservationService {
 		UnMemberReservationInfoResponseDto dto = new UnMemberReservationInfoResponseDto();
 
 		try {
-			unMemberReservationInfo.setReservation_phone(aesUtil.encrypt(unMemberReservationInfo.getReservation_phone()));
+			unMemberReservationInfo
+					.setReservation_phone(aesUtil.encrypt(unMemberReservationInfo.getReservation_phone()));
 		} catch (Exception e) {
 			map.put("result", "ERR");
 			map.put("reason", e);
@@ -155,6 +156,8 @@ public class ReservationServiceImpl implements ReservationService {
 		// 예약자 insert_user 조회
 		String insert_user = null;
 		Map<String, Object> unMemberMap = new HashMap<>();
+		ReservationDetailPaymentsRequest payment = new ReservationDetailPaymentsRequest();
+
 		for (int i = 0; i < memberReservationRequest.size(); i++) {
 
 			if (!(memberReservationRequest.get(i).getMember_num() == null)) {
@@ -171,19 +174,20 @@ public class ReservationServiceImpl implements ReservationService {
 				// 비회원 기본 정보 저장
 				// 최초 1번만 가입
 				MemberVo.RegisterMemberRequest memberVo = new MemberVo.RegisterMemberRequest();
-				memberVo.setName(memberReservationRequest.get(0).getReservation_name());
-				memberVo.setPhone_num(aesUtil.encrypt(memberReservationRequest.get(0).getReservation_phone()));
-				memberVo.setRole(memberReservationRequest.get(0).getRole());
+				memberVo.setName(memberReservationRequest.get(i).getReservation_name());
+				memberVo.setPhone_num(aesUtil.encrypt(memberReservationRequest.get(i).getReservation_phone()));
+				memberVo.setRole(memberReservationRequest.get(i).getRole());
 				
+				//없는 회원이면 간편 가입 시킨다
 				String phoneData = reservationMapper.checkUnMemberInfo(memberVo.getPhone_num());
-				if(phoneData == null) {
+				if (phoneData == null) {
 					int UnMemberInfo = memberMapper.registerUnMemberInfo(memberVo);
 					if (UnMemberInfo == 0) {
 						// insert 실패 시 에러 처리
 						dto.setResult("ERR");
 						dto.setReason("unMember info insert fail");
 						return dto;
-					}	
+					}
 				}
 				unMemberMap = reservationMapper.selectUnUserInfo(memberVo.getPhone_num());
 
@@ -196,11 +200,15 @@ public class ReservationServiceImpl implements ReservationService {
 			// 암호화 후 저장
 			memberReservationRequest.get(i)
 					.setReservation_phone(aesUtil.encrypt(memberReservationRequest.get(i).getReservation_phone()));
-
+		}
+		
+		for (int x = 0; x < memberReservationRequest.size(); x++) {
+			MemberInfoVo.MemberReservationRequest vo = new MemberInfoVo.MemberReservationRequest();
+			vo = memberReservationRequest.get(x);
+			System.out.println("vo = " +vo.toString());
 			int reservation_info = -1;
-
 			try {
-				reservation_info = reservationMapper.reservationInfo(memberReservationRequest);
+				reservation_info = reservationMapper.reservationInfo(vo);
 			} catch (Exception e) {
 				dto.setResult("ERR");
 				dto.setReason("insert Duplicate entry phone");
@@ -214,52 +222,52 @@ public class ReservationServiceImpl implements ReservationService {
 			} else {
 
 				// 예약완료 일 떄
-				ReservationDetailPaymentsRequest payment = new ReservationDetailPaymentsRequest();
 
-				payment.setPayment_price(memberReservationRequest.get(i).getReservation_price());
-				payment.setInsert_user(memberReservationRequest.get(i).getInsert_user());
+				payment.setPayment_price(memberReservationRequest.get(x).getReservation_price());
+				payment.setInsert_user(memberReservationRequest.get(x).getInsert_user());
 
-				// 가격 인서트
-				int pay_info = reservationMapper.payInfo(payment);
+			}
 
-				if (pay_info == 0) {
-					// 가격 인서트 안될 경우 예약정보도 취소해야 함
-					reservationMapper.reservationDeleteUnMember(memberReservationRequest.get(i).getInsert_user());
-					reservationMapper.reservationDelete(memberReservationRequest.get(i).getMember_num());
-					dto.setResult("ERR");
-					dto.setReason("payment Info insert fail");
-					return dto;
-				} else {
+			// 가격 인서트
+			int pay_info = reservationMapper.payInfo(payment);
 
-					// 예약정보 + 결제상세정보 입력이 끝났을 때
+			if (pay_info == 0) {
+				// 가격 인서트 안될 경우 예약정보도 취소해야 함
+				reservationMapper.reservationDeleteUnMember(memberReservationRequest.get(x).getInsert_user());
+				reservationMapper.reservationDelete(memberReservationRequest.get(x).getMember_num());
+				dto.setResult("ERR");
+				dto.setReason("payment Info insert fail");
+				return dto;
+			} else {
 
-					// 결제 정보 인서트
-					int reservation_num = reservationMapper.selectReservationNum(memberReservationRequest.get(i).getMember_num());
-					int payment_num = reservationMapper.selectPaymentNum(memberReservationRequest.get(i).getInsert_user());
+				// 예약정보 + 결제상세정보 입력이 끝났을 때
 
-					if (reservation_num != 0 && payment_num != 0) {
+				// 결제 정보 인서트
+				int reservation_num = reservationMapper
+						.selectReservationNum(memberReservationRequest.get(x).getMember_num());
+				int payment_num = reservationMapper.selectPaymentNum(memberReservationRequest.get(x).getInsert_user());
 
-						ReservationPaymentsRequest req = new ReservationPaymentsRequest();
+				if (reservation_num != 0 && payment_num != 0) {
 
-						req.setReservation_num(reservation_num);
-						req.setPayment_detail_num(payment_num);
-						req.setInsert_user(memberReservationRequest.get(i).getInsert_user());
+					ReservationPaymentsRequest req = new ReservationPaymentsRequest();
 
-						int d_payment = reservationMapper.insertPaymentInfo(req);
+					req.setReservation_num(reservation_num);
+					req.setPayment_detail_num(payment_num);
+					req.setInsert_user(memberReservationRequest.get(x).getInsert_user());
 
-						if (d_payment == 0) {
-							// 전체 취소
-							reservationMapper.reservationDelete(memberReservationRequest.get(i).getMember_num());
-							reservationMapper.paymentDelete(req.getInsert_user());
+					int d_payment = reservationMapper.insertPaymentInfo(req);
 
-						} else {
-							dto.setResult("OK");
-							dto.setReason("reservation success");
-						}
+					if (d_payment == 0) {
+						// 전체 취소
+						reservationMapper.reservationDelete(memberReservationRequest.get(x).getMember_num());
+						reservationMapper.paymentDelete(req.getInsert_user());
+
+					} else {
+						dto.setResult("OK");
+						dto.setReason("reservation success");
 					}
 				}
 			}
-
 		}
 
 		return dto;
