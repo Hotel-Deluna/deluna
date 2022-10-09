@@ -164,12 +164,11 @@ public class MemberServiceImpl implements UserDetailsService {
 				//member.get().setRole(Integer.valueOf("ROLE_SOCIAL_USER"));
 				auth = "ROLE_SOCIAL_USER";
 			}
-			
 			member.get().builder().email(id).role(role);
 			UsernamePasswordAuthenticationToken authenticationToken = memberRequestDto.toAuthentication();
 			dto = jwtTokenProvider.generateMemberTokenDto(authenticationToken, auth);
 			
-			map.put("AccessToken", dto.getAccessToken());
+			map.put("Authorization", dto.getAccessToken());
 			map.put("RefreshToken", dto.getRefreshToken());
 			map.put("email", id);
 			map.put("role", role);
@@ -349,8 +348,8 @@ public class MemberServiceImpl implements UserDetailsService {
 		
 		findPwdRequest.setPhone_num(aesUtil.encrypt(findPwdRequest.getPhone_num()));
 		
-		//String phone = memberMapper.findByPasswd(findPwdRequest.getEmail());
-		//String phone_data = aesUtil.decrypt(phone);
+		String phone = memberMapper.findByPasswd(findPwdRequest.getEmail());
+		String phone_data = aesUtil.decrypt(phone);
 		String email = memberMapper.checkEmailByPwd(findPwdRequest);
 		
 		if (email == null) {
@@ -361,13 +360,12 @@ public class MemberServiceImpl implements UserDetailsService {
 
 		Integer insert_user = memberMapper.selectMemberNum(email);
 
-		System.out.println("insert_user = " + insert_user);
 		
-//		if (insert_user.toString().equals("")) {
-//			dto.setResult("ERR");
-//			dto.setReason("member_num Not Found");
-//			return dto;
-//		}
+		if (insert_user.toString().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("member_numNotFound");
+			return dto;
+		}
 
 		String key = authUtil.CreateAuthNum();
 
@@ -386,7 +384,7 @@ public class MemberServiceImpl implements UserDetailsService {
 
 		UtilVo.MailRequest mailSender = new MailRequest();
 
-		mailSender.setReceiver(email);
+		mailSender.setReceiver(findPwdRequest.getEmail());
 		mailSender.setKey(key);
 		// 수신자 메일정보 저장
 		mailUtil.sendMail(mailSender);

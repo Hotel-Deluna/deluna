@@ -262,32 +262,31 @@ public class ReservationServiceImpl implements ReservationService {
 	}
 
 	@Override
-	public List<MemberReservationListInfoResponseDto> MemberReservationList(MemberReservationListRequest memberInfo)
+	public Map<String, Object> MemberReservationList(MemberReservationListRequest memberInfo)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
-
+		
+		Map<String, Object> map = new HashMap<>();
 		List<MemberReservationListInfoResponseDto> list = new ArrayList<>();
-		MemberReservationListInfoResponseDto dto = new MemberReservationListInfoResponseDto();
 		int memberNum = reservationMapper.checkMemberNum(memberInfo.getEmail());
 		Integer member_num = memberNum;
 		Integer totalCnt;
 		if (member_num.toString().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("member_num select fail");
-			list.add(dto);
-			return list;
+			map.put("result", "ERR");
+			map.put("reason", "tokenNotFound");
+			map.put("list", list);
+			return map;
 		} else {
 			memberInfo.setMember_num(member_num);
 			totalCnt = reservationMapper.selectReservationCnt(memberInfo);
 			if (totalCnt.toString().equals("")) {
-				dto.setResult("ERR");
-				dto.setReason("totalCnt select fail");
-				list.add(dto);
-				return list;
+				map.put("result", "OK");
+				map.put("reason", "total_cnt");
+				map.put("total_cnt", 0);
+				map.put("list", list);
+				return map;
 			}
 		}
 		memberInfo.setMember_num(member_num);
-		dto.setTotalCnt(totalCnt);
-
 		// 페이징 처리
 		int page = memberInfo.getPage();
 		// 총 갯수 30개 일 때
@@ -301,21 +300,23 @@ public class ReservationServiceImpl implements ReservationService {
 		list = reservationMapper.reservationList(memberInfo);
 
 		if (list.size() == 0) {
-			dto.setResult("ERR");
-			dto.setReason("data Not Found");
-			dto.setTotalCnt(list.size());
-			list.add(dto);
-			return list;
+			map.put("result", "OK");
+			map.put("reason", "");
+			map.put("total_cnt", totalCnt);
+			map.put("list", list);
+			return map;
 		} else {
 			// 전화번호 복호화
-			for (int i = 0; i < list.size(); i++) {
-				list.get(i).setReservation_phone(aesUtil.decrypt(list.get(i).getReservation_phone()));
-			}
-			dto.setResult("OK");
-			dto.setReason("");
-			list.add(dto);
+//			for (int i = 0; i < list.size(); i++) {
+//				list.get(i).setReservation_phone(aesUtil.decrypt(list.get(i).getReservation_phone()));
+//			}
+			map.put("result", "OK");
+			map.put("reason", "");
+			map.put("page", page);
+			map.put("total_cnt", totalCnt);
+			map.put("list", list);
 		}
-		return list;
+		return map;
 	}
 
 	@Override

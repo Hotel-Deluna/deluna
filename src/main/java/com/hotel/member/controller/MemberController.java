@@ -91,23 +91,25 @@ public class MemberController {
 		String pwd = memberRequestDto.getPassword();
 
 		if (email.equals("") || email.equals(null) || pwd.equals("") || pwd.equals(null)) {
+			dto.setResult("ERR");
+			dto.setReason("PrameterNotFound");
 			dto.setEmail("");
 			dto.setRole(0);
 			return dto; 
 		} 
 		memberRequestDto.setPassword(shaUtil.encryptSHA512(pwd));
 		Map<String, Object> data = memberServiceImpl.getMemberInfo(memberRequestDto);
-		res.setHeader("AccessToken", (String) data.get("AccessToken"));
+		res.setHeader("Authorization", (String) data.get("Authorization"));
 		res.setHeader("RefreshToken", (String) data.get("RefreshToken"));
 		dto.setEmail((String) data.get("email"));
 		dto.setRole((Integer) data.get("role"));
 		
-		if(!dto.getEmail().equals("") || !dto.getEmail().equals(null)) {
+		if(!(dto.getEmail() == null)) {
 			dto.setResult("OK");
 			dto.setReason("");
 		}else {
-			dto.setResult("fail");
-			dto.setReason("");
+			dto.setResult("ERR");
+			dto.setReason("memberNotFound");
 			dto.setEmail("");
 			dto.setRole(0);
 		}
@@ -153,7 +155,6 @@ public class MemberController {
 			dto.setReason("auth Not Found");
 			return dto;
 		}
-		
 		return memberServiceImpl.memberSignInKakao(loginMemberRequestKokao);
 	}
 
@@ -218,7 +219,7 @@ public class MemberController {
 	public ViewMemberInfoResponseDto ViewMemberInfo(HttpServletRequest req)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
 		ViewMemberInfoResponseDto dto = new ViewMemberInfoResponseDto();
-		String token = req.getHeader("accessToken");
+		String token = req.getHeader("Authorization");
 		String email = info.tokenInfo(token);
 
 		System.out.println("email = " + email);
@@ -242,7 +243,7 @@ public class MemberController {
 		
 		MemberVo.MemberResponseDto dto = new MemberVo.MemberResponseDto();
 		
-		String token = req.getHeader("accessToken");
+		String token = req.getHeader("Authorization");
 		String email = info.tokenInfo(token);
 
 		if (memberInfo.getEmail().equals("")) {
@@ -297,7 +298,7 @@ public class MemberController {
 		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(findPwdRequest.getEmail(), findPwdRequest.getPhone_num());
 		TokenDto token = new TokenDto();
 		token = jwtTokenProvider.generateMemberTokenDto(authenticationToken, "ROLE_UPDATE_MEMBER");
-		res.setHeader("AccessToken", token.getAccessToken());
+		res.setHeader("Authorization", token.getAccessToken());
 		res.setHeader("RefreshToken", token.getRefreshToken());
 		
 		return dto; 
@@ -323,7 +324,7 @@ public class MemberController {
 			return dto;
 		} 
 		
-		String token = req.getHeader("accessToken");
+		String token = req.getHeader("Authorization");
 		String email = info.tokenInfo(token);
 		
 		if (email.equals("")) {
@@ -357,7 +358,7 @@ public class MemberController {
 			return dto;
 		} 
 
-		String token = req.getHeader("accessToken");
+		String token = req.getHeader("Authorization");
 		String email = info.tokenInfo(token);
 		
 		if (email == null) {
@@ -417,7 +418,7 @@ public class MemberController {
 			return dto;
 		}
 
-		String token = req.getHeader("accessToken");
+		String token = req.getHeader("Authorization");
 		String email = info.tokenInfo(token);
 		if (email.equals("") || email.equals(null)) {
 			dto.setResult("ERR");

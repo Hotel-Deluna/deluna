@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -32,7 +33,7 @@ public interface ReservationService {
 
 	MemberReservationResponseDto MemberReservationWithdraw(MemberWithdrawRequest memberWithdrawVo);
 
-	List<MemberReservationListInfoResponseDto> MemberReservationList(MemberReservationListRequest memberInfo) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException;
+	Map<String, Object> MemberReservationList(MemberReservationListRequest memberInfo) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException;
 
 	ReservationDeleteContentResponseDto MemberReservationDeleteContent(MemberReservationDeleteRequest memberInfoRequest);
 
