@@ -270,7 +270,7 @@ public class ReservationServiceImpl implements ReservationService {
 		int memberNum = reservationMapper.checkMemberNum(memberInfo.getEmail());
 		Integer member_num = memberNum;
 		Integer totalCnt;
-		if (member_num.toString().equals("")) {
+		if (member_num.toString() == null) {
 			map.put("result", "ERR");
 			map.put("reason", "tokenNotFound");
 			map.put("list", list);
@@ -307,9 +307,9 @@ public class ReservationServiceImpl implements ReservationService {
 			return map;
 		} else {
 			// 전화번호 복호화
-//			for (int i = 0; i < list.size(); i++) {
-//				list.get(i).setReservation_phone(aesUtil.decrypt(list.get(i).getReservation_phone()));
-//			}
+			for (int i = 0; i < list.size(); i++) {
+				list.get(i).setReservation_phone(aesUtil.decrypt(list.get(i).getReservation_phone()));
+			}
 			map.put("result", "OK");
 			map.put("reason", "");
 			map.put("page", page);

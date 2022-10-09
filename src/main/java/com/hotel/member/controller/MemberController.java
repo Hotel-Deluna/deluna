@@ -89,7 +89,7 @@ public class MemberController {
 
 		String email = memberRequestDto.getEmail();
 		String pwd = memberRequestDto.getPassword();
-
+		
 		if (email.equals("") || email.equals(null) || pwd.equals("") || pwd.equals(null)) {
 			dto.setResult("ERR");
 			dto.setReason("PrameterNotFound");

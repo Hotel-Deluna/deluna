@@ -119,7 +119,9 @@ public class ReservationController {
 			@RequestBody MemberInfoVo.MemberReservationRequest memberReservationRequest, HttpServletRequest req) {
 
 		MemberReservationResponseDto dto = new MemberReservationResponseDto();
-
+		
+		System.out.println("data = " + memberReservationRequest.toString());
+		
 		// 파라미터 밸리데이션 체크
 		if (memberReservationRequest.getEd_date().equals("")) {
 			dto.setResult("ERR");
@@ -157,7 +159,7 @@ public class ReservationController {
 			dto.setResult("ERR");
 			dto.setReason("start_date Not Found");
 			return dto;
-		}else if (memberReservationRequest.getRole() == 1 || memberReservationRequest.getRole() == 2) {
+		}
 			String token = req.getHeader("Authorization");
 			String email = null ;
 			if(token.equals("")){
@@ -182,7 +184,6 @@ public class ReservationController {
 				memberReservationRequest.setMember_num(member_num);		
 			}
 			dto = reservationService.memberReservation(memberReservationRequest);
-		}
 				
 		return dto;
 	}

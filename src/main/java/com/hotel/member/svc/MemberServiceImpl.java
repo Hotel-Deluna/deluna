@@ -134,9 +134,6 @@ public class MemberServiceImpl implements UserDetailsService {
 		try {
 			Optional<Member> member = memberRepository.findByEmail(memberRequestDto.getEmail());
 			
-			System.out.println("test = " + member.isEmpty());
-			System.out.println("test = " + member.toString());
-			
 			if (member.isEmpty() == true) {
 				map.put("result", "ERR");
 				map.put("reason", "member Not Found");
@@ -145,7 +142,7 @@ public class MemberServiceImpl implements UserDetailsService {
 			vo = memberMapper.findByPassword(memberRequestDto);
 			if (vo.getPassword() == null) {
 				map.put("result", "ERR");
-				map.put("reason", "memberPwd Not Found");
+				map.put("reason", "memberPwdFail");
 				return map;
 			}
 			String id = vo.getEmail();
