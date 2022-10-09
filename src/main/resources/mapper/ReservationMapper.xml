@@ -7,7 +7,7 @@
 
 	<insert id="reservationInfo"
 		parameterType="com.hotel.reservation.vo.MemberInfoVo$MemberReservationRequest">
-
+		
 		insert into
 		d_reservation
 		(
@@ -16,10 +16,12 @@
 		,reservation_status, is_delete, dt_insert, insert_user
 		)
 		values(
-		#{member_num}, #{room_detail_num}, #{reservation_phone},
-		#{reservation_name},#{reservation_people}, #{reservation_price},
-		#{st_date}, #{ed_date}
-		,1 , 'N', NOW(), #{insert_user}
+		<foreach collection="list" item="item" separator=",">
+		#{item.member_num}, #{item.room_detail_num}, #{item.reservation_phone},
+		#{item.reservation_name},#{item.reservation_people}, #{item.reservation_price},
+		#{item.st_date}, #{item.ed_date}
+		,1 , 'N', NOW(), #{item.insert_user}
+		</foreach>
 		)
 
 	</insert>
@@ -157,20 +159,21 @@
 	</select> -->
 	
 	<select id="unMemberReservationInfo" resultType="com.hotel.reservation.vo.UnMemberInfoVo$UnMemberReservationInfoResponseDto">
-	
-		select 
-			reservation_num, member_num, room_detail_num,
-			reservation_phone, reservation_name,reservation_people,
-			reservation_price, reservation_status, st_date, ed_date
 		
-		from d_reservation
+	select 
+			a.reservation_num, a.member_num, a.room_detail_num,
+			a.reservation_phone, a.reservation_name, a.reservation_people,
+			a.reservation_price, a.reservation_status, a.st_date, a.ed_date,
+			d.name, c.name AS room_detail_name 	
+		from d_reservation a inner join d_room_detail b ON a.room_detail_num = b.room_detail_num
+		inner join d_room c ON c.room_num = b.room_num  inner join d_hotel d ON c.hotel_num = d.hotel_num  
 		
-		where reservation_name = #{reservation_name} 
+		where reservation_name = #{reservation_name}
 		
-			and reservation_phone = #{reservation_phone}
+		and reservation_phone = #{reservation_phone}
 		
-			and reservation_num = #{reservation_num} 
-	
+		and reservation_num = #{reservation_num}
+		
 	</select>
 	
 	
@@ -224,6 +227,12 @@
 	<select id="selectMemberNum" resultType="string">
 		
 		select insert_user from d_member where email = #{email}
+		
+	</select>
+	
+	<select id="checkUnMemberInfo" resultType="string">
+		
+		select phone_num from d_member where phone_num = #{phone_num}
 		
 	</select>
 	

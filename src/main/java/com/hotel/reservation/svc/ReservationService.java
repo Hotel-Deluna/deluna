@@ -29,7 +29,7 @@ public interface ReservationService {
 
 	CommonResponseVo Payments(MemberReservationInfo memberReservationInfo);
 
-	MemberReservationResponseDto memberReservation(MemberReservationRequest memberReservationRequest) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException;
+	MemberReservationResponseDto memberReservation(List<MemberReservationRequest> memberReservationRequest) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException;
 
 	MemberReservationResponseDto MemberReservationWithdraw(MemberWithdrawRequest memberWithdrawVo);
 

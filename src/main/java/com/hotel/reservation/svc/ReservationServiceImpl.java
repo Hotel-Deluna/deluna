@@ -32,6 +32,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
+import java.sql.SQLDataException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,7 +62,7 @@ public class ReservationServiceImpl implements ReservationService {
 			map.put("result", "ERR");
 			map.put("reason", e);
 			return map;
-		} 
+		}
 
 		list = reservationMapper.unMemberReservationInfo(unMemberReservationInfo);
 
@@ -79,7 +80,7 @@ public class ReservationServiceImpl implements ReservationService {
 					map.put("result", "ERR");
 					map.put("reason", e);
 					return map;
-				} 
+				}
 			}
 			map.put("result", "OK");
 			map.put("reason", "");
@@ -145,7 +146,7 @@ public class ReservationServiceImpl implements ReservationService {
 	}
 
 	@Override
-	public MemberReservationResponseDto memberReservation(MemberReservationRequest memberReservationRequest)
+	public MemberReservationResponseDto memberReservation(List<MemberReservationRequest> memberReservationRequest)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
 		MemberReservationResponseDto dto = new MemberReservationResponseDto();
 		// 예약정보 입력
@@ -154,97 +155,113 @@ public class ReservationServiceImpl implements ReservationService {
 		// 예약자 insert_user 조회
 		String insert_user = null;
 		Map<String, Object> unMemberMap = new HashMap<>();
-		if (!(memberReservationRequest.getMember_num() == null)) {
-			insert_user = reservationMapper.selectUserInfo(memberReservationRequest.getMember_num());
-			if (insert_user != null) {
-				memberReservationRequest.setInsert_user(insert_user);
-			} else {
-				dto.setResult("ERR");
-				dto.setReason("insertNum Not Found");
-			}
-		} else {
+		for (int i = 0; i < memberReservationRequest.size(); i++) {
 
-			// 비회원 예약 로직
-			// 비회원 기본 정보 저장
-			MemberVo.RegisterMemberRequest memberVo = new MemberVo.RegisterMemberRequest();
-			memberVo.setName(memberReservationRequest.getReservation_name());
-			memberVo.setPhone_num(aesUtil.encrypt(memberReservationRequest.getReservation_phone()));
-			memberVo.setRole(memberReservationRequest.getRole());
-			int UnMemberInfo = memberMapper.registerUnMemberInfo(memberVo);
-			if (UnMemberInfo == 0) {
+			if (!(memberReservationRequest.get(i).getMember_num() == null)) {
+				insert_user = reservationMapper.selectUserInfo(memberReservationRequest.get(i).getMember_num());
+				if (insert_user != null) {
+					memberReservationRequest.get(i).setInsert_user(insert_user);
+				} else {
+					dto.setResult("ERR");
+					dto.setReason("insertNum Not Found");
+				}
+			} else {
+
+				// 비회원 예약 로직
+				// 비회원 기본 정보 저장
+				// 최초 1번만 가입
+				MemberVo.RegisterMemberRequest memberVo = new MemberVo.RegisterMemberRequest();
+				memberVo.setName(memberReservationRequest.get(0).getReservation_name());
+				memberVo.setPhone_num(aesUtil.encrypt(memberReservationRequest.get(0).getReservation_phone()));
+				memberVo.setRole(memberReservationRequest.get(0).getRole());
+				
+				String phoneData = reservationMapper.checkUnMemberInfo(memberVo.getPhone_num());
+				if(phoneData == null) {
+					int UnMemberInfo = memberMapper.registerUnMemberInfo(memberVo);
+					if (UnMemberInfo == 0) {
+						// insert 실패 시 에러 처리
+						dto.setResult("ERR");
+						dto.setReason("unMember info insert fail");
+						return dto;
+					}	
+				}
+				unMemberMap = reservationMapper.selectUnUserInfo(memberVo.getPhone_num());
+
+			}
+			// 예약자 정보 입력
+			memberReservationRequest.get(i).setInsert_user(String.valueOf(unMemberMap.get("insert_user")));
+			memberReservationRequest.get(i).setMember_num((Integer) unMemberMap.get("member_num"));
+			// 예약 인서트
+			System.out.println("data = " + memberReservationRequest.toString());
+			// 암호화 후 저장
+			memberReservationRequest.get(i)
+					.setReservation_phone(aesUtil.encrypt(memberReservationRequest.get(i).getReservation_phone()));
+
+			int reservation_info = -1;
+
+			try {
+				reservation_info = reservationMapper.reservationInfo(memberReservationRequest);
+			} catch (Exception e) {
+				dto.setResult("ERR");
+				dto.setReason("insert Duplicate entry phone");
+			}
+
+			if (reservation_info == 0) {
 				// insert 실패 시 에러 처리
 				dto.setResult("ERR");
-				dto.setReason("unMember info insert fail");
-				return dto;
-			}
-			unMemberMap = reservationMapper.selectUnUserInfo(memberVo.getPhone_num());
-
-		}
-
-		// 예약자 정보 입력
-		memberReservationRequest.setInsert_user(String.valueOf(unMemberMap.get("insert_user")));
-		memberReservationRequest.setMember_num((Integer) unMemberMap.get("member_num"));
-		// 예약 인서트
-
-		System.out.println("data = " + memberReservationRequest.toString());
-		
-		//암호화 후 저장
-		memberReservationRequest.setReservation_phone(aesUtil.encrypt(memberReservationRequest.getReservation_phone()));
-		int reservation_info = reservationMapper.reservationInfo(memberReservationRequest);
-
-		if (reservation_info == 0) {
-			// insert 실패 시 에러 처리
-			dto.setResult("ERR");
-			dto.setReason("reservation info insert fail");
-			return dto;
-		} else {
-
-			// 예약완료 일 떄
-			ReservationDetailPaymentsRequest payment = new ReservationDetailPaymentsRequest();
-
-			payment.setPayment_price(memberReservationRequest.getReservation_price());
-			payment.setInsert_user(memberReservationRequest.getInsert_user());
-
-			// 가격 인서트
-			int pay_info = reservationMapper.payInfo(payment);
-
-			if (pay_info == 0) {
-				// 가격 인서트 안될 경우 예약정보도 취소해야 함
-				reservationMapper.reservationDeleteUnMember(memberReservationRequest.getInsert_user());
-				reservationMapper.reservationDelete(memberReservationRequest.getMember_num());
-				dto.setResult("ERR");
-				dto.setReason("payment Info insert fail");
+				dto.setReason("reservation info insert fail");
 				return dto;
 			} else {
 
-				// 예약정보 + 결제상세정보 입력이 끝났을 때
+				// 예약완료 일 떄
+				ReservationDetailPaymentsRequest payment = new ReservationDetailPaymentsRequest();
 
-				// 결제 정보 인서트
-				int reservation_num = reservationMapper.selectReservationNum(memberReservationRequest.getMember_num());
-				int payment_num = reservationMapper.selectPaymentNum(memberReservationRequest);
+				payment.setPayment_price(memberReservationRequest.get(i).getReservation_price());
+				payment.setInsert_user(memberReservationRequest.get(i).getInsert_user());
 
-				if (reservation_num != 0 && payment_num != 0) {
+				// 가격 인서트
+				int pay_info = reservationMapper.payInfo(payment);
 
-					ReservationPaymentsRequest req = new ReservationPaymentsRequest();
+				if (pay_info == 0) {
+					// 가격 인서트 안될 경우 예약정보도 취소해야 함
+					reservationMapper.reservationDeleteUnMember(memberReservationRequest.get(i).getInsert_user());
+					reservationMapper.reservationDelete(memberReservationRequest.get(i).getMember_num());
+					dto.setResult("ERR");
+					dto.setReason("payment Info insert fail");
+					return dto;
+				} else {
 
-					req.setReservation_num(reservation_num);
-					req.setPayment_detail_num(payment_num);
-					req.setInsert_user(memberReservationRequest.getInsert_user());
+					// 예약정보 + 결제상세정보 입력이 끝났을 때
 
-					int d_payment = reservationMapper.insertPaymentInfo(req);
+					// 결제 정보 인서트
+					int reservation_num = reservationMapper.selectReservationNum(memberReservationRequest.get(i).getMember_num());
+					int payment_num = reservationMapper.selectPaymentNum(memberReservationRequest.get(i).getInsert_user());
 
-					if (d_payment == 0) {
-						// 전체 취소
-						reservationMapper.reservationDelete(memberReservationRequest.getMember_num());
-						reservationMapper.paymentDelete(req.getInsert_user());
+					if (reservation_num != 0 && payment_num != 0) {
 
-					} else {
-						dto.setResult("OK");
-						dto.setReason("reservation success");
+						ReservationPaymentsRequest req = new ReservationPaymentsRequest();
+
+						req.setReservation_num(reservation_num);
+						req.setPayment_detail_num(payment_num);
+						req.setInsert_user(memberReservationRequest.get(i).getInsert_user());
+
+						int d_payment = reservationMapper.insertPaymentInfo(req);
+
+						if (d_payment == 0) {
+							// 전체 취소
+							reservationMapper.reservationDelete(memberReservationRequest.get(i).getMember_num());
+							reservationMapper.paymentDelete(req.getInsert_user());
+
+						} else {
+							dto.setResult("OK");
+							dto.setReason("reservation success");
+						}
 					}
 				}
 			}
+
 		}
+
 		return dto;
 	}
 

@@ -22,7 +22,7 @@ import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberWithdrawRequest;
 @Repository
 public interface ReservationMapper {
 
-	int reservationInfo(MemberReservationRequest memberReservationRequest);
+	int reservationInfo(List<MemberReservationRequest> memberReservationRequest);
 
 	int payInfo(ReservationDetailPaymentsRequest payment);
 
@@ -30,7 +30,7 @@ public interface ReservationMapper {
 
 	void reservationDelete(int member_num);
 
-	int selectPaymentNum(MemberReservationRequest memberReservationRequest);
+	int selectPaymentNum(String string);
 
 	String selectUserInfo(int member_num);
 
@@ -76,5 +76,8 @@ public interface ReservationMapper {
 	Map<String, Object> selectUnUserInfo(String string);
 
 	void reservationDeleteUnMember(String insert_user);
+
+	String checkUnMemberInfo(String phone_num);
+
 
 }
