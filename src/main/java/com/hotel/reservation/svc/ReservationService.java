@@ -29,7 +29,7 @@ public interface ReservationService {
 
 	CommonResponseVo Payments(MemberReservationInfo memberReservationInfo);
 
-	MemberReservationResponseDto memberReservation(MemberReservationRequest memberReservationRequest);
+	MemberReservationResponseDto memberReservation(MemberReservationRequest memberReservationRequest) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException;
 
 	MemberReservationResponseDto MemberReservationWithdraw(MemberWithdrawRequest memberWithdrawVo);
 
@@ -40,6 +40,8 @@ public interface ReservationService {
 	String checkMemberInfo(String email);
 
 	int selectMemberNum(String email);
+
+	MemberReservationResponseDto unMemberReservation(MemberReservationRequest memberReservationRequest);
 
 //    HotelSearchVo.Response SearchBar(HotelSearchVo.SearchBarRequest searchBarVoSearchBarRequest);
 }

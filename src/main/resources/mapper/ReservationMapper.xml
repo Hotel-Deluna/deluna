@@ -39,6 +39,12 @@
 		select insert_user from d_member where member_num = #{member_num}
 
 	</select>
+	
+	<select id="selectUnUserInfo" resultType="map">
+
+		select insert_user, member_num from d_member where phone_num = #{phone_num}
+
+	</select>
 
 	<delete id="reservationDelete" parameterType="int">
 

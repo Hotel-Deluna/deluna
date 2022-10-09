@@ -7,6 +7,7 @@ import com.hotel.company.vo.HotelSearchVo;
 import com.hotel.jwt.CheckTokenInfo;
 import com.hotel.jwt.JwtTokenProvider;
 import com.hotel.member.svc.MemberServiceImpl;
+import com.hotel.member.vo.MemberVo;
 import com.hotel.owner.vo.OwnerVo;
 import com.hotel.reservation.svc.ReservationService;
 import com.hotel.reservation.vo.MemberInfoVo;
@@ -116,7 +117,7 @@ public class ReservationController {
 	@ResponseBody
 	@PostMapping("/memberReservation")
 	public MemberReservationResponseDto MemberReservation(
-			@RequestBody MemberInfoVo.MemberReservationRequest memberReservationRequest, HttpServletRequest req) {
+			@RequestBody MemberInfoVo.MemberReservationRequest memberReservationRequest, HttpServletRequest req) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
 
 		MemberReservationResponseDto dto = new MemberReservationResponseDto();
 		
@@ -159,7 +160,7 @@ public class ReservationController {
 			dto.setResult("ERR");
 			dto.setReason("start_date Not Found");
 			return dto;
-		}
+		}else if (memberReservationRequest.getRole() == 1 || memberReservationRequest.getRole() == 2) {
 			String token = req.getHeader("Authorization");
 			String email = null ;
 			if(token.equals("")){
@@ -184,6 +185,9 @@ public class ReservationController {
 				memberReservationRequest.setMember_num(member_num);		
 			}
 			dto = reservationService.memberReservation(memberReservationRequest);
+		}else {
+			dto = reservationService.memberReservation(memberReservationRequest);
+		}
 				
 		return dto;
 	}

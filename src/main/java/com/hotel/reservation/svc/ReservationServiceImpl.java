@@ -2,7 +2,10 @@ package com.hotel.reservation.svc;
 
 import com.hotel.common.CommonResponseVo;
 import com.hotel.company.vo.*;
+import com.hotel.mapper.MemberMapper;
 import com.hotel.mapper.ReservationMapper;
+import com.hotel.member.vo.MemberVo;
+import com.hotel.member.vo.MemberVo.RegisterMemberRequest;
 import com.hotel.reservation.vo.MemberInfoVo;
 import com.hotel.reservation.vo.MemberInfoVo.MemberInfoRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationDeleteRequest;
@@ -40,6 +43,8 @@ import java.util.Map;
 public class ReservationServiceImpl implements ReservationService {
 
 	private final ReservationMapper reservationMapper;
+
+	private final MemberMapper memberMapper;
 
 	private final AES256Util aesUtil;
 
@@ -144,25 +149,50 @@ public class ReservationServiceImpl implements ReservationService {
 	}
 
 	@Override
-	public MemberReservationResponseDto memberReservation(MemberReservationRequest memberReservationRequest) {
+	public MemberReservationResponseDto memberReservation(MemberReservationRequest memberReservationRequest)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
 		MemberReservationResponseDto dto = new MemberReservationResponseDto();
-		Map<String, Object> map = new HashMap<>();
 		// 예약정보 입력
 		// 결재상세정보 입력
 		// 결재정보 입력
-
 		// 예약자 insert_user 조회
-		String insert_user = reservationMapper.selectUserInfo(memberReservationRequest.getMember_num());
+		String insert_user = null;
+		Map<String, Object> unMemberMap = new HashMap<>();
+		if (!(memberReservationRequest.getMember_num() == null)) {
+			insert_user = reservationMapper.selectUserInfo(memberReservationRequest.getMember_num());
+			if(insert_user != null) {
+				memberReservationRequest.setInsert_user(insert_user);
+			}else {
+				dto.setResult("ERR");
+				dto.setReason("insertNum Not Found");
+			}
+		} else {
 
-		if (insert_user == null) {
-			dto.setResult("ERR");
-			dto.setReason("insert_user select fail");
-			return dto;
+			// 비회원 예약 로직
+			// 비회원 기본 정보 저장
+			MemberVo.RegisterMemberRequest memberVo = new MemberVo.RegisterMemberRequest();
+			memberVo.setName(memberReservationRequest.getReservation_name());
+			memberVo.setPhone_num(aesUtil.encrypt(memberReservationRequest.getReservation_phone()));
+			memberVo.setRole(memberReservationRequest.getRole());
+			System.out.println("pass = " + memberVo.getPhone_num());
+			int UnMemberInfo = memberMapper.registerUnMemberInfo(memberVo);
+			if (UnMemberInfo == 0) {
+				// insert 실패 시 에러 처리
+				dto.setResult("ERR");
+				dto.setReason("unMember info insert fail");
+				return dto;
+			}
+			unMemberMap = reservationMapper.selectUnUserInfo(memberVo.getPhone_num());
+			
+			System.out.println("unMemberMap = " + unMemberMap.toString());
 		}
 
 		// 예약자 정보 입력
-		memberReservationRequest.setInsert_user(insert_user);
+		memberReservationRequest.setInsert_user((String) unMemberMap.get("insert_user"));
+		memberReservationRequest.setMember_num( (Integer) unMemberMap.get("member_num"));
 		// 예약 인서트
+		
+		System.out.println("data = " + memberReservationRequest.toString());
 		int reservation_info = reservationMapper.reservationInfo(memberReservationRequest);
 
 		if (reservation_info == 0) {
@@ -176,7 +206,7 @@ public class ReservationServiceImpl implements ReservationService {
 			ReservationDetailPaymentsRequest payment = new ReservationDetailPaymentsRequest();
 
 			payment.setPayment_price(memberReservationRequest.getReservation_price());
-			payment.setInsert_user(insert_user);
+			payment.setInsert_user(memberReservationRequest.getInsert_user());
 
 			// 가격 인서트
 			int pay_info = reservationMapper.payInfo(payment);
@@ -201,7 +231,7 @@ public class ReservationServiceImpl implements ReservationService {
 
 					req.setReservation_num(reservation_num);
 					req.setPayment_detail_num(payment_num);
-					req.setInsert_user(insert_user);
+					req.setInsert_user(memberReservationRequest.getInsert_user());
 
 					int d_payment = reservationMapper.insertPaymentInfo(req);
 
@@ -219,6 +249,15 @@ public class ReservationServiceImpl implements ReservationService {
 		}
 		return dto;
 	}
+	
+	@Override
+	public MemberReservationResponseDto unMemberReservation(MemberReservationRequest memberReservationRequest) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	
+	
 
 	@Override
 	public MemberReservationResponseDto MemberReservationWithdraw(MemberWithdrawRequest memberWithdrawVo) {
@@ -264,7 +303,7 @@ public class ReservationServiceImpl implements ReservationService {
 	@Override
 	public Map<String, Object> MemberReservationList(MemberReservationListRequest memberInfo)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
-		
+
 		Map<String, Object> map = new HashMap<>();
 		List<MemberReservationListInfoResponseDto> list = new ArrayList<>();
 		int memberNum = reservationMapper.checkMemberNum(memberInfo.getEmail());
@@ -357,6 +396,8 @@ public class ReservationServiceImpl implements ReservationService {
 	public int selectMemberNum(String email) {
 		return reservationMapper.checkMemberNum(email);
 	}
+
+	
 
 //    @Override
 //    public CommonResponseVo RegisterHotel(HotelInfoVo.RegisterHotelRequest registerHotelRequest) {

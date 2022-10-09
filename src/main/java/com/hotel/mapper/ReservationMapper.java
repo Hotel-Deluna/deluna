@@ -1,10 +1,12 @@
 package com.hotel.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
+import com.hotel.member.vo.MemberVo.RegisterMemberRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationDeleteRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListInfoResponseDto;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListRequest;
@@ -70,4 +72,7 @@ public interface ReservationMapper {
 	int checkMemberNum(String email);
 
 	Integer selectReservationCnt(MemberReservationListRequest memberInfo);
+
+	Map<String, Object> selectUnUserInfo(String string);
+
 }

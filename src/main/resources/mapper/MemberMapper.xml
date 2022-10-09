@@ -168,10 +168,14 @@
 		
 	</select>
 	
-	<select id="test" resultType="string">
-		
-		select password from d_member where email = #{email}
-		
-	</select>
+	
+	<insert id="registerUnMemberInfo" parameterType="map" >
+		<selectKey resultType="int"  order="BEFORE" keyProperty="member_num">	
+			select max(member_num + 1) from d_member
+		</selectKey>	
+		insert into d_member (name, phone_num, role, is_delete, dt_insert, insert_user) 
+		values(#{name}, #{phone_num}, #{role}, 'N', NOW(), CONCAT(#{role}, #{member_num}))
+	
+	</insert>
 
 </mapper>
