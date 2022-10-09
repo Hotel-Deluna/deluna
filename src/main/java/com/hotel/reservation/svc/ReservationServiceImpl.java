@@ -188,8 +188,8 @@ public class ReservationServiceImpl implements ReservationService {
 		}
 
 		// 예약자 정보 입력
-		memberReservationRequest.setInsert_user((String) unMemberMap.get("insert_user"));
-		memberReservationRequest.setMember_num( (Integer) unMemberMap.get("member_num"));
+		memberReservationRequest.setInsert_user(String.valueOf(unMemberMap.get("insert_user")));
+		memberReservationRequest.setMember_num((Integer) unMemberMap.get("member_num"));
 		// 예약 인서트
 		
 		System.out.println("data = " + memberReservationRequest.toString());
