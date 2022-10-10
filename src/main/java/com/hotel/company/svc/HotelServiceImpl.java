@@ -373,10 +373,9 @@ public class HotelServiceImpl implements HotelService {
                 for(HotelInfoVo.RoomInfo roomInfo : roomInfoList){
                     int roomDetailAvailableCnt = 0; // 사용가능한 호실 수 체크
 
-                    // 투숙인원 조건이 있으면 투숙인원 체크. 조건에 해당되는 방이 한개라도 있으면 true
+                    // 투숙인원 조건이 있으면 투숙인원 체크. 조건에 해당되는 방이 한개라도 있으면 true. 최대인원수 조건에 맞는지만 체크
                     if(searchBarVoSearchBarRequest.getPeople_count() != null){
-                        if(roomInfo.getMinimum_people() <= searchBarVoSearchBarRequest.getPeople_count() &&
-                                searchBarVoSearchBarRequest.getPeople_count() <= roomInfo.getMaximum_people()){
+                        if(searchBarVoSearchBarRequest.getPeople_count() <= roomInfo.getMaximum_people()){
                             isPeopleCountAvailable = true;
                         }
                     }
