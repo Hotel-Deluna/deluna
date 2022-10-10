@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -22,23 +23,25 @@ import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberReservationInfoResponseDt
 @Service
 public interface ReservationService {
 
-	List<UnMemberReservationInfoResponseDto> UnMemberReservationInfo(UnMemberInfoVo.UnMemberReservationRequest unMemberReservationInfo) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException;
+	Map<String, Object> UnMemberReservationInfo(UnMemberInfoVo.UnMemberReservationRequest unMemberReservationInfo) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException;
 	
 	MemberReservationResponseDto UnMemberReservationWithdraw(UnMemberInfoVo.UnMemberWithdrawRequest unMemberWithdrawVo);
 
 	CommonResponseVo Payments(MemberReservationInfo memberReservationInfo);
 
-	MemberReservationResponseDto memberReservation(MemberReservationRequest memberReservationRequest);
+	MemberReservationResponseDto memberReservation(List<MemberReservationRequest> memberReservationRequest) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException;
 
 	MemberReservationResponseDto MemberReservationWithdraw(MemberWithdrawRequest memberWithdrawVo);
 
-	List<MemberReservationListInfoResponseDto> MemberReservationList(MemberReservationListRequest memberInfo) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException;
+	Map<String, Object> MemberReservationList(MemberReservationListRequest memberInfo) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException;
 
 	ReservationDeleteContentResponseDto MemberReservationDeleteContent(MemberReservationDeleteRequest memberInfoRequest);
 
 	String checkMemberInfo(String email);
 
 	int selectMemberNum(String email);
+
+	MemberReservationResponseDto unMemberReservation(MemberReservationRequest memberReservationRequest);
 
 //    HotelSearchVo.Response SearchBar(HotelSearchVo.SearchBarRequest searchBarVoSearchBarRequest);
 }

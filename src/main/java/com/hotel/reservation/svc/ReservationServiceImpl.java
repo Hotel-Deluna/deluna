@@ -2,7 +2,10 @@ package com.hotel.reservation.svc;
 
 import com.hotel.common.CommonResponseVo;
 import com.hotel.company.vo.*;
+import com.hotel.mapper.MemberMapper;
 import com.hotel.mapper.ReservationMapper;
+import com.hotel.member.vo.MemberVo;
+import com.hotel.member.vo.MemberVo.RegisterMemberRequest;
 import com.hotel.reservation.vo.MemberInfoVo;
 import com.hotel.reservation.vo.MemberInfoVo.MemberInfoRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationDeleteRequest;
@@ -29,6 +32,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
+import java.sql.SQLDataException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,51 +45,50 @@ public class ReservationServiceImpl implements ReservationService {
 
 	private final ReservationMapper reservationMapper;
 
+	private final MemberMapper memberMapper;
+
 	private final AES256Util aesUtil;
 
 	@Override
-	public List<UnMemberReservationInfoResponseDto> UnMemberReservationInfo(
-			UnMemberReservationRequest unMemberReservationInfo)
-			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
+	public Map<String, Object> UnMemberReservationInfo(UnMemberReservationRequest unMemberReservationInfo) {
 
+		Map<String, Object> map = new HashMap<>();
 		List<UnMemberReservationInfoResponseDto> list = new ArrayList<>();
 		UnMemberReservationInfoResponseDto dto = new UnMemberReservationInfoResponseDto();
 
-		String phone = reservationMapper.selectMemberPhoneInfo(unMemberReservationInfo);
-
-		if (phone.equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("reservation_num select fail");
-			list.add(dto);
-			return list;
+		try {
+			unMemberReservationInfo
+					.setReservation_phone(aesUtil.encrypt(unMemberReservationInfo.getReservation_phone()));
+		} catch (Exception e) {
+			map.put("result", "ERR");
+			map.put("reason", e);
+			return map;
 		}
 
-		// 암호화 된 핸드폰 번호 복호화
-		phone = aesUtil.decrypt(phone);
-		String reqPhone = unMemberReservationInfo.getReservation_phone();
-
-		// 예약된 고객 번호와 입력된 고객번호가 맞는지 확인 후
-		if (reqPhone.equals(phone)) {
-			list = reservationMapper.unMemberReservationInfo(unMemberReservationInfo);
-		} else {
-			dto.setResult("ERR");
-			dto.setReason("phone eqaule fail");
-			list.add(dto);
-			return list;
-		}
+		list = reservationMapper.unMemberReservationInfo(unMemberReservationInfo);
 
 		// 예약정보 확인
 		if (list.size() == 0) {
-			dto.setResult("ERR");
-			dto.setReason("unReservation Info select fail");
-			list.add(dto);
-			return list;
+			map.put("result", "ERR");
+			map.put("reason", "unReservation Info select fail");
+			return map;
 		} else {
-			dto.setResult("OK");
-			dto.setReason("unReservation select success");
+			for (int i = 0; i < list.size(); i++) {
+				String phone = list.get(i).getReservation_phone();
+				try {
+					list.get(i).setReservation_phone(aesUtil.decrypt(phone));
+				} catch (Exception e) {
+					map.put("result", "ERR");
+					map.put("reason", e);
+					return map;
+				}
+			}
+			map.put("result", "OK");
+			map.put("reason", "");
+			map.put("list", list);
 
 		}
-		return list;
+		return map;
 	}
 
 	@Override
@@ -144,46 +147,94 @@ public class ReservationServiceImpl implements ReservationService {
 	}
 
 	@Override
-	public MemberReservationResponseDto memberReservation(MemberReservationRequest memberReservationRequest) {
+	public MemberReservationResponseDto memberReservation(List<MemberReservationRequest> memberReservationRequest)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
 		MemberReservationResponseDto dto = new MemberReservationResponseDto();
-		Map<String, Object> map = new HashMap<>();
 		// 예약정보 입력
 		// 결재상세정보 입력
 		// 결재정보 입력
-
 		// 예약자 insert_user 조회
-		String insert_user = reservationMapper.selectUserInfo(memberReservationRequest.getMember_num());
+		String insert_user = null;
+		Map<String, Object> unMemberMap = new HashMap<>();
+		ReservationDetailPaymentsRequest payment = new ReservationDetailPaymentsRequest();
 
-		if (insert_user == null) {
-			dto.setResult("ERR");
-			dto.setReason("insert_user select fail");
-			return dto;
+		for (int i = 0; i < memberReservationRequest.size(); i++) {
+
+			if (!(memberReservationRequest.get(i).getMember_num() == null)) {
+				insert_user = reservationMapper.selectUserInfo(memberReservationRequest.get(i).getMember_num());
+				if (insert_user != null) {
+					memberReservationRequest.get(i).setInsert_user(insert_user);
+				} else {
+					dto.setResult("ERR");
+					dto.setReason("insertNum Not Found");
+				}
+			} else {
+
+				// 비회원 예약 로직
+				// 비회원 기본 정보 저장
+				// 최초 1번만 가입
+				MemberVo.RegisterMemberRequest memberVo = new MemberVo.RegisterMemberRequest();
+				memberVo.setName(memberReservationRequest.get(i).getReservation_name());
+				memberVo.setPhone_num(aesUtil.encrypt(memberReservationRequest.get(i).getReservation_phone()));
+				memberVo.setRole(memberReservationRequest.get(i).getRole());
+				
+				//없는 회원이면 간편 가입 시킨다
+				String phoneData = reservationMapper.checkUnMemberInfo(memberVo.getPhone_num());
+				if (phoneData == null) {
+					int UnMemberInfo = memberMapper.registerUnMemberInfo(memberVo);
+					if (UnMemberInfo == 0) {
+						// insert 실패 시 에러 처리
+						dto.setResult("ERR");
+						dto.setReason("unMember info insert fail");
+						return dto;
+					}
+				}
+				unMemberMap = reservationMapper.selectUnUserInfo(memberVo.getPhone_num());
+
+			}
+			// 예약자 정보 입력
+			memberReservationRequest.get(i).setInsert_user(String.valueOf(unMemberMap.get("insert_user")));
+			memberReservationRequest.get(i).setMember_num((Integer) unMemberMap.get("member_num"));
+			// 예약 인서트
+			System.out.println("data = " + memberReservationRequest.toString());
+			// 암호화 후 저장
+			memberReservationRequest.get(i)
+					.setReservation_phone(aesUtil.encrypt(memberReservationRequest.get(i).getReservation_phone()));
 		}
+		
+		for (int x = 0; x < memberReservationRequest.size(); x++) {
+			MemberInfoVo.MemberReservationRequest vo = new MemberInfoVo.MemberReservationRequest();
+			vo = memberReservationRequest.get(x);
+			System.out.println("vo = " +vo.toString());
+			int reservation_info = -1;
+			try {
+				reservation_info = reservationMapper.reservationInfo(vo);
+			} catch (Exception e) {
+				dto.setResult("ERR");
+				dto.setReason("insert Duplicate entry phone");
+			}
 
-		// 예약자 정보 입력
-		memberReservationRequest.setInsert_user(insert_user);
-		// 예약 인서트
-		int reservation_info = reservationMapper.reservationInfo(memberReservationRequest);
+			if (reservation_info == 0) {
+				// insert 실패 시 에러 처리
+				dto.setResult("ERR");
+				dto.setReason("reservation info insert fail");
+				return dto;
+			} else {
 
-		if (reservation_info == 0) {
-			// insert 실패 시 에러 처리
-			dto.setResult("ERR");
-			dto.setReason("reservation info insert fail");
-			return dto;
-		} else {
+				// 예약완료 일 떄
 
-			// 예약완료 일 떄
-			ReservationDetailPaymentsRequest payment = new ReservationDetailPaymentsRequest();
+				payment.setPayment_price(memberReservationRequest.get(x).getReservation_price());
+				payment.setInsert_user(memberReservationRequest.get(x).getInsert_user());
 
-			payment.setPayment_price(memberReservationRequest.getReservation_price());
-			payment.setInsert_user(insert_user);
+			}
 
 			// 가격 인서트
 			int pay_info = reservationMapper.payInfo(payment);
 
 			if (pay_info == 0) {
 				// 가격 인서트 안될 경우 예약정보도 취소해야 함
-				reservationMapper.reservationDelete(memberReservationRequest.getMember_num());
+				reservationMapper.reservationDeleteUnMember(memberReservationRequest.get(x).getInsert_user());
+				reservationMapper.reservationDelete(memberReservationRequest.get(x).getMember_num());
 				dto.setResult("ERR");
 				dto.setReason("payment Info insert fail");
 				return dto;
@@ -192,8 +243,9 @@ public class ReservationServiceImpl implements ReservationService {
 				// 예약정보 + 결제상세정보 입력이 끝났을 때
 
 				// 결제 정보 인서트
-				int reservation_num = reservationMapper.selectReservationNum(memberReservationRequest.getMember_num());
-				int payment_num = reservationMapper.selectPaymentNum(memberReservationRequest);
+				int reservation_num = reservationMapper
+						.selectReservationNum(memberReservationRequest.get(x).getMember_num());
+				int payment_num = reservationMapper.selectPaymentNum(memberReservationRequest.get(x).getInsert_user());
 
 				if (reservation_num != 0 && payment_num != 0) {
 
@@ -201,13 +253,13 @@ public class ReservationServiceImpl implements ReservationService {
 
 					req.setReservation_num(reservation_num);
 					req.setPayment_detail_num(payment_num);
-					req.setInsert_user(insert_user);
+					req.setInsert_user(memberReservationRequest.get(x).getInsert_user());
 
 					int d_payment = reservationMapper.insertPaymentInfo(req);
 
 					if (d_payment == 0) {
 						// 전체 취소
-						reservationMapper.reservationDelete(memberReservationRequest.getMember_num());
+						reservationMapper.reservationDelete(memberReservationRequest.get(x).getMember_num());
 						reservationMapper.paymentDelete(req.getInsert_user());
 
 					} else {
@@ -217,7 +269,14 @@ public class ReservationServiceImpl implements ReservationService {
 				}
 			}
 		}
+
 		return dto;
+	}
+
+	@Override
+	public MemberReservationResponseDto unMemberReservation(MemberReservationRequest memberReservationRequest) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
@@ -262,32 +321,31 @@ public class ReservationServiceImpl implements ReservationService {
 	}
 
 	@Override
-	public List<MemberReservationListInfoResponseDto> MemberReservationList(MemberReservationListRequest memberInfo)
+	public Map<String, Object> MemberReservationList(MemberReservationListRequest memberInfo)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
 
+		Map<String, Object> map = new HashMap<>();
 		List<MemberReservationListInfoResponseDto> list = new ArrayList<>();
-		MemberReservationListInfoResponseDto dto = new MemberReservationListInfoResponseDto();
 		int memberNum = reservationMapper.checkMemberNum(memberInfo.getEmail());
 		Integer member_num = memberNum;
 		Integer totalCnt;
-		if (member_num.toString().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("member_num select fail");
-			list.add(dto);
-			return list;
+		if (member_num.toString() == null) {
+			map.put("result", "ERR");
+			map.put("reason", "tokenNotFound");
+			map.put("list", list);
+			return map;
 		} else {
 			memberInfo.setMember_num(member_num);
 			totalCnt = reservationMapper.selectReservationCnt(memberInfo);
 			if (totalCnt.toString().equals("")) {
-				dto.setResult("ERR");
-				dto.setReason("totalCnt select fail");
-				list.add(dto);
-				return list;
+				map.put("result", "OK");
+				map.put("reason", "total_cnt");
+				map.put("total_cnt", 0);
+				map.put("list", list);
+				return map;
 			}
 		}
 		memberInfo.setMember_num(member_num);
-		dto.setTotalCnt(totalCnt);
-
 		// 페이징 처리
 		int page = memberInfo.getPage();
 		// 총 갯수 30개 일 때
@@ -301,21 +359,23 @@ public class ReservationServiceImpl implements ReservationService {
 		list = reservationMapper.reservationList(memberInfo);
 
 		if (list.size() == 0) {
-			dto.setResult("ERR");
-			dto.setReason("data Not Found");
-			dto.setTotalCnt(list.size());
-			list.add(dto);
-			return list;
+			map.put("result", "OK");
+			map.put("reason", "");
+			map.put("total_cnt", totalCnt);
+			map.put("list", list);
+			return map;
 		} else {
 			// 전화번호 복호화
 			for (int i = 0; i < list.size(); i++) {
 				list.get(i).setReservation_phone(aesUtil.decrypt(list.get(i).getReservation_phone()));
 			}
-			dto.setResult("OK");
-			dto.setReason("");
-			list.add(dto);
+			map.put("result", "OK");
+			map.put("reason", "");
+			map.put("page", page);
+			map.put("total_cnt", totalCnt);
+			map.put("list", list);
 		}
-		return list;
+		return map;
 	}
 
 	@Override

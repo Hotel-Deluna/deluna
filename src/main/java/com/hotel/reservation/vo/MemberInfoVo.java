@@ -105,17 +105,11 @@ public class MemberInfoVo {
 	@Schema(description = "회원 예약 리스트 조회 response")
 	public static class MemberReservationListInfoResponseDto {
 		
-		@Schema(description = "api 결과값", required = true, example = "OK or ERR")
-		String result;
-		
-		@Schema(description = "상세내용", required = true, example = "param Not Found")
-		String reason;
-		
-		@Schema(description = "totalSize", required = true, example = "30")
-		Integer totalCnt;
-
 		@Schema(description = "예약번호", required = true, example = "1")
 		Integer reservation_num;
+		
+//		@Schema(description = "호텔번호", required = true, example = "1")
+//		Integer hotel_num;
 
 		@Schema(description = "객실상세번호", required = true, example = "2")
 		Integer room_detail_num;
@@ -156,18 +150,15 @@ public class MemberInfoVo {
 
 		@Schema(description = "객실상세번호", required = true, example = "000002")
 		Integer room_detail_num;
+		
+		@Schema(description = "호텔번호", required = true, example = "000002")
+		Integer hotel_num;
 
 		@Schema(description = "예약자명", required = true, example = "예약자명")
 		String reservation_name;
 
 		@Schema(description = "휴대폰번호", required = true, example = "01012345678")
 		String reservation_phone;
-
-		@Schema(description = "호텔명", required = true, example = "호텔 델루나")
-		String name;
-
-		@Schema(description = "객실명", required = true, example = "스탠다드 룸")
-		String room_detail_name;
 
 		@Schema(description = "투숙인원", required = true, example = "2")
 		Integer reservation_people;
@@ -189,9 +180,6 @@ public class MemberInfoVo {
 		
 		@Schema(description = "회원번호", required = true, example = "백엔드에서만 사용")
 		Integer member_num;
-		
-		@Schema(description = "email", required = true, example = "test@test.com")
-		String email;
 		
 	}
 
@@ -258,9 +246,6 @@ public class MemberInfoVo {
 		
 		@Schema(description = "상세내용", required = true, example = "param Not Found")
 		String reason;
-		
-		@Schema(description = "핸드폰 체크", required = true, example = "Y or N")
-		String reservation_phone_yn;
 		
 	}
 	

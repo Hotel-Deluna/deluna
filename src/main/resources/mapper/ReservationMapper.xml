@@ -7,7 +7,7 @@
 
 	<insert id="reservationInfo"
 		parameterType="com.hotel.reservation.vo.MemberInfoVo$MemberReservationRequest">
-
+		
 		insert into
 		d_reservation
 		(
@@ -39,6 +39,12 @@
 		select insert_user from d_member where member_num = #{member_num}
 
 	</select>
+	
+	<select id="selectUnUserInfo" resultType="map">
+
+		select insert_user, member_num from d_member where phone_num = #{phone_num}
+
+	</select>
 
 	<delete id="reservationDelete" parameterType="int">
 
@@ -49,6 +55,12 @@
 	<delete id="paymentDelete" parameterType="string">
 
 		delete from d_payment_detail where insert_user = #{insert_user}
+
+	</delete>
+	
+	<delete id="reservationDeleteUnMember" parameterType="string">
+
+		delete from d_member where insert_user = #{insert_user}
 
 	</delete>
 
@@ -138,27 +150,28 @@
 
 	</select>
 	
-	<select id= "selectMemberPhoneInfo" resultType="string">
+<!-- 	<select id= "selectMemberPhoneInfo" resultType="string">
 	
 		select reservation_phone from d_reservation where reservation_num = #{reservation_num}
 	
-	</select>
+	</select> -->
 	
 	<select id="unMemberReservationInfo" resultType="com.hotel.reservation.vo.UnMemberInfoVo$UnMemberReservationInfoResponseDto">
-	
-		select 
-			reservation_num, member_num, room_detail_num,
-			reservation_phone, reservation_name,reservation_people,
-			reservation_price, reservation_status, st_date, ed_date
 		
-		from d_reservation
+	select 
+			a.reservation_num, a.member_num, a.room_detail_num,
+			a.reservation_phone, a.reservation_name, a.reservation_people,
+			a.reservation_price, a.reservation_status, a.st_date, a.ed_date,
+			d.name, c.name AS room_detail_name 	
+		from d_reservation a inner join d_room_detail b ON a.room_detail_num = b.room_detail_num
+		inner join d_room c ON c.room_num = b.room_num  inner join d_hotel d ON c.hotel_num = d.hotel_num  
 		
-		where reservation_name = #{reservation_name} 
+		where reservation_name = #{reservation_name}
 		
-			and reservation_phone = #{reservation_phone}
+		and reservation_phone = #{reservation_phone}
 		
-			and reservation_num = #{reservation_num} 
-	
+		and reservation_num = #{reservation_num}
+		
 	</select>
 	
 	
@@ -214,5 +227,15 @@
 		select insert_user from d_member where email = #{email}
 		
 	</select>
+	
+	<select id="checkUnMemberInfo" resultType="string">
+		
+		select phone_num from d_member where phone_num = #{phone_num}
+		
+	</select>
+	
+	
+	
+	
 	
 </mapper>

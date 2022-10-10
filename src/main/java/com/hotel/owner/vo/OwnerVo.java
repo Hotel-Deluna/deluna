@@ -83,7 +83,7 @@ public class OwnerVo {
         @Schema(description = "개업일", required = true, example = "2022/08/25")
         Date opening_day;
 
-        @JsonIgnore
+        @Schema(description = "DB에 저장된 사업자의 회원번호", required = true, example = "12345")
         Integer business_user_num;
 
         @JsonIgnore
@@ -96,7 +96,7 @@ public class OwnerVo {
     @NoArgsConstructor
     @Schema(description = "사업자 탈퇴 사유")
     public static class OwnerWithdrawRequest {
-        @Schema(description = "사업자 탈퇴 사유 코드",  required = true, example = "매출없음")
+        @Schema(description = "사업자 탈퇴 사유 코드",  required = true, example = "1 : 매출없음, 2: 파산, 3: 서비스 불만, 4: 다른사이트 이용, 5: 개인사정")
         Integer reason;
 
         @JsonIgnore

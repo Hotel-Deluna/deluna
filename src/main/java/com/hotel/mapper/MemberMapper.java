@@ -22,6 +22,8 @@ import com.hotel.member.vo.MemberVo.MemberFindPwdRequest;
 import com.hotel.member.vo.MemberVo.MemberInfo;
 import com.hotel.member.vo.MemberVo.MemberUpdateInfo;
 import com.hotel.member.vo.MemberVo.MemberUpdatePwdRequest;
+import com.hotel.member.vo.MemberVo.RegisterMemberRequest;
+import com.hotel.reservation.vo.MemberInfoVo.MemberReservationRequest;
 
 @Mapper
 @Repository
@@ -79,5 +81,7 @@ public interface MemberMapper {
 	String loginByEmail(String email);
 
 	Map<String, Object> updateCheckOwnerEmailByPwd(MemberChangePwdRequest updatePwdRequest);
+
+	int registerUnMemberInfo(MemberVo.RegisterMemberRequest memberVo);
 
 }

@@ -1,10 +1,13 @@
 package com.hotel.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
+import com.hotel.member.vo.MemberVo.RegisterMemberRequest;
+import com.hotel.reservation.vo.MemberInfoVo;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationDeleteRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListInfoResponseDto;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListRequest;
@@ -20,7 +23,7 @@ import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberWithdrawRequest;
 @Repository
 public interface ReservationMapper {
 
-	int reservationInfo(MemberReservationRequest memberReservationRequest);
+	int reservationInfo(MemberInfoVo.MemberReservationRequest vo);
 
 	int payInfo(ReservationDetailPaymentsRequest payment);
 
@@ -28,7 +31,7 @@ public interface ReservationMapper {
 
 	void reservationDelete(int member_num);
 
-	int selectPaymentNum(MemberReservationRequest memberReservationRequest);
+	int selectPaymentNum(String string);
 
 	String selectUserInfo(int member_num);
 
@@ -70,4 +73,12 @@ public interface ReservationMapper {
 	int checkMemberNum(String email);
 
 	Integer selectReservationCnt(MemberReservationListRequest memberInfo);
+
+	Map<String, Object> selectUnUserInfo(String string);
+
+	void reservationDeleteUnMember(String insert_user);
+
+	String checkUnMemberInfo(String phone_num);
+
+
 }
