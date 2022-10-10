@@ -127,4 +127,11 @@ public class CommonController {
     public String InsertTouristSpot(@ModelAttribute CommonVo.InsertTouristSpotRequest insertTouristSpotRequest){
         return commonService.InsertTouristSpot(insertTouristSpotRequest);
     }
+
+    @ApiOperation(value="메일전송 테스트 - 테스트 API")
+    @ResponseBody
+    @GetMapping("/mail")
+    public String MailTest(@RequestParam String text, @RequestParam String to){
+        return commonService.MailTest(text, to);
+    }
 }

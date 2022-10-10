@@ -34,9 +34,7 @@ public class OwnerController {
     @ResponseBody
     @PostMapping("/view-info")
     public OwnerVo.OwnerInfoResponse ViewOwnerInfo(@RequestHeader(value="Authorization") String jwt){
-//        String jwt = res.getHeader("Authorization");
         return ownerService.ViewOwnerInfo(jwt);
-
     }
 
     @ApiOperation(value="사업자 정보수정")
