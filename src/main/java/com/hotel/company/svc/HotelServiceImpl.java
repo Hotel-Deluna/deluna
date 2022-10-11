@@ -1080,12 +1080,25 @@ public class HotelServiceImpl implements HotelService {
             // 객실 정보 조회
             HotelInfoVo.RoomInfoResponse roomInfoResponse = RoomInfo(room_num);
             HotelInfoVo.RoomInfo roomInfo = roomInfoResponse.getData();
+
+            if(roomInfo == null){
+                result.setResult("ERROR");
+                result.setMessage("삭제할 객실정보가 존재하지 않습니다");
+                return result;
+            }
+
+            List<Integer> room_num_list = new ArrayList<>();
+            room_num_list.add(room_num);
+
             List<Integer> room_detail_num_list = roomInfo.getRoom_detail_info()
                     .stream()
                     .map(HotelInfoVo.RoomDetailInfo::getRoom_detail_num)
                     .collect(Collectors.toList());
-            List<Integer> room_num_list = new ArrayList<>();
-            room_num_list.add(room_num);
+
+            // 호실 정보가 존재하지 않을경우 예외처리 : 호실번호에 0추가 (pk 0인 호실은 존재하지않음)
+            if(CollectionUtils.isEmpty(room_detail_num_list)){
+                room_detail_num_list.add(0);
+            }
 
             // 해당 호실들의 마지막 예약날짜 조회
             Date lastReservationDate = hotelMapper.selectLastReservationDate(room_detail_num_list);
