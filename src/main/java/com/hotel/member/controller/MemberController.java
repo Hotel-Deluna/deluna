@@ -403,7 +403,7 @@ public class MemberController {
 //		return memberService.EditPassword(editPasswordRequest);
 //	}
 //
-	@ApiOperation(value = "고객 회원탈퇴")
+	@ApiOperation(value = "공통 고객 회원탈퇴")
 	@ApiImplicitParams({
 	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody

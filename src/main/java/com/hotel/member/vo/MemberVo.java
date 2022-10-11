@@ -216,7 +216,6 @@ public class MemberVo {
 		public MemberDeleteRequest() {
 			
 		}
-		
 		@Schema(description = "고객 탈퇴 사유", required = true, example = "value=1 (타 사이트 이용)")
 		int reason;
 	}

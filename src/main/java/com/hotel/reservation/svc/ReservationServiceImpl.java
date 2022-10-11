@@ -92,48 +92,6 @@ public class ReservationServiceImpl implements ReservationService {
 	}
 
 	@Override
-	public MemberReservationResponseDto UnMemberReservationWithdraw(UnMemberWithdrawRequest unMemberWithdrawVo) {
-		MemberReservationResponseDto result = new MemberReservationResponseDto();
-		Map<String, Object> map = new HashMap<>();
-		int member_num;
-
-		if (unMemberWithdrawVo.getMember_num() == 0) {
-			member_num = reservationMapper.selectInsertUnUser(unMemberWithdrawVo);
-		}
-
-		int reservation_cancel = reservationMapper.unReservationCancelUpdate(unMemberWithdrawVo);
-		if (reservation_cancel == 0) {
-			result.setResult("ERR");
-			result.setReason("reservation_cancel Fail");
-			return result;
-		} else {
-
-			String reservation_num = unMemberWithdrawVo.getUpdate_user();
-
-			int payment_detail_num = reservationMapper.paymentNum(reservation_num);
-
-			if (payment_detail_num == 0) {
-				result.setResult("ERR");
-				result.setReason("payment_num Not Found");
-				return result;
-			}
-			unMemberWithdrawVo.setPayment_detail_num(payment_detail_num);
-
-			int reservation_delete = reservationMapper.unReservationDeleteUpdate(unMemberWithdrawVo);
-
-			if (reservation_delete == 0) {
-				result.setResult("ERR");
-				result.setReason("reservation_delete Update Fail");
-				return result;
-			} else {
-				result.setResult("OK");
-				result.setReason("delete success");
-			}
-		}
-		return result;
-	}
-
-	@Override
 	public CommonResponseVo Payments(MemberReservationInfo memberReservationInfo) {
 		CommonResponseVo result = new CommonResponseVo();
 
@@ -282,10 +240,27 @@ public class ReservationServiceImpl implements ReservationService {
 	@Override
 	public MemberReservationResponseDto MemberReservationWithdraw(MemberWithdrawRequest memberWithdrawVo) {
 		MemberReservationResponseDto dto = new MemberReservationResponseDto();
-		int member_num;
+		String insert_user;
 
-		if (memberWithdrawVo.getMember_num() == 0) {
-			member_num = reservationMapper.selectInsertUser(memberWithdrawVo);
+		if (!(memberWithdrawVo.getEmail() == null)) {
+			//member_num 필요
+			int member_num = reservationMapper.checkMemberNum(memberWithdrawVo.getEmail());
+			if(member_num == 0) {
+				dto.setResult("ERR");
+				dto.setReason("member_num Not Found");
+				return dto;
+			}
+			memberWithdrawVo.setMember_num(member_num);
+			insert_user = reservationMapper.selectInsertUser(memberWithdrawVo);
+			if(insert_user == null) {
+				dto.setResult("ERR");
+				dto.setReason("member Reservation Not Found");
+				return dto;
+			}
+			memberWithdrawVo.setUpdate_user(insert_user);
+		}else {
+			insert_user = reservationMapper.selectUnInsertUser(memberWithdrawVo);
+			memberWithdrawVo.setUpdate_user(insert_user);
 		}
 
 		int reservation_cancel = reservationMapper.reservationCancelUpdate(memberWithdrawVo);
@@ -296,15 +271,9 @@ public class ReservationServiceImpl implements ReservationService {
 		} else {
 
 			String reservation_num = memberWithdrawVo.getUpdate_user();
-
-			int payment_detail_num = reservationMapper.paymentNum(reservation_num);
-
-			if (payment_detail_num == 0) {
-				dto.setResult("ERR");
-				dto.setReason("payment_num Not Found");
-				return dto;
-			}
-			memberWithdrawVo.setPayment_detail_num(payment_detail_num);
+			
+			//결제내역 중 최신을 조회
+			//int payment_detail_num = reservationMapper.paymentNum(reservation_num);
 
 			int reservation_delete = reservationMapper.reservationDeleteUpdate(memberWithdrawVo);
 

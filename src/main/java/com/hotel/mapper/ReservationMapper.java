@@ -41,7 +41,7 @@ public interface ReservationMapper {
 
 	int reservationCancelUpdate(MemberWithdrawRequest memberWithdrawVo);
 
-	int selectInsertUser(MemberWithdrawRequest memberWithdrawVo);
+	String selectInsertUser(MemberWithdrawRequest memberWithdrawVo);
 
 	int reservationDeleteUpdate(MemberWithdrawRequest memberWithdrawVo);
 
@@ -58,12 +58,6 @@ public interface ReservationMapper {
 	
 	int selectInsertUnUser(UnMemberWithdrawRequest unMemberWithdrawVo);
 	
-	int unReservationCancelUpdate(UnMemberWithdrawRequest unMemberWithdrawVo);
-	
-	int unReservationDeleteUpdate(UnMemberWithdrawRequest unMemberWithdrawVo);
-
-	String selectInsertUser(String email);
-
 	String selectInsertUserInEmail(String email);
 
 	int selectMemberNum(String email);
@@ -79,6 +73,10 @@ public interface ReservationMapper {
 	void reservationDeleteUnMember(String insert_user);
 
 	String checkUnMemberInfo(String phone_num);
+	
+	String selectInsertUser(String email);
+
+	String selectUnInsertUser(MemberWithdrawRequest memberWithdrawVo);
 
 
 }

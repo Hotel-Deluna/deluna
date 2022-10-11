@@ -218,19 +218,16 @@ public class MemberInfoVo {
 		@Schema(description = "회원 예약번호", required = true, example = "1108668")
 		Integer reservation_num;
 		
-	//	@Schema(description = "객실 상세정보 번호", required = true, example = "2")
-	//	int room_detail_num;
-		
-		@Schema(description = "고객 번호", required = true, example = "1")
-		Integer member_num;
-		
-		@Schema(description = "결제 상세 번호", required = true, example = "1")
-		Integer payment_detail_num;
-
 		@Schema(description = "비회원 탈퇴 사유", required = true, example = "다른호텔 예약")
 		String content;
 		
-		@Schema(description = "update_user", required = true, example = "백엔드에서만 사용")
+		@Schema(description = "이메일", required = true, example = "백엔드 사용")
+		String email;
+		
+		@Schema(description = "회원번호", required = true, example = "백엔드 사용")
+		Integer member_num;
+		
+		@Schema(description = "update_user", required = true, example = "백엔드만 사용")
 		String update_user;
 
 	}
