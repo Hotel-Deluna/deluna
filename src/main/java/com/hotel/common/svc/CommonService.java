@@ -35,4 +35,6 @@ public interface CommonService {
     String InsertTouristSpotImage(CommonVo.InsertTouristSpotImageRequest insertTouristSpotImageRequest);
 
     String InsertTouristSpot(CommonVo.InsertTouristSpotRequest insertTouristSpotRequest);
+
+	void updateReservationEndDate();
 }
