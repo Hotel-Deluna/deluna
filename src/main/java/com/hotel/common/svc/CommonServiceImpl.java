@@ -18,6 +18,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,6 +72,12 @@ public class CommonServiceImpl implements CommonService {
 
     @Autowired
     DBUtil dbUtil;
+
+    @Value("${spring.mail.username}")
+    String sender;
+
+    @Autowired
+    JavaMailSender javaMailSender;
 
     @Override
     public CommonResponseVo RequestPhoneAuth(CommonVo.PhoneAuthRequest phoneAuthRequest) {
@@ -434,4 +442,16 @@ public class CommonServiceImpl implements CommonService {
 		log.info("예약 만요일 업데이트 시작");
 		commonMapper.updateReservationEndDate();
 	}
+    @Override
+    public String MailTest(String text, String to) {
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setFrom(sender);
+        message.setSubject("Mail Test");
+        message.setText(text);
+        javaMailSender.send(message);
+
+        return "메일 전송 완료";
+    }
 }

@@ -37,4 +37,6 @@ public interface CommonService {
     String InsertTouristSpot(CommonVo.InsertTouristSpotRequest insertTouristSpotRequest);
 
 	void updateReservationEndDate();
+   
+	String MailTest(String text, String to);
 }

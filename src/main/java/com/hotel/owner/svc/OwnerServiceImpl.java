@@ -152,6 +152,7 @@ public class OwnerServiceImpl implements OwnerService {
             if(ownerInfo == null){
                 result.setData(null);
                 result.setMessage("사업자 정보 조회 완료");
+                return result;
             }
             ownerInfo.setPhone_num(aes256Util.decrypt(ownerInfo.getPhone_num())); // 휴대폰번호 복호화
 

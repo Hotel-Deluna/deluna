@@ -373,10 +373,9 @@ public class HotelServiceImpl implements HotelService {
                 for(HotelInfoVo.RoomInfo roomInfo : roomInfoList){
                     int roomDetailAvailableCnt = 0; // 사용가능한 호실 수 체크
 
-                    // 투숙인원 조건이 있으면 투숙인원 체크. 조건에 해당되는 방이 한개라도 있으면 true
+                    // 투숙인원 조건이 있으면 투숙인원 체크. 조건에 해당되는 방이 한개라도 있으면 true. 최대인원수 조건에 맞는지만 체크
                     if(searchBarVoSearchBarRequest.getPeople_count() != null){
-                        if(roomInfo.getMinimum_people() <= searchBarVoSearchBarRequest.getPeople_count() &&
-                                searchBarVoSearchBarRequest.getPeople_count() <= roomInfo.getMaximum_people()){
+                        if(searchBarVoSearchBarRequest.getPeople_count() <= roomInfo.getMaximum_people()){
                             isPeopleCountAvailable = true;
                         }
                     }
@@ -1007,10 +1006,10 @@ public class HotelServiceImpl implements HotelService {
 
             // 이미지 업데이트
             // 현재 DB에 저장된 객실 이미지 정보 전부 Delete & AWS에 저장된 이미지 삭제
-            deleteImage(CommonEnum.ImageType.ROOM.getCode(), hotelNum);
+            deleteImage(CommonEnum.ImageType.ROOM.getCode(), roomNum);
             if(!CollectionUtils.isEmpty(editRoomRequest.getImage())){
                 // Image Resizing & S3 Upload & DB insert
-                insertImage(editRoomRequest.getImage(), CommonEnum.ImageType.HOTEL.getCode(), hotelNum,  userPk);
+                insertImage(editRoomRequest.getImage(), CommonEnum.ImageType.ROOM.getCode(), roomNum,  userPk);
             }
 
             // 객실 태그 업데이트
@@ -1751,7 +1750,7 @@ public class HotelServiceImpl implements HotelService {
                 roomInfo.setImage(imageList);
             }
 
-            roomInfo.setRoom_detail_info(roomDetailInfoList);
+            roomInfo.setRoom_detail_info(roomDetailInfoListResult);
             roomInfo.setTags(tags);
 
         return roomInfo;
