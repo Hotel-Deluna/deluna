@@ -25,8 +25,6 @@ public interface ReservationService {
 
 	Map<String, Object> UnMemberReservationInfo(UnMemberInfoVo.UnMemberReservationRequest unMemberReservationInfo) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException;
 	
-	MemberReservationResponseDto UnMemberReservationWithdraw(UnMemberInfoVo.UnMemberWithdrawRequest unMemberWithdrawVo);
-
 	CommonResponseVo Payments(MemberReservationInfo memberReservationInfo);
 
 	MemberReservationResponseDto memberReservation(List<MemberReservationRequest> memberReservationRequest) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException;

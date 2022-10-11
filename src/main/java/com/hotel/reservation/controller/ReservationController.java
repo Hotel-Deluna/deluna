@@ -74,34 +74,6 @@ public class ReservationController {
 		return reservationService.UnMemberReservationInfo(unMemberReservationRequest);
 	}
 
-	@ApiOperation(value = "비회원 예약 삭제")
-	@ResponseBody
-	@DeleteMapping(value = "/unMemberwithdraw", produces = "application/json")
-	public MemberReservationResponseDto UnMemberReservationWithdraw(
-			@RequestBody UnMemberInfoVo.UnMemberWithdrawRequest memberWithdrawVo) {
-
-		MemberReservationResponseDto dto = new MemberReservationResponseDto();
-		if (memberWithdrawVo.getReservation_num() == 0) {
-			dto.setResult("ERR");
-			dto.setReason("reservation_num Not Found");
-			return dto;
-		} else if (memberWithdrawVo.getMember_num() == 0) {
-			dto.setResult("ERR");
-			dto.setReason("member_num Not Found");
-			return dto;
-		} else if (memberWithdrawVo.getPayment_detail_num() == 0) {
-			dto.setResult("ERR");
-			dto.setReason("payment_detail_num Not Found");
-			return dto;
-		} else if (memberWithdrawVo.getContent().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("content Not Found");
-			return dto;
-		}
-
-		return reservationService.UnMemberReservationWithdraw(memberWithdrawVo);
-	}
-
 //	@ApiOperation(value = "결제하기(필요없을수도)")
 //	@ApiImplicitParams({
 //			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
@@ -206,11 +178,11 @@ public class ReservationController {
 
 	@ApiOperation(value = "고객 예약 삭제")
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
-	@PutMapping(value = "/memberReservationwithdraw", produces = "application/json")
+	@PutMapping(value = "/reservationWithdraw", produces = "application/json")
 	public MemberReservationResponseDto MemberReservationWithdraw(
-			@RequestBody MemberInfoVo.MemberWithdrawRequest memberWithdrawVo) {
+			@RequestBody MemberInfoVo.MemberWithdrawRequest memberWithdrawVo, HttpServletRequest req) {
 
 		MemberReservationResponseDto dto = new MemberReservationResponseDto();
 		Map<String, Object> map = new HashMap<>();
@@ -218,25 +190,27 @@ public class ReservationController {
 			dto.setResult("ERR");
 			dto.setReason("reservation_num Not Found");
 			return dto;
-//		} else if (memberWithdrawVo.getRoom_detail_num() == 0) {
-//			map.put("result", "ERR");
-//			map.put("reason", "room_detail_num Not Found");
-//			vo.setMap(map);
-//			return vo;
 		} else if (memberWithdrawVo.getContent().equals("")) {
 			dto.setResult("ERR");
 			dto.setReason("getContent Not Found");
 			return dto;
-		} else if (memberWithdrawVo.getMember_num() == 0) {
+		} else if (memberWithdrawVo.getReservation_num().toString().equals("")){
 			dto.setResult("ERR");
 			dto.setReason("member_num Not Found");
 			return dto;
-		} else if (memberWithdrawVo.getPayment_detail_num() == 0) {
-			dto.setResult("ERR");
-			dto.setReason("payment_detail_num Not Found");
-			return dto;
+		} 
+		
+		String token = req.getHeader("Authorization");
+		String email = null;
+		if (token == null) {
+			//비회원 삭제
+			System.out.println("비회원 삭제 스타트!!");
+		} else {
+			// 회원 삭제
+			email = info.tokenInfo(token);
+			email = reservationService.checkMemberInfo(email);
+			memberWithdrawVo.setEmail(email);
 		}
-
 		return reservationService.MemberReservationWithdraw(memberWithdrawVo);
 	}
 

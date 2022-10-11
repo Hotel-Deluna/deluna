@@ -87,8 +87,15 @@
 		values (#{reservation_num}, #{payment_detail_num}, NOW(), #{insert_user})
 
 	</insert>
-
+	
 	<select id="selectInsertUser" resultType="string">
+
+		select insert_user from d_reservation where reservation_num =
+		#{reservation_num} and member_num = #{member_num}
+
+	</select>
+
+	<select id="selectUnInsertUser" resultType="string">
 
 		select insert_user from d_reservation where reservation_num =
 		#{reservation_num}
@@ -179,24 +186,6 @@
 		select insert_user from d_reservation where reservation_num =
 		#{reservation_num}
 	</select>
-	
-	<update id="unReservationCancelUpdate"
-		parameterType="com.hotel.reservation.vo.MemberInfoVo$MemberWithdrawRequest">
-
-		update d_reservation set is_delete='Y', dt_update = NOW(), update_user =
-		#{update_user} where reservation_num = #{reservation_num}
-
-	</update>
-	
-	<insert id="unReservationDeleteUpdate"
-		parameterType="com.hotel.reservation.vo.MemberInfoVo$MemberWithdrawRequest">
-
-		insert into d_reservation_delete(reservation_num, content, dt_insert,
-		insert_member)
-
-		values(#{reservation_num}, #{content}, NOW(), #{update_user})
-
-	</insert>
 	
 	<select id="selectInsertUserInEmail" resultType="string">
 
