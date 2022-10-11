@@ -162,12 +162,11 @@ public class ReservationServiceImpl implements ReservationService {
 
 			if (!(memberReservationRequest.get(i).getMember_num() == null)) {
 				insert_user = reservationMapper.selectUserInfo(memberReservationRequest.get(i).getMember_num());
-				if (insert_user != null) {
-					memberReservationRequest.get(i).setInsert_user(insert_user);
-				} else {
+				memberReservationRequest.get(i).setInsert_user(insert_user);
+				if (insert_user == null) {
 					dto.setResult("ERR");
 					dto.setReason("insertNum Not Found");
-				}
+				} 
 			} else {
 
 				// 비회원 예약 로직
@@ -190,11 +189,12 @@ public class ReservationServiceImpl implements ReservationService {
 					}
 				}
 				unMemberMap = reservationMapper.selectUnUserInfo(memberVo.getPhone_num());
-
+				
+				// 예약자 정보 입력
+				memberReservationRequest.get(i).setInsert_user(String.valueOf(unMemberMap.get("insert_user")));
+				memberReservationRequest.get(i).setMember_num((Integer) unMemberMap.get("member_num"));
 			}
-			// 예약자 정보 입력
-			memberReservationRequest.get(i).setInsert_user(String.valueOf(unMemberMap.get("insert_user")));
-			memberReservationRequest.get(i).setMember_num((Integer) unMemberMap.get("member_num"));
+			
 			// 예약 인서트
 			System.out.println("data = " + memberReservationRequest.toString());
 			// 암호화 후 저장
