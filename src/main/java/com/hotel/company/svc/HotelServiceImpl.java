@@ -57,6 +57,8 @@ public class HotelServiceImpl implements HotelService {
     @Value("${search.distance}")
     Integer allowedDistance;
 
+    @Autowired
+    KaKaoUtil kaKaoUtil;
 
     @Override
     public HotelInfoVo.OwnerHotelListResponse OwnerHotelList(HotelInfoVo.OwnerHotelListRequest ownerHotelListRequest, String jwtToken) {
@@ -326,17 +328,17 @@ public class HotelServiceImpl implements HotelService {
             }else {
                 try{
                     // 카카오 키워드 검색 API호출 가장 위에있는 검색결과의 address_name의 첫번째 소절 (서울, 경기등 시,도정보임) 위도,경도정보 추출
-                    JSONArray jsonArrayData = KaKaoUtil.getKeywordMapData(text);
-                    if(CollectionUtils.isEmpty(jsonArrayData)){
+                    JSONArray jsonArrayData = kaKaoUtil.getKeywordMapData(text);
+                    if(!CollectionUtils.isEmpty(jsonArrayData)){
                         JSONObject jsonObject = (JSONObject) jsonArrayData.get(0);
                         String kakaoRegion = (String) jsonObject.get("address_name");
-                        kakaoRegion = kakaoRegion.substring(0, 1);
+                        kakaoRegion = kakaoRegion.substring(0, 2);
                         double kakaoLongitude = Double.parseDouble((String) jsonObject.get("x"));
                         double kakaoLatitude = Double.parseDouble((String) jsonObject.get("y"));
 
                         // DB에서 address_name의 첫번째 소절에 해당하는 region_code 의 호텔만 추출
                         List<HotelInfoVo.HotelDetailInfo> hotelList = hotelMapper.selectHotelByRegionCode(kakaoRegion);
-                        // 해당 호텔들의 위도 경도와 가장 위에있는 검색결과의 위도, 경도 비교해서 1km이내의 호텔만 추출
+                        // 해당 호텔들의 위도 경도와 가장 위에있는 검색결과의 위도, 경도 비교해서 5km이내의 호텔만 추출
                         for(HotelInfoVo.HotelDetailInfo hotelDetailInfo : hotelList){
                             if(DistanceUtil.getDistance(
                                     kakaoLatitude,
@@ -563,7 +565,7 @@ public class HotelServiceImpl implements HotelService {
                 }
 
                 // 필터조건
-                // 위도, 경도. 해당 위도경도에 반경 1km 이내여야 검색됨
+                // 위도, 경도. 해당 위도경도에 반경 5km 이내여야 검색됨
                 if(location != null){
                     if(DistanceUtil.getDistance(
                             location.get(1),
@@ -571,7 +573,7 @@ public class HotelServiceImpl implements HotelService {
                             hotelDetailInfo.getLatitude(),
                             hotelDetailInfo.getLongitude())
                             > allowedDistance){
-                        continue; // 1km 넘으면 패스
+                        continue; // 5km 넘으면 패스
                     }
                 }
 
@@ -1738,6 +1740,8 @@ public class HotelServiceImpl implements HotelService {
 
             // 예약가능방갯수
             roomInfo.setReservable_room_count(reservable_room_count);
+
+            // 만약 예약가능방 갯수가 0개면 예약 혹은 호실사용금지가 제일 빨리 끝나는 호실의 예약 or 사용금지 날짜 제공
 
             // 객실 이미지 조회
             List<String> imageList = selectImage(CommonEnum.ImageType.ROOM.getCode(), roomInfo.getRoom_num());

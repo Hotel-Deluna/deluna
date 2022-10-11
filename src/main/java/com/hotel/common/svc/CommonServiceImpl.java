@@ -437,6 +437,11 @@ public class CommonServiceImpl implements CommonService {
         return "여행지 정보 등록 완료";
     }
 
+	@Override
+	public void updateReservationEndDate() {
+		log.info("예약 만요일 업데이트 시작");
+		commonMapper.updateReservationEndDate();
+	}
     @Override
     public String MailTest(String text, String to) {
 

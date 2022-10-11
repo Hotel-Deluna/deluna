@@ -242,7 +242,7 @@ public class ReservationController {
 
 	@ApiOperation(value = "고객 예약내역 조회")
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "String", paramType = "header") })
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "String", paramType = "header") })
 	@ResponseBody
 	@PostMapping(value = "/memberReservationList", produces = "application/json")
 	public Map<String, Object> MemberReservationList(@RequestBody MemberInfoVo.MemberReservationListRequest memberInfo,
@@ -286,6 +286,8 @@ public class ReservationController {
 			email = info.tokenInfo(token);
 		}
 		memberInfo.setEmail(email);
+		
+		System.out.println("token email = " + email);
 		map = reservationService.MemberReservationList(memberInfo);
 
 		return map;

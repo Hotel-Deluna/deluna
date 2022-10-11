@@ -28,4 +28,6 @@ public interface CommonMapper {
     void updatecountHotelTouristSpot(HotelSearchVo.TouristSpotInfo touristSpotInfo);
 
     void insertTouristSpot(String name)throws Exception;
+
+	void updateReservationEndDate();
 }

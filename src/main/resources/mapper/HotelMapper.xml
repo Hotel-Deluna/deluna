@@ -186,6 +186,7 @@
             re.reservation_status,
             re.st_date,
             re.ed_date,
+            re.dt_insert,
             r.name AS room_name,
             h.name AS hotel_name
         FROM d_reservation re

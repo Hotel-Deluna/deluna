@@ -902,6 +902,9 @@ public class HotelInfoVo {
         @Schema(description = "예약상태 - 1: 예약확정 2: 예약취소 3: 이용완료",  required = true, example = "1")
         Integer reservation_status;
 
+        @Schema(description = "예약한 날짜 - (DB에 insert된 날짜)",  required = true, example = "2022/08/01")
+        Date dt_insert;
+
         // DB
         @JsonIgnore
         @ApiParam(value = "입실일", required = true)

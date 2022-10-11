@@ -4,6 +4,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -12,14 +13,15 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+@Component
 public class KaKaoUtil {
 
     @Value("${kakao.secretKey}")
-    static String kakaoKey;
+    String kakaoKey;
 
-    public static JSONArray getKeywordMapData(String text) throws Exception{
+    public JSONArray getKeywordMapData(String text) throws Exception{
         JSONArray result = null;
-        URL url = new URL("https://dapi.kakao.com/v2/local/search/keyword.json?size=3&query="+ URLEncoder.encode(text, StandardCharsets.UTF_8));
+        URL url = new URL("https://dapi.kakao.com/v2/local/search/keyword.json?size=3&query="+URLEncoder.encode(text, StandardCharsets.UTF_8));
 
         // GET 전송
         HttpURLConnection con = (HttpURLConnection) url.openConnection();

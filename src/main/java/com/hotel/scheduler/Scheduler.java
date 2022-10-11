@@ -22,4 +22,10 @@ public class Scheduler {
     public void SaveTouristSpotHotelCount() {
         commonService.SaveTouristSpotHotelCount();
     }
+    
+    // 예약일 만료 상태값 변경
+    @Scheduled(cron = "0 0 1 * * ?")
+    public void updateReservationEndDate() {
+        commonService.updateReservationEndDate();
+    }
 }

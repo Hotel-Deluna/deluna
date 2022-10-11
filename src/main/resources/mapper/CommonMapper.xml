@@ -50,5 +50,10 @@
     <insert id="insertTouristSpot">
         INSERT INTO d_tourist_spot (name, count, dt_insert) VALUE (#{name}, 0, NOW())
     </insert>
+    
+     <!-- 호텔 예약 만료일 업데이트  -->
+    <update id="updateReservationEndDate">
+        update d_reservation set reservation_status = 4, is_delete = 'Y' where ed_date <![CDATA[<=]]> NOW() 
+    </update>
 
 </mapper>
