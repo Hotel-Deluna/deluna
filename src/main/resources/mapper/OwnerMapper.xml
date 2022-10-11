@@ -37,6 +37,7 @@
         SET is_delete = 'Y',
             dt_update = NOW()
         WHERE business_user_num = #{business_user_num}
+
     </update>
 
     <!-- 사업자 탈퇴사유 insert -->
@@ -50,6 +51,14 @@
         SELECT business_num
         FROM d_business_member
         WHERE business_num = #{business_num}
+          AND is_delete = 'N'
+    </select>
+
+    <!-- 사업자 이메일 중복조회 -->
+    <select id="checkDuplicationEmail" resultType="string">
+        SELECT business_num
+        FROM d_business_member
+        WHERE email = #{email}
           AND is_delete = 'N'
     </select>
 

@@ -18,4 +18,6 @@ public interface OwnerMapper {
     int insertOwnerWithdrawReason(OwnerVo.OwnerWithdrawRequest ownerWithdrawRequest);
 
     String checkDuplicationOwner(String business_num);
+
+    String checkDuplicationEmail(String email);
 }

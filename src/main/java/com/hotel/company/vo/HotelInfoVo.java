@@ -701,6 +701,14 @@ public class HotelInfoVo {
 
         @Schema(description = "객실명",  required = false, example = "스탠다드 트윈룸")
         String room_name;
+
+        @JsonIgnore
+        @Schema(description = "예약 시작일",  required = true, example = "12345")
+        Date st_date;
+
+        @JsonIgnore
+        @Schema(description = "예약 종료일",  required = true, example = "12345")
+        Date ed_date;
     }
 
     @Data

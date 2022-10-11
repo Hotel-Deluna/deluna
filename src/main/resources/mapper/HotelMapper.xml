@@ -43,6 +43,8 @@
         <result column="room_closed_end" property="room_closed_end"/>
         <result column="delete_date" property="delete_date"/>
         <result column="reservation_status" property="reservation_status"/>
+        <result column="st_date" property="st_date"/>
+        <result column="ed_date" property="ed_date"/>
     </resultMap>
 
     <resultMap id="selectRoomInfoListMap" type="com.hotel.company.vo.HotelInfoVo$RoomInfo">
@@ -449,7 +451,7 @@
 
     <!-- 객실번호로 호실 조회 -->
     <select id="selectRoomDetailInfo" resultMap="selectRoomDetailInfoMap">
-        SELECT rd.* , rv.reservation_status
+        SELECT rd.* , rv.reservation_status, rv.st_date, rv.ed_date
         FROM d_room_detail rd
                  LEFT JOIN d_reservation rv on rd.room_detail_num = rv.room_detail_num
         WHERE rd.room_num = #{room_num}

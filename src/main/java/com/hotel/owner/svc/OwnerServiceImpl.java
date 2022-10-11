@@ -64,10 +64,17 @@ public class OwnerServiceImpl implements OwnerService {
         CommonResponseVo result = new CommonResponseVo();
 
         try{
-            // 중복가입 조회 - 사업자번호기준
+            // 중복가입 조회 - 사업자번호
             if(checkDuplicationOwner(ownerVo.getBusiness_num())){
                 result.setResult("ERROR");
                 result.setMessage("사업자 번호가 이미 존재합니다");
+                return result;
+            }
+
+            // 중복가입 조회 - 이메일
+            if(checkDuplicationEmail(ownerVo.getEmail())){
+                result.setResult("ERROR");
+                result.setMessage("이메일이 이미 존재합니다");
                 return result;
             }
 
@@ -287,7 +294,7 @@ public class OwnerServiceImpl implements OwnerService {
     }
 
     /**
-     * 중복가입 조회 - 사업자번호가 DB에 이미 있으면 True 리턴
+     * 중복가입 조회 - 사업자번호, 이메일 중복조회. DB에 이미 있으면 True 리턴
      * @param business_num : 사업자번호
      * @return
      */
@@ -295,6 +302,17 @@ public class OwnerServiceImpl implements OwnerService {
         boolean result = false;
 
         String checkDuplicationOwner = ownerMapper.checkDuplicationOwner(business_num);
+        if(checkDuplicationOwner != null){
+            result = true;
+        }
+
+        return result;
+    }
+
+    private boolean checkDuplicationEmail(String email){
+        boolean result = false;
+
+        String checkDuplicationOwner = ownerMapper.checkDuplicationEmail(email);
         if(checkDuplicationOwner != null){
             result = true;
         }

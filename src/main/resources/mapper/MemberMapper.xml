@@ -178,4 +178,12 @@
 	
 	</insert>
 
+	<select id="getOwnerNum" resultType="int">
+		SELECT business_user_num
+		FROM d_business_member
+		WHERE email = #{email}
+		  AND password = #{password}
+		  AND is_delete = 'N'
+	</select>
+
 </mapper>
