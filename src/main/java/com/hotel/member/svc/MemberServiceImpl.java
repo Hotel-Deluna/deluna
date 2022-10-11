@@ -130,45 +130,67 @@ public class MemberServiceImpl implements UserDetailsService {
 		Map<String, Object> map = new HashMap<>();
 		MemberRequestDto vo = new MemberRequestDto();
 		TokenDto dto = new TokenDto();
+		int user_id = 0;
+		String id = "";
+		int role = 0;
 
 		try {
-			Optional<Member> member = memberRepository.findByEmail(memberRequestDto.getEmail());
-			
-			if (member.isEmpty() == true) {
-				map.put("result", "ERR");
-				map.put("reason", "member Not Found");
-				return map;
+
+			if(memberRequestDto.getRole() != 2){
+				Optional<Member> member = memberRepository.findByEmail(memberRequestDto.getEmail());
+
+				if (member.isEmpty() == true) {
+					map.put("result", "ERR");
+					map.put("reason", "member Not Found");
+					return map;
+				}
+				vo = memberMapper.findByPassword(memberRequestDto);
+				if (vo.getPassword() == null) {
+					map.put("result", "ERR");
+					map.put("reason", "memberPwdFail");
+					return map;
+				}
+				id = vo.getEmail();
+				role = vo.getRole();
+				String auth = null ;
+				if (role == 1) {
+					//member.get().setRole(Integer.valueOf("ROLE_MEMBER"));
+					auth = "ROLE_MEMBER";
+				} else if (memberRequestDto.getRole() == 2) {
+					//member.get().setRole(Integer.valueOf("ROLE_OWNER"));
+					auth = "ROLE_OWNER";
+				} else if (role == 3) {
+					//member.get().setRole(Integer.valueOf("ROLE_UN_USER"));
+					auth = "ROLE_UN_USER";
+				}else if(role == 4) {
+					//member.get().setRole(Integer.valueOf("ROLE_SOCIAL_USER"));
+					auth = "ROLE_SOCIAL_USER";
+				}
+				member.get().builder().email(id).role(role);
+				UsernamePasswordAuthenticationToken authenticationToken = memberRequestDto.toAuthentication();
+				dto = jwtTokenProvider.generateMemberTokenDto(authenticationToken, auth);
+
+			}else {	// 사업자 로그인
+				Integer business_user_num = memberMapper.getOwnerNum(memberRequestDto);
+
+				if(business_user_num == null){
+					map.put("result", "ERR");
+					map.put("reason", "member Not Found");
+					return map;
+				}
+
+				UsernamePasswordAuthenticationToken authenticationToken = memberRequestDto.toAuthentication();
+				dto = jwtTokenProvider.generateMemberTokenDto(authenticationToken, "ROLE_OWNER", business_user_num);
+
+				id = memberRequestDto.getEmail();
+				role = memberRequestDto.getRole();
 			}
-			vo = memberMapper.findByPassword(memberRequestDto);
-			if (vo.getPassword() == null) {
-				map.put("result", "ERR");
-				map.put("reason", "memberPwdFail");
-				return map;
-			}
-			String id = vo.getEmail();
-			int role = vo.getRole();
-			String auth = null ;
-			if (role == 1) {
-				//member.get().setRole(Integer.valueOf("ROLE_MEMBER"));
-				auth = "ROLE_MEMBER";
-			} else if (role == 2) {
-				//member.get().setRole(Integer.valueOf("ROLE_OWNER"));
-				auth = "ROLE_OWNER";
-			} else if (role == 3) {
-				//member.get().setRole(Integer.valueOf("ROLE_UN_USER"));
-				auth = "ROLE_UN_USER";
-			}else if(role == 4) {
-				//member.get().setRole(Integer.valueOf("ROLE_SOCIAL_USER"));
-				auth = "ROLE_SOCIAL_USER";
-			}
-			member.get().builder().email(id).role(role);
-			UsernamePasswordAuthenticationToken authenticationToken = memberRequestDto.toAuthentication();
-			dto = jwtTokenProvider.generateMemberTokenDto(authenticationToken, auth);
-			
+
 			map.put("Authorization", dto.getAccessToken());
 			map.put("RefreshToken", dto.getRefreshToken());
 			map.put("email", id);
 			map.put("role", role);
+
 		} catch (Exception e) {
 			map.put("result", "ERR");
 			map.put("reason", "delete member");

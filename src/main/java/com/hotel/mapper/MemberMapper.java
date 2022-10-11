@@ -84,4 +84,7 @@ public interface MemberMapper {
 
 	int registerUnMemberInfo(MemberVo.RegisterMemberRequest memberVo);
 
+	// 사업자 로그인
+	Integer getOwnerNum (MemberRequestDto memberRequestDto);
+
 }
