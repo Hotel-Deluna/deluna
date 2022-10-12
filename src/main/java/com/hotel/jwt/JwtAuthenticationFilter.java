@@ -44,13 +44,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try{
             boolean isValid = tokenProvider.validateToken(jwt);
-        // 2. validateToken 으로 토큰 유효성 검사
-        // 정상 토큰이면 해당 토큰으로 Authentication 을 가져와서 SecurityContext 에 저장
-
-            if (StringUtils.hasText(jwt) && isValid) {
-            Authentication authentication = tokenProvider.getAuthentication(jwt);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
             filterChain.doFilter(request, response);
 
         // 잘못된 토큰 혹은 토큰만료시 예외처리
@@ -60,13 +53,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }catch (UnsupportedJwtException e){
             RequestDispatcher dp=request.getRequestDispatcher("/exception/UnsupportedJwt");
             dp.forward(request, response);
-        }catch (IllegalArgumentException e){
-            RequestDispatcher dp=request.getRequestDispatcher("/exception/IllegalArgumentJwt");
-            dp.forward(request, response);
         }catch (UnauthorizedException e){
             RequestDispatcher dp=request.getRequestDispatcher("/exception/ExpiredToken");
             dp.forward(request, response);
         }
+        // IllegalArgumentException은 스웨거 첫페이지 진입시 전역 JWT토큰문제때문에 일단 주석처리..
+//        catch (IllegalArgumentException e){
+//            RequestDispatcher dp=request.getRequestDispatcher("/exception/IllegalArgumentJwt");
+//            dp.forward(request, response);
+//        }
 
     }
 
