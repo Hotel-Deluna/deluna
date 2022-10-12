@@ -288,7 +288,7 @@ public class HotelServiceImpl implements HotelService {
 
             } else {
                 log.info("카카오 API 연동에 실패하였습니다");
-                result.setMessage("카카오 API 연동에 실패하였습니다");
+                result.setMessage("KAKAO-0001");
                 result.setResult("ERROR");
                 return result;
             }
@@ -754,7 +754,7 @@ public class HotelServiceImpl implements HotelService {
             if(HotelDetailInfo.getData() == null){
                 log.info("호텔 삭제 - 조회된 호텔 없음");
                 result.setResult("ERROR");
-                result.setMessage("조회된 호텔 없음");
+                result.setMessage("DEL-0001");
                 return result;
             }
 
@@ -1083,7 +1083,7 @@ public class HotelServiceImpl implements HotelService {
 
             if(roomInfo == null){
                 result.setResult("ERROR");
-                result.setMessage("삭제할 객실정보가 존재하지 않습니다");
+                result.setMessage("DEL-0001");
                 return result;
             }
 
@@ -1274,7 +1274,7 @@ public class HotelServiceImpl implements HotelService {
                     );
                     if(isDuplication){
                         result.setResult("ERROR");
-                        result.setMessage("해당 일자에 예약이 있습니다");
+                        result.setMessage("DUP-0003");
                         return result;
                     }
                 }
@@ -1827,7 +1827,7 @@ public class HotelServiceImpl implements HotelService {
 
     private CommonResponseVo ErrorResult (CommonResponseVo result){
         result.setResult("ERROR");
-        result.setMessage("");
+        result.setMessage("BACK-0001");
         return result;
     }
 
