@@ -42,12 +42,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return result;
     }
 
-    @ExceptionHandler(value = { IllegalArgumentException.class})
-    public Object IllegalArgumentJwt(Exception e) {
-        Map<String, String> result = new HashMap<>();
-        result.put("result", "ERROR");
-        result.put("reason", ExceptionMessage.VerifyFailToken.getMessage());
-        return result;
-    }
+//    @ExceptionHandler(value = { IllegalArgumentException.class})
+//    public Object IllegalArgumentJwt(Exception e) {
+//        Map<String, String> result = new HashMap<>();
+//        result.put("result", "ERROR");
+//        result.put("reason", ExceptionMessage.VerifyFailToken.getMessage());
+//        return result;
+//    }
 
 }

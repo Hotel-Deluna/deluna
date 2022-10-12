@@ -24,8 +24,8 @@ public class ExceptionController {
         throw new UnsupportedJwtException("");
     }
 
-    @RequestMapping("/exception/IllegalArgumentJwt")
-    public void IllegalArgumentJwt(){
-        throw new IllegalArgumentException();
-    }
+//    @RequestMapping("/exception/IllegalArgumentJwt")
+//    public void IllegalArgumentJwt(){
+//        throw new IllegalArgumentException();
+//    }
 }
