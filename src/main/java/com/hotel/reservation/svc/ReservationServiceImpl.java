@@ -34,7 +34,10 @@ import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLDataException;
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -238,42 +241,74 @@ public class ReservationServiceImpl implements ReservationService {
 	}
 
 	@Override
-	public MemberReservationResponseDto MemberReservationWithdraw(MemberWithdrawRequest memberWithdrawVo) {
+	public MemberReservationResponseDto MemberReservationWithdraw(MemberWithdrawRequest memberWithdrawVo) throws ParseException {
 		MemberReservationResponseDto dto = new MemberReservationResponseDto();
 		String insert_user;
-
-		if (!(memberWithdrawVo.getEmail() == null)) {
-			//member_num 필요
-			int member_num = reservationMapper.checkMemberNum(memberWithdrawVo.getEmail());
-			if(member_num == 0) {
-				dto.setResult("ERR");
-				dto.setReason("member_num Not Found");
-				return dto;
+		
+		if(memberWithdrawVo.getReservation_status() == 2) {
+			if (!(memberWithdrawVo.getEmail() == null)) {
+				//member_num 필요
+				int member_num = reservationMapper.checkMemberNum(memberWithdrawVo.getEmail());
+				if(member_num == 0) {
+					dto.setResult("ERR");
+					dto.setReason("member_num Not Found");
+					return dto;
+				}
+				memberWithdrawVo.setMember_num(member_num);
+				insert_user = reservationMapper.selectInsertUser(memberWithdrawVo);
+				if(insert_user == null) {
+					dto.setResult("ERR");
+					dto.setReason("member Reservation Not Found");
+					return dto;
+				}
+				memberWithdrawVo.setUpdate_user(insert_user);
+			}else {
+				insert_user = reservationMapper.selectUnInsertUser(memberWithdrawVo);
+				memberWithdrawVo.setUpdate_user(insert_user);
 			}
-			memberWithdrawVo.setMember_num(member_num);
-			insert_user = reservationMapper.selectInsertUser(memberWithdrawVo);
+			
+		}else if(memberWithdrawVo.getReservation_status() == 3){
+			insert_user = reservationMapper.selectBusinessInsertUser(memberWithdrawVo.getBusiness_user_num());
 			if(insert_user == null) {
 				dto.setResult("ERR");
-				dto.setReason("member Reservation Not Found");
+				dto.setReason("business_user_num Reservation Not Found");
 				return dto;
 			}
 			memberWithdrawVo.setUpdate_user(insert_user);
-		}else {
-			insert_user = reservationMapper.selectUnInsertUser(memberWithdrawVo);
-			memberWithdrawVo.setUpdate_user(insert_user);
 		}
-
+		
+		// status 값 및 날짜 필터링
+		Map<String, Object> checkMap = reservationMapper.reservationCheckTime(memberWithdrawVo.getReservation_num());
+		
+		Date date = new Date();
+		String st_date = (String) checkMap.get("st_date");
+		String ed_date = (String) checkMap.get("ed_date");
+		Date stDate = new Date();
+		Date edDate = new Date();
+		System.out.println("edDate = " + edDate);
+		SimpleDateFormat format = new  SimpleDateFormat("yy-MM-dd");
+		
+		String today = format.format(date);
+		date = format.parse(today);
+		stDate = format.parse(st_date);
+		edDate = format.parse(ed_date);
+		
+		if(date.equals(stDate)) {
+			dto.setResult("ERR");
+			dto.setReason("today check st_date ERR");
+			return dto;
+		}else if(date.after(stDate)) {
+			dto.setResult("ERR");
+			dto.setReason("today check ed_date ERR");
+			return dto;
+		}
+		
 		int reservation_cancel = reservationMapper.reservationCancelUpdate(memberWithdrawVo);
 		if (reservation_cancel == 0) {
 			dto.setResult("ERR");
 			dto.setReason("reservation_cancel update fail");
 			return dto;
 		} else {
-
-			String reservation_num = memberWithdrawVo.getUpdate_user();
-			
-			//결제내역 중 최신을 조회
-			//int payment_detail_num = reservationMapper.paymentNum(reservation_num);
 
 			int reservation_delete = reservationMapper.reservationDeleteUpdate(memberWithdrawVo);
 

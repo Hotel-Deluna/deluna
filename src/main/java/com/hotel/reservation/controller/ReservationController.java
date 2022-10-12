@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -182,7 +183,7 @@ public class ReservationController {
 	@ResponseBody
 	@PutMapping(value = "/reservationWithdraw", produces = "application/json")
 	public MemberReservationResponseDto MemberReservationWithdraw(
-			@RequestBody MemberInfoVo.MemberWithdrawRequest memberWithdrawVo, HttpServletRequest req) {
+			@RequestBody MemberInfoVo.MemberWithdrawRequest memberWithdrawVo, HttpServletRequest req) throws Exception {
 
 		MemberReservationResponseDto dto = new MemberReservationResponseDto();
 		Map<String, Object> map = new HashMap<>();
@@ -198,19 +199,29 @@ public class ReservationController {
 			dto.setResult("ERR");
 			dto.setReason("member_num Not Found");
 			return dto;
-		} 
+		} else if(memberWithdrawVo.getReservation_status().toString().equals("")) {
+			dto.setResult("ERR");
+			dto.setReason("reservation_status Not Found");
+			return dto;
+		}
 		
 		String token = req.getHeader("Authorization");
 		String email = null;
 		if (token == null) {
 			//비회원 삭제
 			System.out.println("비회원 삭제 스타트!!");
+			memberWithdrawVo.setReservation_status(2);
 		} else {
 			// 회원 삭제
-			email = info.tokenInfo(token);
-			email = reservationService.checkMemberInfo(email);
-			memberWithdrawVo.setEmail(email);
-		}
+			if(memberWithdrawVo.getReservation_status() == 2) {
+				email = info.tokenInfo(token);
+				email = reservationService.checkMemberInfo(email);
+				memberWithdrawVo.setEmail(email);
+			}else if(memberWithdrawVo.getReservation_status() == 3) {
+				Integer num = info.tokenBusinessInfo(token);
+				memberWithdrawVo.setBusiness_user_num(num);
+			}
+ 		}
 		return reservationService.MemberReservationWithdraw(memberWithdrawVo);
 	}
 

@@ -122,22 +122,7 @@ public class MemberController {
 		
 		return dto;
 	}
-//	@ResponseBody
-//	@PostMapping("/token")
-//	public Map<String, Object> MemberTest(@RequestBody Map<String, Object> map, HttpServletRequest req) throws Exception {
-//		
-//		Map<String, Object> result = new HashMap<>();
-//		
-//		String token = req.getHeader("accessToken");
-//		
-//		System.out.println("token =" + token);
-//		
-//		
-//		String email = info.tokenInfo(token);
-//		
-//		
-//		return result;
-//	}
+
 
 	@ApiOperation(value = "카카오 로그인")
 	@ApiImplicitParams({

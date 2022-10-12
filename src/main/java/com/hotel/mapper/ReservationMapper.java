@@ -78,5 +78,9 @@ public interface ReservationMapper {
 
 	String selectUnInsertUser(MemberWithdrawRequest memberWithdrawVo);
 
+	Map<String, Object> reservationCheckTime(Integer integer);
+
+	String selectBusinessInsertUser(Integer business_user_num);
+
 
 }

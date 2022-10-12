@@ -105,7 +105,7 @@
 	<update id="reservationCancelUpdate"
 		parameterType="com.hotel.reservation.vo.MemberInfoVo$MemberWithdrawRequest">
 
-		update d_reservation set is_delete='Y', dt_update = NOW(), update_user =
+		update d_reservation set is_delete='Y', reservation_status=#{reservation_status} ,dt_update = NOW(), update_user =
 		#{update_user} where reservation_num = #{reservation_num}
 
 	</update>
@@ -220,6 +220,18 @@
 	<select id="checkUnMemberInfo" resultType="string">
 		
 		select phone_num from d_member where phone_num = #{phone_num}
+		
+	</select>
+	
+	<select id="reservationCheckTime" resultType="map">
+		
+		select DATE_FORMAT(st_date, '%y-%m-%d') AS st_date, DATE_FORMAT(ed_date, '%y-%m-%d') AS ed_date from d_reservation where reservation_num = #{reservation_num}
+		
+	</select>
+	
+	<select id="selectBusinessInsertUser" resultType="string">
+		
+		select insert_user from d_business_member where business_user_num = #{business_user_num};
 		
 	</select>
 	

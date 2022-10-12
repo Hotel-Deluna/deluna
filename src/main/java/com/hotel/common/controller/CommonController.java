@@ -1,12 +1,27 @@
 package com.hotel.common.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.hotel.common.CommonResponseVo;
 import com.hotel.common.svc.CommonService;
 import com.hotel.common.vo.CommonVo;
+import com.hotel.jwt.JwtAuthenticationFilter;
+
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/common")
@@ -15,6 +30,9 @@ public class CommonController {
 
     @Autowired
     CommonService commonService;
+    
+    @Autowired
+    JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @ApiOperation(value="휴대폰 인증 요청 - 인증 번호 생성 및 전송")
     @ResponseBody
@@ -134,4 +152,22 @@ public class CommonController {
     public String MailTest(@RequestParam String text, @RequestParam String to){
         return commonService.MailTest(text, to);
     }
+    
+    @ApiOperation(value="토큰 재발급 api")
+	@ResponseBody
+	@PostMapping("/token")
+	public Map<String, Object> MemberTest(@RequestBody Map<String, Object> map, HttpServletRequest req) throws Exception {
+		
+		Map<String, Object> result = new HashMap<>();
+		
+		String token = req.getHeader("Authorization");
+		
+		if(token != null) {
+			jwtAuthenticationFilter.doFilter(req, null, null);
+		}
+		
+		
+		
+		return result;
+	}
 }

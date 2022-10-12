@@ -218,6 +218,12 @@ public class MemberInfoVo {
 		@Schema(description = "회원 예약번호", required = true, example = "1108668")
 		Integer reservation_num;
 		
+		@Schema(description = "사업자 회원번호", required = true, example = "백엔드사용")
+		Integer business_user_num;
+		
+		@Schema(description = "상태값", required = true, example = "11")
+		Integer reservation_status;
+		
 		@Schema(description = "비회원 탈퇴 사유", required = true, example = "다른호텔 예약")
 		String content;
 		
@@ -235,7 +241,7 @@ public class MemberInfoVo {
 	@Data
 	@AllArgsConstructor
 	@NoArgsConstructor
-	@Schema(description = "곧통 예약 API Response")
+	@Schema(description = "공통 예약 API Response")
 	public static class MemberReservationResponseDto {
 
 		@Schema(description = "api 결과값", required = true, example = "OK or ERR")
