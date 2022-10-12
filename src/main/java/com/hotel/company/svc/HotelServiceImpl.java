@@ -288,7 +288,7 @@ public class HotelServiceImpl implements HotelService {
 
             } else {
                 log.info("카카오 API 연동에 실패하였습니다");
-                result.setMessage("카카오 API 연동에 실패하였습니다");
+                result.setMessage("KAKAO-0001");
                 result.setResult("ERROR");
                 return result;
             }
@@ -754,7 +754,7 @@ public class HotelServiceImpl implements HotelService {
             if(HotelDetailInfo.getData() == null){
                 log.info("호텔 삭제 - 조회된 호텔 없음");
                 result.setResult("ERROR");
-                result.setMessage("조회된 호텔 없음");
+                result.setMessage("DEL-0001");
                 return result;
             }
 
@@ -1080,12 +1080,25 @@ public class HotelServiceImpl implements HotelService {
             // 객실 정보 조회
             HotelInfoVo.RoomInfoResponse roomInfoResponse = RoomInfo(room_num);
             HotelInfoVo.RoomInfo roomInfo = roomInfoResponse.getData();
+
+            if(roomInfo == null){
+                result.setResult("ERROR");
+                result.setMessage("DEL-0001");
+                return result;
+            }
+
+            List<Integer> room_num_list = new ArrayList<>();
+            room_num_list.add(room_num);
+
             List<Integer> room_detail_num_list = roomInfo.getRoom_detail_info()
                     .stream()
                     .map(HotelInfoVo.RoomDetailInfo::getRoom_detail_num)
                     .collect(Collectors.toList());
-            List<Integer> room_num_list = new ArrayList<>();
-            room_num_list.add(room_num);
+
+            // 호실 정보가 존재하지 않을경우 예외처리 : 호실번호에 0추가 (pk 0인 호실은 존재하지않음)
+            if(CollectionUtils.isEmpty(room_detail_num_list)){
+                room_detail_num_list.add(0);
+            }
 
             // 해당 호실들의 마지막 예약날짜 조회
             Date lastReservationDate = hotelMapper.selectLastReservationDate(room_detail_num_list);
@@ -1261,7 +1274,7 @@ public class HotelServiceImpl implements HotelService {
                     );
                     if(isDuplication){
                         result.setResult("ERROR");
-                        result.setMessage("해당 일자에 예약이 있습니다");
+                        result.setMessage("DUP-0003");
                         return result;
                     }
                 }
@@ -1741,7 +1754,11 @@ public class HotelServiceImpl implements HotelService {
             // 예약가능방갯수
             roomInfo.setReservable_room_count(reservable_room_count);
 
-            // 만약 예약가능방 갯수가 0개면 예약 혹은 호실사용금지가 제일 빨리 끝나는 호실의 예약 or 사용금지 날짜 제공
+            // 호실이 존재하는데 예약가능방 갯수가 0개면 예약 혹은 호실사용금지가 제일 빨리 끝나는 호실의 예약 or 사용금지 날짜 제공
+            if(reservable_room_count == 0 && (!CollectionUtils.isEmpty(roomDetailInfoList))){
+                //
+
+            }
 
             // 객실 이미지 조회
             List<String> imageList = selectImage(CommonEnum.ImageType.ROOM.getCode(), roomInfo.getRoom_num());
@@ -1810,7 +1827,7 @@ public class HotelServiceImpl implements HotelService {
 
     private CommonResponseVo ErrorResult (CommonResponseVo result){
         result.setResult("ERROR");
-        result.setMessage("");
+        result.setMessage("BACK-0001");
         return result;
     }
 

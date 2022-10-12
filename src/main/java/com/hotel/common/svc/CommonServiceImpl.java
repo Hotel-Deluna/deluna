@@ -454,4 +454,5 @@ public class CommonServiceImpl implements CommonService {
 
         return "메일 전송 완료";
     }
+
 }
