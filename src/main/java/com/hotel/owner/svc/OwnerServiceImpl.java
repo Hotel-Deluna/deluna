@@ -67,14 +67,14 @@ public class OwnerServiceImpl implements OwnerService {
             // 중복가입 조회 - 사업자번호
             if(checkDuplicationOwner(ownerVo.getBusiness_num())){
                 result.setResult("ERROR");
-                result.setMessage("사업자 번호가 이미 존재합니다");
+                result.setMessage("DUP-0002");
                 return result;
             }
 
             // 중복가입 조회 - 이메일
             if(checkDuplicationEmail(ownerVo.getEmail())){
                 result.setResult("ERROR");
-                result.setMessage("이메일이 이미 존재합니다");
+                result.setMessage("DUP-0001");
                 return result;
             }
 
@@ -91,8 +91,7 @@ public class OwnerServiceImpl implements OwnerService {
             result.setMessage("사업자 회원 가입 완료");
         }catch (Exception e){
             e.printStackTrace();
-            result.setResult("ERROR");
-            result.setMessage("");
+            ErrorResult(result);
             return result;
         }
 
@@ -139,8 +138,7 @@ public class OwnerServiceImpl implements OwnerService {
 
         }catch (Exception e){
             e.printStackTrace();
-            result.setResult("ERROR");
-            result.setMessage("");
+            ErrorResult(result);
             return result;
         }
 
@@ -168,8 +166,7 @@ public class OwnerServiceImpl implements OwnerService {
 
         }catch (Exception e){
             e.printStackTrace();
-            result.setResult("ERROR");
-            result.setMessage("");
+            ErrorResult(result);
             return result;
         }
 
@@ -204,8 +201,7 @@ public class OwnerServiceImpl implements OwnerService {
 
         }catch (Exception e){
             e.printStackTrace();
-            result.setResult("ERROR");
-            result.setMessage("");
+            ErrorResult(result);
             return result;
         }
 
@@ -284,8 +280,7 @@ public class OwnerServiceImpl implements OwnerService {
 
         }catch (Exception e){
             e.printStackTrace();
-            result.setResult("ERROR");
-            result.setMessage("");
+            ErrorResult(result);
             return result;
         }
         result.setMessage("사업자 번호 진위여부 확인 완료");
@@ -329,5 +324,11 @@ public class OwnerServiceImpl implements OwnerService {
     private int getPk(String jwtToken) throws Exception{
         JwtTokenDto.PayLoadDto payloadData = jwtTokenProvider.getPayload(jwtToken);
         return payloadData.getId();
+    }
+
+    private CommonResponseVo ErrorResult (CommonResponseVo result){
+        result.setResult("ERROR");
+        result.setMessage("BACK-0001");
+        return result;
     }
 }
