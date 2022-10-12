@@ -22,7 +22,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public Object ExpiredToken(Exception e) {
         Map<String, String> result = new HashMap<>();
         result.put("result", "ERROR");
-        result.put("reason", ExceptionMessage.ExpiredToken.getMessage());
+        result.put("reason", ExceptionMessage.ExpiredToken.getCode());
         return result;
     }
 
@@ -30,7 +30,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public Object MalformedJwt(Exception e) {
         Map<String, String> result = new HashMap<>();
         result.put("result", "ERROR");
-        result.put("reason", ExceptionMessage.MalformedToken.getMessage());
+        result.put("reason", ExceptionMessage.MalformedToken.getCode());
         return result;
     }
 
@@ -38,7 +38,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public Object UnsupportedJwt(Exception e) {
         Map<String, String> result = new HashMap<>();
         result.put("result", "ERROR");
-        result.put("reason", ExceptionMessage.MalformedToken.getMessage());
+        result.put("reason", ExceptionMessage.UnsupportedToken.getCode());
         return result;
     }
 
