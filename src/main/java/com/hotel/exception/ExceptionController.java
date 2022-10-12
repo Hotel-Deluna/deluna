@@ -1,4 +1,4 @@
-package com.hotel.common.controller;
+package com.hotel.exception;
 import com.hotel.exception.status.UnauthorizedException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Slf4j
-public class ExceptionHandler {
+public class ExceptionController {
 
     @RequestMapping("/exception/ExpiredToken")
     public void ExpiredToken(){
