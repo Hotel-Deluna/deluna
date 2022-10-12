@@ -1754,7 +1754,11 @@ public class HotelServiceImpl implements HotelService {
             // 예약가능방갯수
             roomInfo.setReservable_room_count(reservable_room_count);
 
-            // 만약 예약가능방 갯수가 0개면 예약 혹은 호실사용금지가 제일 빨리 끝나는 호실의 예약 or 사용금지 날짜 제공
+            // 호실이 존재하는데 예약가능방 갯수가 0개면 예약 혹은 호실사용금지가 제일 빨리 끝나는 호실의 예약 or 사용금지 날짜 제공
+            if(reservable_room_count == 0 && (!CollectionUtils.isEmpty(roomDetailInfoList))){
+                //
+
+            }
 
             // 객실 이미지 조회
             List<String> imageList = selectImage(CommonEnum.ImageType.ROOM.getCode(), roomInfo.getRoom_num());

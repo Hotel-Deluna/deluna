@@ -2,6 +2,8 @@ package com.hotel.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hotel.common.vo.JwtTokenDto;
+import com.hotel.exception.status.ExceptionMessage;
+import com.hotel.exception.status.UnauthorizedException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -182,14 +184,36 @@ public class JwtTokenProvider {
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("잘못된 JWT 서명입니다.");
+            throw new MalformedJwtException(ExceptionMessage.SignatureVerifyToken.getMessage());
         } catch (ExpiredJwtException e) {
             log.info("만료된 JWT 토큰입니다.");
+            throw new UnauthorizedException(ExceptionMessage.ExpiredToken.getMessage());
         } catch (UnsupportedJwtException e) {
             log.info("지원되지 않는 JWT 토큰입니다.");
+            throw new UnsupportedJwtException(ExceptionMessage.MalformedToken.getMessage());
         } catch (IllegalArgumentException e) {
             log.info("JWT 토큰이 잘못되었습니다.");
+            throw new IllegalArgumentException(ExceptionMessage.VerifyFailToken.getMessage());
         }
-        return false;
+    }
+
+    public int validateToken1(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return 1;
+        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+            log.info("잘못된 JWT 서명입니다.");
+            return 2;
+        } catch (ExpiredJwtException e) {
+            log.info("만료된 JWT 토큰입니다.");
+            return 3;
+        } catch (UnsupportedJwtException e) {
+            log.info("지원되지 않는 JWT 토큰입니다.");
+            return 4;
+        } catch (IllegalArgumentException e) {
+            log.info("JWT 토큰이 잘못되었습니다.");
+            return 5;
+        }
     }
 
     public JwtTokenDto.PayLoadDto getPayload(String accessToken) throws Exception{
