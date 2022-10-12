@@ -1,9 +1,12 @@
 package com.hotel.common.controller;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -19,7 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hotel.common.CommonResponseVo;
 import com.hotel.common.svc.CommonService;
 import com.hotel.common.vo.CommonVo;
+import com.hotel.jwt.CheckTokenInfo;
 import com.hotel.jwt.JwtAuthenticationFilter;
+import com.hotel.jwt.JwtTokenProvider;
 
 import io.swagger.annotations.ApiOperation;
 
@@ -32,7 +37,10 @@ public class CommonController {
     CommonService commonService;
     
     @Autowired
-    JwtAuthenticationFilter jwtAuthenticationFilter;
+    JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
+	CheckTokenInfo info;
 
     @ApiOperation(value="휴대폰 인증 요청 - 인증 번호 생성 및 전송")
     @ResponseBody
@@ -156,17 +164,34 @@ public class CommonController {
     @ApiOperation(value="토큰 재발급 api")
 	@ResponseBody
 	@PostMapping("/token")
-	public Map<String, Object> MemberTest(@RequestBody Map<String, Object> map, HttpServletRequest req) throws Exception {
+	public Map<String, Object> TokenReCreate(@RequestBody Map<String, Object> map, HttpServletRequest req, HttpServletResponse res) throws Exception {
 		
 		Map<String, Object> result = new HashMap<>();
 		
 		String token = req.getHeader("Authorization");
-		
-		if(token != null) {
-			jwtAuthenticationFilter.doFilter(req, null, null);
+		String reToken = req.getHeader("refreshToken");
+		if(token == null) {
+			result.put("result", "ERR");
+			result.put("reason", "JWT-0002");
+		}else if(reToken == null) {
+			result.put("result", "ERR");
+			result.put("reason", "JWT-0002");
+		}
+		String email = info.tokenInfo(token);
+		if(email == null) {
+			result.put("result", "ERR");
+			result.put("reason", "JWT-0003");
 		}
 		
+		result = commonService.TokenReCreate(email);
 		
+		Date date = new Date();
+		SimpleDateFormat sDate = new SimpleDateFormat("yyyy-MM-dd hh:mm");
+		res.setHeader("Authorization", (String) result.get("Authorization"));
+		res.setHeader("RefreshToken", (String) result.get("RefreshToken"));
+		res.setHeader("TokenCreateDate", sDate.format(date));
+		
+		result.clear();
 		
 		return result;
 	}

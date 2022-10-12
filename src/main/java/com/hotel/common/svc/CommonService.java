@@ -1,5 +1,7 @@
 package com.hotel.common.svc;
 
+import java.util.Map;
+
 import com.hotel.common.CommonResponseVo;
 import com.hotel.common.vo.CommonVo;
 
@@ -39,5 +41,7 @@ public interface CommonService {
 	void updateReservationEndDate();
    
 	String MailTest(String text, String to);
+
+	Map<String, Object> TokenReCreate(String email);
 
 }

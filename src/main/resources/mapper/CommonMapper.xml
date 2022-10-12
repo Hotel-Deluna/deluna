@@ -55,5 +55,16 @@
     <update id="updateReservationEndDate">
         update d_reservation set reservation_status = 4, is_delete = 'Y' where ed_date <![CDATA[<=]]> NOW() 
     </update>
+    
+     <select id="selectMemberInfo" resultType="string">
+        select email from d_member where email = #{email} 
+    </select>
+    
+     <select id="selectBusinessMemberInfo" resultType="int">
+        select business_user_num from d_business_member where email = #{email}
+    </select>
+    
+    
+    
 
 </mapper>

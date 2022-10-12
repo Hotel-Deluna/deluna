@@ -5,9 +5,11 @@ import com.hotel.common.dto.CommonMapper;
 import com.hotel.common.vo.CommonEnum;
 import com.hotel.common.vo.CommonVo;
 import com.hotel.common.vo.JwtTokenDto;
+import com.hotel.common.vo.JwtTokenDto.TokenDto;
 import com.hotel.company.dto.HotelMapper;
 import com.hotel.company.vo.HotelSearchVo;
 import com.hotel.jwt.JwtTokenProvider;
+import com.hotel.member.dto.MemberRequestDto;
 import com.hotel.util.*;
 import com.hotel.util.vo.UtilVo;
 import lombok.extern.slf4j.Slf4j;
@@ -454,5 +456,35 @@ public class CommonServiceImpl implements CommonService {
 
         return "메일 전송 완료";
     }
+
+	@Override
+	public Map<String, Object> TokenReCreate(String email) {
+		MemberRequestDto memberRequestDto = new MemberRequestDto();
+		memberRequestDto.setEmail(email);
+		Map<String, Object> map = new HashMap<>();
+		TokenDto dto = new TokenDto();
+		String data = commonMapper.selectMemberInfo(email);
+		
+		if(data == null) {
+			Integer num = commonMapper.selectBusinessMemberInfo(email);
+			if(num.toString() == null) {
+				map.put("result", "ERR");
+				map.put("reason", "memberInfo Not Found");
+				return map;
+			}
+			UsernamePasswordAuthenticationToken authenticationToken = memberRequestDto.toAuthentication();
+			dto = jwtTokenProvider.generateMemberTokenDto(authenticationToken, "ROLE_OWNER", num);
+		}else {
+			UsernamePasswordAuthenticationToken authenticationToken = memberRequestDto.toAuthentication();
+			dto = jwtTokenProvider.generateMemberTokenDto(authenticationToken, "ROLE_MEMBER");
+		}
+		String id = memberRequestDto.getEmail();
+		Integer role = memberRequestDto.getRole();
+		
+		map.put("Authorization", dto.getAccessToken());
+		map.put("RefreshToken", dto.getRefreshToken());
+		
+		return map;
+	}
 
 }

@@ -30,4 +30,8 @@ public interface CommonMapper {
     void insertTouristSpot(String name)throws Exception;
 
 	void updateReservationEndDate();
+
+	String selectMemberInfo(String email);
+
+	Integer selectBusinessMemberInfo(String email);
 }
