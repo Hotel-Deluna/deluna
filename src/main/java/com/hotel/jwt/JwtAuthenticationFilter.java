@@ -1,8 +1,15 @@
 package com.hotel.jwt;
 
 
+import com.hotel.exception.status.ExceptionMessage;
+import com.hotel.exception.status.UnauthorizedException;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -10,10 +17,13 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.rmi.RemoteException;
+import java.security.Key;
 
 @RequiredArgsConstructor
 @Configuration
@@ -30,16 +40,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
         // 1. Request Header 에서 토큰을 꺼냄
-        String jwt = resolveToken(request);
+        String jwt = request.getHeader(AUTHORIZATION_HEADER);
 
+        try{
+            boolean isValid = tokenProvider.validateToken(jwt);
         // 2. validateToken 으로 토큰 유효성 검사
         // 정상 토큰이면 해당 토큰으로 Authentication 을 가져와서 SecurityContext 에 저장
-        if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
+
+            if (StringUtils.hasText(jwt) && isValid) {
             Authentication authentication = tokenProvider.getAuthentication(jwt);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
+            filterChain.doFilter(request, response);
 
-        filterChain.doFilter(request, response);
+        // 잘못된 토큰 혹은 토큰만료시 예외처리
+        }catch (MalformedJwtException e){
+            RequestDispatcher dp=request.getRequestDispatcher("/exception/MalformedJwt");
+            dp.forward(request, response);
+        }catch (UnsupportedJwtException e){
+            RequestDispatcher dp=request.getRequestDispatcher("/exception/UnsupportedJwt");
+            dp.forward(request, response);
+        }catch (IllegalArgumentException e){
+            RequestDispatcher dp=request.getRequestDispatcher("/exception/IllegalArgumentJwt");
+            dp.forward(request, response);
+        }catch (UnauthorizedException e){
+            RequestDispatcher dp=request.getRequestDispatcher("/exception/ExpiredToken");
+            dp.forward(request, response);
+        }
+
     }
 
     // Request Header 에서 토큰 정보를 꺼내오기

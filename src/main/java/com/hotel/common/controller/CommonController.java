@@ -134,4 +134,5 @@ public class CommonController {
     public String MailTest(@RequestParam String text, @RequestParam String to){
         return commonService.MailTest(text, to);
     }
+
 }

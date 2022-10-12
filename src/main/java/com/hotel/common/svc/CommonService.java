@@ -39,4 +39,5 @@ public interface CommonService {
 	void updateReservationEndDate();
    
 	String MailTest(String text, String to);
+
 }
