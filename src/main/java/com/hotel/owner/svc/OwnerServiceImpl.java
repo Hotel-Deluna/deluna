@@ -166,14 +166,7 @@ public class OwnerServiceImpl implements OwnerService {
             result.setData(ownerInfo);
             result.setMessage("사업자 정보 조회 완료");
 
-        }catch (RuntimeException e){
-            e.printStackTrace();
-            result.setResult("ERROR");
-            result.setMessage("만료된 토큰");
-            return result;
-        }
-
-        catch (Exception e){
+        }catch (Exception e){
             e.printStackTrace();
             result.setResult("ERROR");
             result.setMessage("");

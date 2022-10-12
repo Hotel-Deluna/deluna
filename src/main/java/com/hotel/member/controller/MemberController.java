@@ -20,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -99,8 +101,12 @@ public class MemberController {
 		} 
 		memberRequestDto.setPassword(shaUtil.encryptSHA512(pwd));
 		Map<String, Object> data = memberServiceImpl.getMemberInfo(memberRequestDto);
+		
+		Date date = new Date();
+		SimpleDateFormat sDate = new SimpleDateFormat("yyyy-MM-dd hh:mm");
 		res.setHeader("Authorization", (String) data.get("Authorization"));
 		res.setHeader("RefreshToken", (String) data.get("RefreshToken"));
+		res.setHeader("TokenCreateDate", sDate.format(date));
 		dto.setEmail((String) data.get("email"));
 		dto.setRole((Integer) data.get("role"));
 		
