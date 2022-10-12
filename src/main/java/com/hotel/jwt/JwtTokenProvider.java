@@ -184,7 +184,7 @@ public class JwtTokenProvider {
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("잘못된 JWT 서명이거나 올바른 토큰이 아닙니다.");
-            throw new MalformedJwtException(ExceptionMessage.SignatureVerifyToken.getMessage());
+            throw new MalformedJwtException(ExceptionMessage.MalformedToken.getMessage());
         } catch (ExpiredJwtException e) {
             log.info("만료된 JWT 토큰입니다.");
             throw new UnauthorizedException(ExceptionMessage.ExpiredToken.getMessage());
