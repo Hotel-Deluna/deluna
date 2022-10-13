@@ -42,6 +42,12 @@ public class CommonController {
     @Autowired
 	CheckTokenInfo info;
 
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
+	CheckTokenInfo info;
+
     @ApiOperation(value="휴대폰 인증 요청 - 인증 번호 생성 및 전송")
     @ResponseBody
     @PostMapping("/phone/auth/request")
@@ -195,5 +201,47 @@ public class CommonController {
 		
 		return result;
 	}
+
+    @ApiOperation(value="토큰 재발급 api")
+	@ResponseBody
+	@PostMapping("/token")
+	public Map<String, Object> TokenReCreate(@RequestBody Map<String, Object> map, HttpServletRequest req, HttpServletResponse res) throws Exception {
+
+		Map<String, Object> result = new HashMap<>();
+
+		String token = req.getHeader("Authorization");
+		String reToken = req.getHeader("refreshToken");
+		if(token == null) {
+			result.put("result", "ERR");
+			result.put("reason", "JWT-0002");
+		}else if(reToken == null) {
+			result.put("result", "ERR");
+			result.put("reason", "JWT-0002");
+		}
+		String email = info.tokenInfo(token);
+		if(email == null) {
+			result.put("result", "ERR");
+			result.put("reason", "JWT-0003");
+		}
+
+		result = commonService.TokenReCreate(email);
+
+		Date date = new Date();
+		SimpleDateFormat sDate = new SimpleDateFormat("yyyy-MM-dd hh:mm");
+		res.setHeader("Authorization", (String) result.get("Authorization"));
+		res.setHeader("RefreshToken", (String) result.get("RefreshToken"));
+		res.setHeader("TokenCreateDate", sDate.format(date));
+
+		result.clear();
+
+		return result;
+	}
+
+    @ApiOperation(value="객실, 호실 예약삭제 - 내부 스케쥴러 API")
+    @ResponseBody
+    @GetMapping(value = "/scheduler/delete/room")
+    public String deleteRoom(){
+        return commonService.deleteRoom();
+    }
 
 }

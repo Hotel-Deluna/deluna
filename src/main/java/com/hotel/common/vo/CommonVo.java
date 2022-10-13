@@ -127,4 +127,22 @@ public class CommonVo {
         MultipartFile image;
     }
 
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "삭제해야할 객실정보")
+    public static class deleteRoomInfo extends CommonDto {
+        @ApiParam(value = "객실 구분번호", required = true, example = "1")
+        Integer room_num;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "삭제해야할 호실정보")
+    public static class deleteRoomDetailInfo extends CommonDto {
+        @ApiParam(value = "호실 구분번호", required = true, example = "1")
+        Integer room_detail_num;
+    }
+
 }

@@ -165,6 +165,16 @@ public class HotelServiceImpl implements HotelService {
             registerHotelRequest.setHoliday_price_status(1); // 기본셋팅 - 비성수기 주말가격 객실수정에서 변경가능
             registerHotelRequest.setInsert_user(userPk);
             registerHotelRequest.setUpdate_user(userPk);
+
+            // 위도 경도로 중복체크
+            Integer checkDuplicationHotel = hotelMapper.checkDuplicationHotel(registerHotelRequest);
+
+            if(checkDuplicationHotel != null){
+                result.setResult("ERROR");
+                result.setMessage("DUP-0004");
+                return result;
+            }
+
             hotelMapper.insertHotelInfo(registerHotelRequest);
 
             // Image Resizing & S3 Upload & DB insert
@@ -1719,6 +1729,8 @@ public class HotelServiceImpl implements HotelService {
             // 호실정보
             List<HotelInfoVo.RoomDetailInfo> roomDetailInfoList = hotelMapper.selectRoomDetailInfo(roomInfo.getRoom_num());
             List<HotelInfoVo.RoomDetailInfo> roomDetailInfoListResult = new ArrayList<>();
+            // 예약 혹은 호실사용금지가 제일 빨리 끝나는 호실의 예약 or 사용금지 날짜
+            List<HotelInfoVo.doNotResDateList> dateList = new ArrayList<>();
 
             // 호실정보 저장
             for(HotelInfoVo.RoomDetailInfo roomDetailInfo : roomDetailInfoList){
@@ -1727,6 +1739,11 @@ public class HotelServiceImpl implements HotelService {
                     if(DateUtil.checkDateBetween(roomDetailInfo.getRoom_closed_start(), roomDetailInfo.getRoom_closed_end(), new Date())){
                         // 오늘날짜가 사용금지일에 해당하면 Available_yn = false
                         roomDetailInfo.setAvailable_yn(false);
+                        HotelInfoVo.doNotResDateList dt = new HotelInfoVo.doNotResDateList();
+                        dt.setStart_dt(roomDetailInfo.getRoom_closed_start());
+                        dt.setEnd_dt(roomDetailInfo.getRoom_closed_end());
+                        dt.setDiff(DateUtil.dateDiff(roomDetailInfo.getRoom_closed_start(), roomDetailInfo.getRoom_closed_end()));
+                        dateList.add(dt);
                     }
                 }
                 roomDetailInfo.setAvailable_yn(true);
@@ -1737,7 +1754,7 @@ public class HotelServiceImpl implements HotelService {
                     reservable_room_count += 1;
                 }else {
                     if(roomDetailInfo.getReservation_status() != 1){
-                        // 사용금지가 아니고 호실상세정보삭제 예정일이 없다면 예약가능
+                        // 사용금지가 아니고 호실상세정보 삭제예정일이 없다면 예약가능
                         if(roomDetailInfo.getAvailable_yn() && roomDetailInfo.getDelete_date() == null){
                             roomDetailInfo.setStatus(CommonEnum.RoomDetailStatus.AVAILABLE.getCode());
                             reservable_room_count += 1;
@@ -1745,19 +1762,41 @@ public class HotelServiceImpl implements HotelService {
                         else {
                             roomDetailInfo.setStatus(CommonEnum.RoomDetailStatus.UNAVAILABLE.getCode());
                         }
+                    }else{
+                        // 예약상태가 1(예약중)인 경우
+                        roomDetailInfo.setStatus(CommonEnum.RoomDetailStatus.UNAVAILABLE.getCode());
+                        HotelInfoVo.doNotResDateList dt = new HotelInfoVo.doNotResDateList();
+                        dt.setStart_dt(roomDetailInfo.getSt_date());
+                        dt.setEnd_dt(roomDetailInfo.getEd_date());
+                        dt.setDiff(DateUtil.dateDiff(roomDetailInfo.getSt_date(), roomDetailInfo.getEd_date()));
+                        dateList.add(dt);
                     }
                 }
-
                 roomDetailInfoListResult.add(roomDetailInfo);
             }
+
 
             // 예약가능방갯수
             roomInfo.setReservable_room_count(reservable_room_count);
 
-            // 호실이 존재하는데 예약가능방 갯수가 0개면 예약 혹은 호실사용금지가 제일 빨리 끝나는 호실의 예약 or 사용금지 날짜 제공
-            if(reservable_room_count == 0 && (!CollectionUtils.isEmpty(roomDetailInfoList))){
-                //
+            // 예약불가시 사용금지 날짜가 필요해서 제공 - 호실사용금지가 제일 빨리 끝나는 호실의 예약 or 사용금지 날짜 제공
+            if(!CollectionUtils.isEmpty(dateList)){
+                String earliestAvailableDate = "";
 
+                // 오늘날짜에서 제일 가까운 종료일로 정렬
+                dateList = dateList
+                        .stream()
+                        .sorted(Comparator.comparing(HotelInfoVo.doNotResDateList::getEnd_dt))
+                        .collect(Collectors.toList());
+
+                Date resultStartDt = dateList.get(0).getStart_dt();
+                Date resultEndDt = dateList.get(0).getEnd_dt();
+
+                earliestAvailableDate = DateUtil.dateToString(resultStartDt)
+                    + " ~ "
+                    + DateUtil.dateToString(resultEndDt);
+
+                roomInfo.setEarliest_available_date(earliestAvailableDate);
             }
 
             // 객실 이미지 조회

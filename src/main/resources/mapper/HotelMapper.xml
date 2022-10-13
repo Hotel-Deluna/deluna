@@ -90,6 +90,14 @@
                    'N', NOW(), NOW(), #{insert_user}, #{update_user})
     </insert>
 
+    <!-- 호텔 등록시 중복조회 -->
+    <select id="checkDuplicationHotel" resultType="int">
+        SELECT hotel_num
+        FROM d_hotel
+        WHERE latitude = #{latitude} AND longitude = #{longitude}
+        LIMIT 1
+    </select>
+
     <!-- 호텔 태그 등록 -->
     <insert id="insertHotelTags">
         INSERT INTO d_hotel_reference_tag (hotel_num, hotel_tag_num, dt_insert, dt_update, insert_user, update_user)
@@ -451,12 +459,21 @@
 
     <!-- 객실번호로 호실 조회 -->
     <select id="selectRoomDetailInfo" resultMap="selectRoomDetailInfoMap">
-        SELECT rd.* , rv.reservation_status, rv.st_date, rv.ed_date
-        FROM d_room_detail rd
-                 LEFT JOIN d_reservation rv on rd.room_detail_num = rv.room_detail_num
-        WHERE rd.room_num = #{room_num}
-          AND rd.is_delete = 'N'
-        GROUP BY rd.room_detail_num
+        SELECT A.* FROM
+            (
+                SELECT rd.*, rv.reservation_status, rv.room_detail_num AS rv_room, rv.st_date, rv.ed_date
+                FROM d_room_detail rd
+                         LEFT JOIN d_reservation rv on rd.room_detail_num = rv.room_detail_num
+                WHERE rd.room_num = 8
+                  AND rd.is_delete = 'N'
+                ORDER BY rv.reservation_num DESC LIMIT 20000
+                /*
+                My-SQL의 서브쿼리의 데이터 구조와 정렬을 변화시키기 위해 리밋값을 줌 https://jaenjoy.tistory.com/39
+                Limit을 걸어줄 경우 데이터의 순서 뿐만 아니라 데이터의 갯수까지도 제한되기 떄문에
+                테이블 내 데이터의 본절적인 내용이 변경되어서 서브쿼리의 결과 즉, group by의 대상이 되는 결과를 원하는데로 설정가능
+                */
+            ) A
+        GROUP BY rv_room
     </select>
 
     <!-- 호실번호로 호실 조회 -->

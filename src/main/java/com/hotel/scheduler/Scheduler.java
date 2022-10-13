@@ -28,4 +28,10 @@ public class Scheduler {
     public void updateReservationEndDate() {
         commonService.updateReservationEndDate();
     }
+
+    // 객실, 호실 예약 삭제
+    @Scheduled(cron = "0 2 * * * ?")
+    public void deleteRoom() {
+        commonService.deleteRoom();
+    }
 }
