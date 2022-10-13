@@ -50,7 +50,7 @@ public class DateUtil {
     public static String dateToString(Date date) throws ParseException {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
         // 한국 표준시로 변경
-        formatter.setTimeZone(TimeZone.getTimeZone("KST"));
+//        formatter.setTimeZone(TimeZone.getTimeZone("KST"));
 
         return formatter.format(date);
     }
@@ -84,10 +84,10 @@ public class DateUtil {
      * @param date1, date2
      * @return 두 날짜의 차이 정수로 return
      * date1 과 date2가 같으면 0
-     * date1 이 date2보다 이전이면 그 차이만큼 음수
-     * date1 이 date2보다 이후면 그 차이만큼 양수
+     * date1 이 date2보다 이전이면 음수
+     * date1 이 date2보다 이후면 양수
      */
-    public static int dateDiff(Date date1, Date date2){
+    public static int dateCompare(Date date1, Date date2){
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
         // 한국 표준시로 변경
         formatter.setTimeZone(TimeZone.getTimeZone("KST"));
@@ -196,6 +196,25 @@ public class DateUtil {
         formatter.setTimeZone(TimeZone.getTimeZone("KST"));
 
         return formatter.parse(formatter.format(date));
+    }
+
+    /**
+     * @param date1, date2
+     * @return 두 날짜의 차이 정수로 return
+     * @return Date
+     * @throws Exception
+     */
+    public static int dateDiff(Date date1, Date date2) throws Exception {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
+        // 한국 표준시로 변경
+        formatter.setTimeZone(TimeZone.getTimeZone("KST"));
+        formatter.format(date1);
+        formatter.format(date2);
+
+        long diffSec = (date1.getTime() - date2.getTime()) / 1000;
+        long diffDays = diffSec / (24*60*60); //일자수 차이
+
+        return (int) diffDays;
     }
 
 }

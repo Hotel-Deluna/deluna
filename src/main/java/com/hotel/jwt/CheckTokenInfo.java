@@ -31,13 +31,13 @@ public class CheckTokenInfo {
 	}
 	
 	public Integer tokenBusinessInfo(String accessToken) throws Exception {
-		
+
 		PayLoadDto auth = jwtTokenProvider.getPayload(accessToken);
-		
+
 		Integer num = auth.getId();
 		System.out.println("num = " + auth.toString());
 		return num;
-		
+
 	}
-	
+
 }

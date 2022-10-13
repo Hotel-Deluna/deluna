@@ -7,7 +7,7 @@ import com.hotel.common.dto.CommonDto;
 import io.micrometer.core.lang.Nullable;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiParam;
-import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.models.auth.In;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -398,6 +398,9 @@ public class HotelInfoVo {
 
         @ApiParam(value = "공휴일 가격 상태 - 공휴일을 성수기 가격취급할건지 결정. 1: 비성수기 주말가격, 2: 성수기 주말가격",  required = true, example = "1")
         Integer holiday_price_status;
+
+        @Schema(description = "모든 객실 예약불가시 가장 가장 빨리 종료되는 예약일 - 예약시작/종료일 문자형으로 제공", required = false, example = "2022/08/01 ~ 2022/08/03")
+        String earliest_available_date;
     }
 
     @Data
@@ -703,11 +706,11 @@ public class HotelInfoVo {
         String room_name;
 
         @JsonIgnore
-        @Schema(description = "예약 시작일",  required = true, example = "12345")
+        @Schema(description = "예약 시작일",  required = true, hidden = true)
         Date st_date;
 
         @JsonIgnore
-        @Schema(description = "예약 종료일",  required = true, example = "12345")
+        @Schema(description = "예약 종료일",  required = true, hidden = true)
         Date ed_date;
     }
 
@@ -915,10 +918,12 @@ public class HotelInfoVo {
 
         // DB
         @JsonIgnore
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd", timezone="Asia/Seoul")
         @ApiParam(value = "입실일", required = true)
         Date st_date;
 
         @JsonIgnore
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd", timezone="Asia/Seoul")
         @ApiParam(value = "퇴실일", required = true)
         Date ed_date;
     }
@@ -992,5 +997,22 @@ public class HotelInfoVo {
 
         @ApiParam(value = "삭제 예약일", required = true)
         Date delete_date;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class doNotResDateList {
+
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd", timezone="Asia/Seoul")
+        @Schema(description = "예약불가 시작일", required = false, example = "2022/08/01")
+        Date start_dt;
+
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd", timezone="Asia/Seoul")
+        @Schema(description = "예약불가 종료일", required = false, example = "2022/08/03")
+        Date end_dt;
+
+        @Schema(description = "시작일과 종료일의 차이", required = false, example = "3")
+        Integer diff;
     }
 }
