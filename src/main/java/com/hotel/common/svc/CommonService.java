@@ -38,11 +38,11 @@ public interface CommonService {
 
     String InsertTouristSpot(CommonVo.InsertTouristSpotRequest insertTouristSpotRequest);
 
-	void updateReservationEndDate();
+	  void updateReservationEndDate();
    
-	String MailTest(String text, String to);
+	  String MailTest(String text, String to);
 
-	Map<String, Object> TokenReCreate(String email);
+	  Map<String, Object> TokenReCreate(String email);
 
     String deleteRoom();
 
