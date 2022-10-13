@@ -280,21 +280,27 @@ public class ReservationServiceImpl implements ReservationService {
 		// status 값 및 날짜 필터링
 		Map<String, Object> checkMap = reservationMapper.reservationCheckTime(memberWithdrawVo.getReservation_num());
 		
+		if(checkMap == null) {
+			dto.setResult("ERR");
+			dto.setReason("reservation data Not found");
+			return dto;
+		}
+		
+		
 		Date date = new Date();
-		//String st_date = (String) checkMap.get("st_date");
-		//String ed_date = (String) checkMap.get("ed_date");
-		String st_date = String.valueOf(checkMap.get("st_date"));
-		String ed_date = String.valueOf(checkMap.get("ed_date"));
+		String st_date = (String) checkMap.get("st_date");
+		String ed_date = (String) checkMap.get("ed_date");
+		//String st_date = String.valueOf(checkMap.get("st_date"));
+		//String ed_date = String.valueOf(checkMap.get("ed_date"));
 		
 		Date stDate = new Date();
-		Date edDate = new Date();
-		System.out.println("edDate = " + edDate);
+		//Date edDate = new Date();
 		SimpleDateFormat format = new  SimpleDateFormat("yy-MM-dd");
 		
 		String today = format.format(date);
 		date = format.parse(today);
 		stDate = format.parse(st_date);
-		edDate = format.parse(ed_date);
+		//edDate = format.parse(ed_date);
 		
 		if(date.equals(stDate)) {
 			dto.setResult("ERR");
