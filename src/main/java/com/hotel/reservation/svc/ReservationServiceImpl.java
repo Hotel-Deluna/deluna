@@ -431,7 +431,7 @@ public class ReservationServiceImpl implements ReservationService {
 	public String checkMemberInfo(String email) {
 
 		String id = reservationMapper.checkMemberInfo(email);
-		if (id.equals("")) {
+		if (id == null) {
 			return null;
 		}
 		return id;
