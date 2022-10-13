@@ -137,7 +137,6 @@ public class ReservationServiceImpl implements ReservationService {
 				MemberVo.RegisterMemberRequest memberVo = new MemberVo.RegisterMemberRequest();
 				memberVo.setName(memberReservationRequest.get(i).getReservation_name());
 				memberVo.setPhone_num(aesUtil.encrypt(memberReservationRequest.get(i).getReservation_phone()));
-				memberVo.setRole(memberReservationRequest.get(i).getRole());
 				
 				//없는 회원이면 간편 가입 시킨다
 				String phoneData = reservationMapper.checkUnMemberInfo(memberVo.getPhone_num());
@@ -184,7 +183,6 @@ public class ReservationServiceImpl implements ReservationService {
 			} else {
 
 				// 예약완료 일 떄
-
 				payment.setPayment_price(memberReservationRequest.get(x).getReservation_price());
 				payment.setInsert_user(memberReservationRequest.get(x).getInsert_user());
 
@@ -306,11 +304,11 @@ public class ReservationServiceImpl implements ReservationService {
 		
 		if(date.equals(stDate)) {
 			dto.setResult("ERR");
-			dto.setReason("today check st_date ERR");
+			dto.setReason("today check st_date NOW ERR");
 			return dto;
 		}else if(date.after(stDate)) {
 			dto.setResult("ERR");
-			dto.setReason("today check ed_date ERR");
+			dto.setReason("today check st_date after ERR");
 			return dto;
 		}
 		

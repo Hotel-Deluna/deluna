@@ -67,9 +67,6 @@ public class MemberVo {
 		@Schema(description = "비밀번호", required = true, example = "비밀번호 입력")
 		String password;
 		
-		@Schema(description = "회원상태여부", required = true, example = "1:고객,2:사업자")
-		Integer role;
-		
 		@Schema(description = "member_num", required = true, example = "백엔드 사용")
 		Integer member_num;
 

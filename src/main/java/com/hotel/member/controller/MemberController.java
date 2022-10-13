@@ -47,8 +47,6 @@ public class MemberController {
 	private final CheckTokenInfo info;
 
 	@ApiOperation(value = "고객 회원가입")
-	@ApiImplicitParams({
-	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PostMapping("/sign-up")
 	public MemberResponseDto MemberSignUp(@RequestBody MemberVo.RegisterMemberRequest registerMemberRequest) {
@@ -71,11 +69,7 @@ public class MemberController {
 			dto.setResult("ERR");
 			dto.setReason("phone_num not Found");
 			return dto;
-		} else if (registerMemberRequest.getRole().toString().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("role not Found");
-			return dto;
-		}
+		} 
 		return memberServiceImpl.MemberSignUp(registerMemberRequest);
 	}
 
