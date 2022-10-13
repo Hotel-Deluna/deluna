@@ -209,7 +209,6 @@ public class MemberServiceImpl implements UserDetailsService {
 	public LoginMemberResponseDto memberSignInKakao(LoginMemberRequestKokao memberVo) throws Exception {
 		LoginMemberResponseDto dto = new LoginMemberResponseDto();
 		
-		memberVo.setRole(4);
 		Integer memberInfo = memberMapper.registerKakaoInfo(memberVo);
 		
 		if(memberInfo.toString().equals("")) {
@@ -234,7 +233,6 @@ public class MemberServiceImpl implements UserDetailsService {
 	public LoginMemberResponseDto memberSignInNaver(LoginMemberRequestNaver memberVo) {
 		LoginMemberResponseDto dto = new LoginMemberResponseDto();
 		
-		memberVo.setRole(4);
 		Integer memberInfo = memberMapper.registerNaverInfo(memberVo);
 		
 		if(memberInfo.toString().equals("")) {
@@ -259,7 +257,6 @@ public class MemberServiceImpl implements UserDetailsService {
 	public LoginMemberResponseDto memberSignInGoogle(LoginMemberRequestGoogle memberVo) {
 		LoginMemberResponseDto dto = new LoginMemberResponseDto();
 			
-		memberVo.setRole(4);
 		Integer memberInfo = memberMapper.registerGoogleInfo(memberVo);
 		
 		if(memberInfo.toString().equals("")) {

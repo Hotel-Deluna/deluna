@@ -156,7 +156,6 @@ public class ReservationServiceImpl implements ReservationService {
 				memberReservationRequest.get(i).setMember_num((Integer) unMemberMap.get("member_num"));
 			}
 			
-			// 예약 인서트
 			System.out.println("data = " + memberReservationRequest.toString());
 			// 암호화 후 저장
 			memberReservationRequest.get(i)
@@ -262,6 +261,7 @@ public class ReservationServiceImpl implements ReservationService {
 				}
 				memberWithdrawVo.setUpdate_user(insert_user);
 			}else {
+				// 비회원 
 				insert_user = reservationMapper.selectUnInsertUser(memberWithdrawVo);
 				memberWithdrawVo.setUpdate_user(insert_user);
 			}

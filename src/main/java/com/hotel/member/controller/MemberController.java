@@ -135,10 +135,6 @@ public class MemberController {
 			dto.setResult("ERR");
 			dto.setReason("name Not Found");
 			return dto;
-		}else if(loginMemberRequestKokao.getAuth().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("auth Not Found");
-			return dto;
 		}
 		return memberServiceImpl.memberSignInKakao(loginMemberRequestKokao);
 	}
@@ -159,10 +155,6 @@ public class MemberController {
 		}else if(loginMemberRequestNaver.getName().equals("")) {
 			dto.setResult("ERR");
 			dto.setReason("name Not Found");
-			return dto;
-		}else if(loginMemberRequestNaver.getAuth().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("auth Not Found");
 			return dto;
 		}
 		
@@ -186,10 +178,6 @@ public class MemberController {
 		}else if(loginMemberRequestGoogle.getName().equals("")) {
 			dto.setResult("ERR");
 			dto.setReason("name Not Found");
-			return dto;
-		}else if(loginMemberRequestGoogle.getAuth().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("auth Not Found");
 			return dto;
 		}
 		

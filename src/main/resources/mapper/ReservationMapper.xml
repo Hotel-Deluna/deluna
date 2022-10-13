@@ -144,6 +144,8 @@
 			and a.st_date LIKE CONCAT(#{st_date},'%') 
 		
 			and a.ed_date LIKE CONCAT(#{ed_date},'%')
+			
+			and a.role = 1
 		
 		GROUP BY a.reservation_num
 		ORDER BY a.reservation_num DESC
@@ -178,6 +180,8 @@
 		and reservation_phone = #{reservation_phone}
 		
 		and reservation_num = #{reservation_num}
+		
+		and reservation_num = 3
 		
 	</select>
 	

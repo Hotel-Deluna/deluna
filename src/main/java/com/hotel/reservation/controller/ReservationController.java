@@ -1,19 +1,10 @@
 package com.hotel.reservation.controller;
 
-import com.hotel.common.CommonResponseVo;
-import com.hotel.company.svc.HotelService;
-import com.hotel.company.vo.HotelInfoVo;
-import com.hotel.company.vo.HotelSearchVo;
 import com.hotel.jwt.CheckTokenInfo;
-import com.hotel.jwt.JwtTokenProvider;
-import com.hotel.member.svc.MemberServiceImpl;
-import com.hotel.member.vo.MemberVo;
-import com.hotel.owner.vo.OwnerVo;
 import com.hotel.reservation.svc.ReservationService;
 import com.hotel.reservation.vo.MemberInfoVo;
 import com.hotel.reservation.vo.UnMemberInfoVo;
 import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberReservationInfoResponseDto;
-import com.hotel.util.SHA512Util;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListInfoResponseDto;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationResponseDto;
 import com.hotel.reservation.vo.MemberInfoVo.ReservationDeleteContentResponseDto;
@@ -24,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

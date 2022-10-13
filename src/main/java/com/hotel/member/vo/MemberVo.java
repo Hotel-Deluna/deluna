@@ -102,12 +102,6 @@ public class MemberVo {
 		@Schema(description = "고객 이름", required = true, example = "이름 or 닉네임")
 		String name;
 
-		@Schema(description = "Oauth2", required = true, example = "소셜 인증키")
-		String auth;
-		
-		@Schema(description = "role", required = true, example = "백엔드에서 사용")
-		Integer role;
-		
 	}
 
 	@Data
@@ -122,12 +116,6 @@ public class MemberVo {
 		@Schema(description = "고객 이름", required = true, example = "이름 or 닉네임")
 		String name;
 
-		@Schema(description = "Oauth2", required = true, example = "소셜 인증키")
-		String auth;
-		
-		@Schema(description = "role", required = true, example = "백엔드에서 사용")
-		Integer role;
-
 	}
 	
 	@Data
@@ -141,12 +129,6 @@ public class MemberVo {
 		
 		@Schema(description = "고객 이름", required = true, example = "이름 or 닉네임")
 		String name;
-
-		@Schema(description = "Oauth2", required = true, example = "소셜 인증키")
-		String auth;
-		
-		@Schema(description = "role", required = true, example = "백엔드에서 사용")
-		Integer role;
 
 	}
 
