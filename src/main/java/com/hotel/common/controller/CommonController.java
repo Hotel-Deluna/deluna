@@ -42,12 +42,6 @@ public class CommonController {
     @Autowired
 	CheckTokenInfo info;
 
-    @Autowired
-    JwtTokenProvider jwtTokenProvider;
-
-    @Autowired
-	CheckTokenInfo info;
-
     @ApiOperation(value="휴대폰 인증 요청 - 인증 번호 생성 및 전송")
     @ResponseBody
     @PostMapping("/phone/auth/request")
