@@ -42,7 +42,8 @@
 	
 	<select id="selectUnUserInfo" resultType="map">
 
-		select insert_user, member_num from d_member where phone_num = #{phone_num}
+		select insert_user, MAX(member_num) AS member_num from d_member 
+		where name = #{name} and phone_num = #{phone_num} and role = #{role}
 
 	</select>
 
@@ -98,7 +99,7 @@
 	<select id="selectUnInsertUser" resultType="string">
 
 		select insert_user from d_reservation where reservation_num =
-		#{reservation_num}
+		#{reservation_num} and is_delete = 'N'
 
 	</select>
 
@@ -223,8 +224,7 @@
 	
 	<select id="checkUnMemberInfo" resultType="string">
 		
-		select phone_num from d_member where phone_num = #{phone_num}
-		
+		select MAX(member_num) AS member_num from d_member where name = #{name} and role = #{role} and phone_num = #{phone_num}  group by email
 	</select>
 	
 	<select id="reservationCheckTime" resultType="com.hotel.reservation.vo.MemberInfoVo$MemberWithdrawCheckDate">

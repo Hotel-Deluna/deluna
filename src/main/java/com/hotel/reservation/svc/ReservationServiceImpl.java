@@ -134,22 +134,34 @@ public class ReservationServiceImpl implements ReservationService {
 				// 비회원 예약 로직
 				// 비회원 기본 정보 저장
 				// 최초 1번만 가입
-				MemberVo.RegisterMemberRequest memberVo = new MemberVo.RegisterMemberRequest();
-				memberVo.setName(memberReservationRequest.get(i).getReservation_name());
-				memberVo.setPhone_num(aesUtil.encrypt(memberReservationRequest.get(i).getReservation_phone()));
+				MemberVo.RegisterMemberUnMemberRequest unMemberVo = new MemberVo.RegisterMemberUnMemberRequest();
+				unMemberVo.setName(memberReservationRequest.get(i).getReservation_name());
+				unMemberVo.setPhone_num(aesUtil.encrypt(memberReservationRequest.get(i).getReservation_phone()));
+				unMemberVo.setRole(memberReservationRequest.get(i).getRole());
 				
 				//없는 회원이면 간편 가입 시킨다
-				String phoneData = reservationMapper.checkUnMemberInfo(memberVo.getPhone_num());
+				// 기존 회원이 비회원으로 등록하는지 확인
+				String phoneData = reservationMapper.checkUnMemberInfo(unMemberVo);
 				if (phoneData == null) {
-					int UnMemberInfo = memberMapper.registerUnMemberInfo(memberVo);
+					int UnMemberInfo = memberMapper.registerUnMemberInfo(unMemberVo);
 					if (UnMemberInfo == 0) {
 						// insert 실패 시 에러 처리
 						dto.setResult("ERR");
 						dto.setReason("unMember info insert fail");
 						return dto;
 					}
+				}else {
+					// 기존 회원이 비회원으로 등록
+					int memberUnmemberInfo = memberMapper.registerMemberUnMemberInfo(unMemberVo);
+					if(memberUnmemberInfo == 0) {
+						dto.setResult("ERR");
+						dto.setReason("unMember info insert fail");
+						return dto;
+					}
+					
 				}
-				unMemberMap = reservationMapper.selectUnUserInfo(memberVo.getPhone_num());
+				
+				unMemberMap = reservationMapper.selectUnUserInfo(unMemberVo);
 				
 				// 예약자 정보 입력
 				memberReservationRequest.get(i).setInsert_user(String.valueOf(unMemberMap.get("insert_user")));
@@ -261,7 +273,7 @@ public class ReservationServiceImpl implements ReservationService {
 				}
 				memberWithdrawVo.setUpdate_user(insert_user);
 			}else {
-				// 비회원 
+				// 비회원 처리인데...
 				insert_user = reservationMapper.selectUnInsertUser(memberWithdrawVo);
 				memberWithdrawVo.setUpdate_user(insert_user);
 			}

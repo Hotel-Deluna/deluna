@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
 import com.hotel.member.vo.MemberVo.RegisterMemberRequest;
+import com.hotel.member.vo.MemberVo.RegisterMemberUnMemberRequest;
 import com.hotel.reservation.vo.MemberInfoVo;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationDeleteRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListInfoResponseDto;
@@ -69,11 +70,11 @@ public interface ReservationMapper {
 
 	Integer selectReservationCnt(MemberReservationListRequest memberInfo);
 
-	Map<String, Object> selectUnUserInfo(String string);
+	Map<String, Object> selectUnUserInfo(RegisterMemberUnMemberRequest unMemberVo);
 
 	void reservationDeleteUnMember(String insert_user);
 
-	String checkUnMemberInfo(String phone_num);
+	String checkUnMemberInfo(RegisterMemberUnMemberRequest unMemberVo);
 	
 	String selectInsertUser(String email);
 

@@ -23,6 +23,7 @@ import com.hotel.member.vo.MemberVo.MemberInfo;
 import com.hotel.member.vo.MemberVo.MemberUpdateInfo;
 import com.hotel.member.vo.MemberVo.MemberUpdatePwdRequest;
 import com.hotel.member.vo.MemberVo.RegisterMemberRequest;
+import com.hotel.member.vo.MemberVo.RegisterMemberUnMemberRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationRequest;
 
 @Mapper
@@ -82,9 +83,11 @@ public interface MemberMapper {
 
 	Map<String, Object> updateCheckOwnerEmailByPwd(MemberChangePwdRequest updatePwdRequest);
 
-	int registerUnMemberInfo(MemberVo.RegisterMemberRequest memberVo);
+	int registerUnMemberInfo(RegisterMemberUnMemberRequest unMemberVo);
 
 	// 사업자 로그인
 	Integer getOwnerNum (MemberRequestDto memberRequestDto);
+
+	int registerMemberUnMemberInfo(RegisterMemberUnMemberRequest unMemberVo);
 
 }

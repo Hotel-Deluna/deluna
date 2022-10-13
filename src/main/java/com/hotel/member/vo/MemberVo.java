@@ -71,6 +71,28 @@ public class MemberVo {
 		Integer member_num;
 
 	}
+	
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
+	@Schema(description = "고객 회원가입 파라미터")
+	public static class RegisterMemberUnMemberRequest {
+		@Schema(description = "한글 이름", required = true, example = "홍길동")
+		String name;
+
+		@Schema(description = "휴대폰 번호", required = true, example = "01012345678")
+		String phone_num;
+
+		@Schema(description = "role", required = true, example = "백엔드 사용")
+		Integer role;
+		
+		@Schema(description = "member_num", required = true, example = "백엔드 사용")
+		Integer member_num;
+		
+		@Schema(description = "reservation_num", required = true, example = "백엔드 사용")
+		Integer reservation_num;
+		
+	}
 
 //	@Data
 //	@NoArgsConstructor
