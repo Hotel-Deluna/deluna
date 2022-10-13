@@ -47,6 +47,7 @@ public class JwtTokenProvider {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
+    //재발급에 사용
     public JwtTokenDto.TokenDto generateTokenDto(Authentication authentication) {
         // 권한들 가져오기
         String authorities = authentication.getAuthorities().stream()
@@ -82,6 +83,7 @@ public class JwtTokenProvider {
     }
 
     //추가 - 2022/09/21 한동희
+    //고객용 발급 사용
     public JwtTokenDto.TokenDto generateMemberTokenDto(Authentication authentication, String role) {
         // 권한들 가져오기
         String authorities = authentication.getAuthorities().stream()
@@ -119,6 +121,7 @@ public class JwtTokenProvider {
                 .build();
     }
 
+    //사업자 발급 사용
     public JwtTokenDto.TokenDto generateMemberTokenDto(Authentication authentication, String role, int id) {
         // 권한들 가져오기
         String authorities = authentication.getAuthorities().stream()
@@ -196,25 +199,6 @@ public class JwtTokenProvider {
 //            throw new IllegalArgumentException(ExceptionMessage.VerifyFailToken.getMessage());
         }
         return false;
-    }
-
-    public int validateToken1(String token) {
-        try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return 1;
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            log.info("잘못된 JWT 서명입니다.");
-            return 2;
-        } catch (ExpiredJwtException e) {
-            log.info("만료된 JWT 토큰입니다.");
-            return 3;
-        } catch (UnsupportedJwtException e) {
-            log.info("지원되지 않는 JWT 토큰입니다.");
-            return 4;
-        } catch (IllegalArgumentException e) {
-            log.info("JWT 토큰이 잘못되었습니다.");
-            return 5;
-        }
     }
 
     public JwtTokenDto.PayLoadDto getPayload(String accessToken) throws Exception{

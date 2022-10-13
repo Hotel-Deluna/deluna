@@ -15,6 +15,8 @@ public interface HotelMapper {
     // 호텔
     void insertHotelInfo(HotelInfoVo.RegisterHotelRequest registerHotelRequest) throws Exception;
 
+    Integer checkDuplicationHotel(HotelInfoVo.RegisterHotelRequest registerHotelRequest) throws Exception;
+
     void insertHotelTags(HotelInfoVo.Tags tags) throws Exception;
 
     void updateHotelInfo(HotelInfoVo.EditInfoHotelRequest editInfoHotelRequest) throws Exception;

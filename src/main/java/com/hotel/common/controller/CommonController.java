@@ -1,8 +1,31 @@
 package com.hotel.common.controller;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.hotel.common.CommonResponseVo;
 import com.hotel.common.svc.CommonService;
 import com.hotel.common.vo.CommonVo;
+import com.hotel.jwt.CheckTokenInfo;
+import com.hotel.jwt.JwtAuthenticationFilter;
+import com.hotel.jwt.JwtTokenProvider;
+
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -15,6 +38,12 @@ public class CommonController {
 
     @Autowired
     CommonService commonService;
+
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
+	CheckTokenInfo info;
 
     @ApiOperation(value="휴대폰 인증 요청 - 인증 번호 생성 및 전송")
     @ResponseBody
@@ -133,6 +162,48 @@ public class CommonController {
     @GetMapping("/mail")
     public String MailTest(@RequestParam String text, @RequestParam String to){
         return commonService.MailTest(text, to);
+    }
+
+    @ApiOperation(value="토큰 재발급 api")
+	@ResponseBody
+	@PostMapping("/token")
+	public Map<String, Object> TokenReCreate(@RequestBody Map<String, Object> map, HttpServletRequest req, HttpServletResponse res) throws Exception {
+
+		Map<String, Object> result = new HashMap<>();
+
+		String token = req.getHeader("Authorization");
+		String reToken = req.getHeader("refreshToken");
+		if(token == null) {
+			result.put("result", "ERR");
+			result.put("reason", "JWT-0002");
+		}else if(reToken == null) {
+			result.put("result", "ERR");
+			result.put("reason", "JWT-0002");
+		}
+		String email = info.tokenInfo(token);
+		if(email == null) {
+			result.put("result", "ERR");
+			result.put("reason", "JWT-0003");
+		}
+
+		result = commonService.TokenReCreate(email);
+
+		Date date = new Date();
+		SimpleDateFormat sDate = new SimpleDateFormat("yyyy-MM-dd hh:mm");
+		res.setHeader("Authorization", (String) result.get("Authorization"));
+		res.setHeader("RefreshToken", (String) result.get("RefreshToken"));
+		res.setHeader("TokenCreateDate", sDate.format(date));
+
+		result.clear();
+
+		return result;
+	}
+
+    @ApiOperation(value="객실, 호실 예약삭제 - 내부 스케쥴러 API")
+    @ResponseBody
+    @GetMapping(value = "/scheduler/delete/room")
+    public String deleteRoom(){
+        return commonService.deleteRoom();
     }
 
 }

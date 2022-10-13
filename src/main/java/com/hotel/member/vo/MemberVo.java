@@ -67,12 +67,31 @@ public class MemberVo {
 		@Schema(description = "비밀번호", required = true, example = "비밀번호 입력")
 		String password;
 		
-		@Schema(description = "회원상태여부", required = true, example = "1:고객,2:사업자")
+		@Schema(description = "member_num", required = true, example = "백엔드 사용")
+		Integer member_num;
+
+	}
+	
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
+	@Schema(description = "고객 회원가입 파라미터")
+	public static class RegisterMemberUnMemberRequest {
+		@Schema(description = "한글 이름", required = true, example = "홍길동")
+		String name;
+
+		@Schema(description = "휴대폰 번호", required = true, example = "01012345678")
+		String phone_num;
+
+		@Schema(description = "role", required = true, example = "백엔드 사용")
 		Integer role;
 		
 		@Schema(description = "member_num", required = true, example = "백엔드 사용")
 		Integer member_num;
-
+		
+		@Schema(description = "reservation_num", required = true, example = "백엔드 사용")
+		Integer reservation_num;
+		
 	}
 
 //	@Data
@@ -105,12 +124,6 @@ public class MemberVo {
 		@Schema(description = "고객 이름", required = true, example = "이름 or 닉네임")
 		String name;
 
-		@Schema(description = "Oauth2", required = true, example = "소셜 인증키")
-		String auth;
-		
-		@Schema(description = "role", required = true, example = "백엔드에서 사용")
-		Integer role;
-		
 	}
 
 	@Data
@@ -125,12 +138,6 @@ public class MemberVo {
 		@Schema(description = "고객 이름", required = true, example = "이름 or 닉네임")
 		String name;
 
-		@Schema(description = "Oauth2", required = true, example = "소셜 인증키")
-		String auth;
-		
-		@Schema(description = "role", required = true, example = "백엔드에서 사용")
-		Integer role;
-
 	}
 	
 	@Data
@@ -144,12 +151,6 @@ public class MemberVo {
 		
 		@Schema(description = "고객 이름", required = true, example = "이름 or 닉네임")
 		String name;
-
-		@Schema(description = "Oauth2", required = true, example = "소셜 인증키")
-		String auth;
-		
-		@Schema(description = "role", required = true, example = "백엔드에서 사용")
-		Integer role;
 
 	}
 

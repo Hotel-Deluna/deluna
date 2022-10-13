@@ -47,8 +47,6 @@ public class MemberController {
 	private final CheckTokenInfo info;
 
 	@ApiOperation(value = "고객 회원가입")
-	@ApiImplicitParams({
-	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PostMapping("/sign-up")
 	public MemberResponseDto MemberSignUp(@RequestBody MemberVo.RegisterMemberRequest registerMemberRequest) {
@@ -71,11 +69,7 @@ public class MemberController {
 			dto.setResult("ERR");
 			dto.setReason("phone_num not Found");
 			return dto;
-		} else if (registerMemberRequest.getRole().toString().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("role not Found");
-			return dto;
-		}
+		} 
 		return memberServiceImpl.MemberSignUp(registerMemberRequest);
 	}
 
@@ -122,22 +116,7 @@ public class MemberController {
 		
 		return dto;
 	}
-//	@ResponseBody
-//	@PostMapping("/token")
-//	public Map<String, Object> MemberTest(@RequestBody Map<String, Object> map, HttpServletRequest req) throws Exception {
-//		
-//		Map<String, Object> result = new HashMap<>();
-//		
-//		String token = req.getHeader("accessToken");
-//		
-//		System.out.println("token =" + token);
-//		
-//		
-//		String email = info.tokenInfo(token);
-//		
-//		
-//		return result;
-//	}
+
 
 	@ApiOperation(value = "카카오 로그인")
 	@ApiImplicitParams({
@@ -155,10 +134,6 @@ public class MemberController {
 		}else if(loginMemberRequestKokao.getName().equals("")) {
 			dto.setResult("ERR");
 			dto.setReason("name Not Found");
-			return dto;
-		}else if(loginMemberRequestKokao.getAuth().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("auth Not Found");
 			return dto;
 		}
 		return memberServiceImpl.memberSignInKakao(loginMemberRequestKokao);
@@ -180,10 +155,6 @@ public class MemberController {
 		}else if(loginMemberRequestNaver.getName().equals("")) {
 			dto.setResult("ERR");
 			dto.setReason("name Not Found");
-			return dto;
-		}else if(loginMemberRequestNaver.getAuth().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("auth Not Found");
 			return dto;
 		}
 		
@@ -207,10 +178,6 @@ public class MemberController {
 		}else if(loginMemberRequestGoogle.getName().equals("")) {
 			dto.setResult("ERR");
 			dto.setReason("name Not Found");
-			return dto;
-		}else if(loginMemberRequestGoogle.getAuth().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("auth Not Found");
 			return dto;
 		}
 		

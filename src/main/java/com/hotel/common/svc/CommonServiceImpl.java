@@ -5,9 +5,12 @@ import com.hotel.common.dto.CommonMapper;
 import com.hotel.common.vo.CommonEnum;
 import com.hotel.common.vo.CommonVo;
 import com.hotel.common.vo.JwtTokenDto;
+import com.hotel.common.vo.JwtTokenDto.TokenDto;
 import com.hotel.company.dto.HotelMapper;
+import com.hotel.company.vo.HotelInfoVo;
 import com.hotel.company.vo.HotelSearchVo;
 import com.hotel.jwt.JwtTokenProvider;
+import com.hotel.member.dto.MemberRequestDto;
 import com.hotel.util.*;
 import com.hotel.util.vo.UtilVo;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +26,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -422,6 +426,13 @@ public class CommonServiceImpl implements CommonService {
             }
 
             if(insertTouristSpotRequest.getName() != null){
+                // 여행지명으로 중복체크
+                Integer checkDuplicationTouristSpot = commonMapper.checkDuplicationTouristSpot(insertTouristSpotRequest.getName());
+
+                if(checkDuplicationTouristSpot != null){
+                    return "중복된 여행지명";
+                }
+
                 // 여행지 정보 등록
                 commonMapper.insertTouristSpot(insertTouristSpotRequest.getName());
             }
@@ -453,6 +464,92 @@ public class CommonServiceImpl implements CommonService {
         javaMailSender.send(message);
 
         return "메일 전송 완료";
+    }
+
+	@Override
+	public Map<String, Object> TokenReCreate(String email) {
+		MemberRequestDto memberRequestDto = new MemberRequestDto();
+		memberRequestDto.setEmail(email);
+		Map<String, Object> map = new HashMap<>();
+		TokenDto dto = new TokenDto();
+		String data = commonMapper.selectMemberInfo(email);
+
+		if(data == null) {
+			Integer num = commonMapper.selectBusinessMemberInfo(email);
+			if(num.toString() == null) {
+				map.put("result", "ERR");
+				map.put("reason", "memberInfo Not Found");
+				return map;
+			}
+			UsernamePasswordAuthenticationToken authenticationToken = memberRequestDto.toAuthentication();
+			dto = jwtTokenProvider.generateMemberTokenDto(authenticationToken, "ROLE_OWNER", num);
+		}else {
+			UsernamePasswordAuthenticationToken authenticationToken = memberRequestDto.toAuthentication();
+			dto = jwtTokenProvider.generateMemberTokenDto(authenticationToken, "ROLE_MEMBER");
+		}
+		String id = memberRequestDto.getEmail();
+		Integer role = memberRequestDto.getRole();
+
+		map.put("Authorization", dto.getAccessToken());
+		map.put("RefreshToken", dto.getRefreshToken());
+
+		return map;
+	}
+
+    @Override
+    public String deleteRoom() {
+
+        log.info("객실, 호실 예약 삭제 시작");
+
+        try{
+            // 당일 기준 예약삭제 해야하는 객실, 호실 조회
+            List<CommonVo.deleteRoomInfo> deleteRoomInfoList = commonMapper.deleteRoomInfo();
+            List<CommonVo.deleteRoomDetailInfo> deleteRoomDetailInfoList = commonMapper.deleteRoomDetailInfo();
+
+            if(!CollectionUtils.isEmpty(deleteRoomInfoList)){
+                List<Integer> room_num_list = deleteRoomInfoList
+                        .stream()
+                        .map(CommonVo.deleteRoomInfo::getRoom_num)
+                        .toList();
+
+                // 객실 삭제처리
+                hotelMapper.deleteRoom(room_num_list);
+
+                // 객실 삭제테이블에 정보 저장
+                for(CommonVo.deleteRoomInfo deleteRoomInfo : deleteRoomInfoList){
+                    HotelInfoVo.DeleteTable insertRoomDelete = new HotelInfoVo.DeleteTable();
+                    insertRoomDelete.setPk(deleteRoomInfo.getRoom_num());
+                    insertRoomDelete.setInsert_user(deleteRoomInfo.getInsert_user());
+                    hotelMapper.insertRoomDelete(insertRoomDelete);
+                }
+            }
+
+            if(!CollectionUtils.isEmpty(deleteRoomDetailInfoList)){
+                List<Integer> room_detail_num_list = deleteRoomDetailInfoList
+                        .stream()
+                        .map(CommonVo.deleteRoomDetailInfo::getRoom_detail_num)
+                        .toList();
+                // 호실 삭제처리
+                hotelMapper.deleteRoomDetail(room_detail_num_list);
+
+                // 호실 삭제테이블에 정보 저장
+                for(CommonVo.deleteRoomDetailInfo deleteRoomDetailInfo : deleteRoomDetailInfoList){
+                    HotelInfoVo.DeleteTable insertRoomDetailDelete = new HotelInfoVo.DeleteTable();
+                    insertRoomDetailDelete.setPk(deleteRoomDetailInfo.getRoom_detail_num());
+                    insertRoomDetailDelete.setInsert_user(deleteRoomDetailInfo.getInsert_user());
+                    hotelMapper.insertRoomDetailDelete(insertRoomDetailDelete);
+                }
+
+
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+            log.info("객실, 호실 삭제 에러");
+            return "객실 호실 삭제 에러";
+        }
+
+        return "객실, 호실 예약 삭제 완료";
     }
 
 }

@@ -3,6 +3,7 @@ package com.hotel.reservation.svc;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +30,7 @@ public interface ReservationService {
 
 	MemberReservationResponseDto memberReservation(List<MemberReservationRequest> memberReservationRequest) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException;
 
-	MemberReservationResponseDto MemberReservationWithdraw(MemberWithdrawRequest memberWithdrawVo);
+	MemberReservationResponseDto MemberReservationWithdraw(MemberWithdrawRequest memberWithdrawVo) throws ParseException;
 
 	Map<String, Object> MemberReservationList(MemberReservationListRequest memberInfo) throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException;
 

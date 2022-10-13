@@ -22,13 +22,13 @@
 			select max(member_num + 1) from d_member
 		</selectKey>	
 		insert into d_member (name, phone_num, email, password, role, is_delete, dt_insert, insert_user) 
-		values(#{name},#{phone_num},#{email},#{password}, #{role}, 'N', NOW(), CONCAT(#{role}, #{member_num}))
+		values(#{name},#{phone_num},#{email},#{password}, 1, 'N', NOW(), CONCAT(1, #{member_num}))
 	
 	</insert>
 	
 	<insert id="registerKakaoInfo" parameterType="com.hotel.member.vo.MemberVo$LoginMemberRequestKokao">
 		insert into d_member (name, email, role, is_delete, dt_insert, insert_user) 
-		values(#{name},#{email}, #{role}, 'N', NOW(), CONCAT(#{role}+Auto_increment));
+		values(#{name},#{email}, 1, 'N', NOW(), CONCAT(1+Auto_increment));
 	</insert>
 	
 	<select id="selectKakaoInfo" resultType="com.hotel.member.vo.MemberVo$LoginMemberResponseDto">
@@ -39,7 +39,7 @@
 	
 	<insert id="registerNaverInfo" parameterType="com.hotel.member.vo.MemberVo$LoginMemberRequestNaver">
 		insert into d_member (name, email, role, is_delete, dt_insert, insert_user) 
-		values(#{name},#{email}, #{role}, 'N', NOW(), CONCAT(#{role}+member_num));
+		values(#{name},#{email}, 1, 'N', NOW(), CONCAT(1+member_num));
 	</insert>
 	
 	<select id="selectNaverInfo" resultType="com.hotel.member.vo.MemberVo$LoginMemberResponseDto">
@@ -50,7 +50,7 @@
 	
 	<insert id="registerGoogleInfo" parameterType="com.hotel.member.vo.MemberVo$LoginMemberRequestGoogle">
 		insert into d_member (name, email, role, is_delete, dt_insert, insert_user) 
-		values(#{name},#{email}, #{role}, 'N', NOW(), CONCAT(#{role}+member_num));
+		values(#{name},#{email}, 1, 'N', NOW(), CONCAT(1+member_num));
 	</insert>
 	
 	<select id="selectGoogleInfo" resultType="com.hotel.member.vo.MemberVo$LoginMemberResponseDto">
@@ -170,6 +170,15 @@
 	
 	
 	<insert id="registerUnMemberInfo" parameterType="map" >
+		<selectKey resultType="int"  order="BEFORE" keyProperty="member_num">	
+			select max(member_num + 1) from d_member
+		</selectKey>	
+		insert into d_member (name, phone_num, role, is_delete, dt_insert, insert_user) 
+		values(#{name}, #{phone_num}, #{role}, 'N', NOW(), CONCAT(#{role}, #{member_num}))
+	
+	</insert>
+	
+	<insert id="registerMemberUnMemberInfo" parameterType="map" >
 		<selectKey resultType="int"  order="BEFORE" keyProperty="member_num">	
 			select max(member_num + 1) from d_member
 		</selectKey>	

@@ -1,19 +1,10 @@
 package com.hotel.reservation.controller;
 
-import com.hotel.common.CommonResponseVo;
-import com.hotel.company.svc.HotelService;
-import com.hotel.company.vo.HotelInfoVo;
-import com.hotel.company.vo.HotelSearchVo;
 import com.hotel.jwt.CheckTokenInfo;
-import com.hotel.jwt.JwtTokenProvider;
-import com.hotel.member.svc.MemberServiceImpl;
-import com.hotel.member.vo.MemberVo;
-import com.hotel.owner.vo.OwnerVo;
 import com.hotel.reservation.svc.ReservationService;
 import com.hotel.reservation.vo.MemberInfoVo;
 import com.hotel.reservation.vo.UnMemberInfoVo;
 import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberReservationInfoResponseDto;
-import com.hotel.util.SHA512Util;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListInfoResponseDto;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationResponseDto;
 import com.hotel.reservation.vo.MemberInfoVo.ReservationDeleteContentResponseDto;
@@ -144,7 +135,7 @@ public class ReservationController {
 		if (memberReservationRequest.get(0).getRole() == 1 || memberReservationRequest.get(0).getRole() == 2) {
 			String token = req.getHeader("Authorization");
 			String email = null;
-			if (token.equals("")) {
+			if (token == null) {
 				// 삭제 예정
 				dto.setResult("ERR");
 				dto.setReason("tokenNotFound");
@@ -182,7 +173,7 @@ public class ReservationController {
 	@ResponseBody
 	@PutMapping(value = "/reservationWithdraw", produces = "application/json")
 	public MemberReservationResponseDto MemberReservationWithdraw(
-			@RequestBody MemberInfoVo.MemberWithdrawRequest memberWithdrawVo, HttpServletRequest req) {
+			@RequestBody MemberInfoVo.MemberWithdrawRequest memberWithdrawVo, HttpServletRequest req) throws Exception {
 
 		MemberReservationResponseDto dto = new MemberReservationResponseDto();
 		Map<String, Object> map = new HashMap<>();
@@ -194,23 +185,29 @@ public class ReservationController {
 			dto.setResult("ERR");
 			dto.setReason("getContent Not Found");
 			return dto;
-		} else if (memberWithdrawVo.getReservation_num().toString().equals("")){
+		} else if(memberWithdrawVo.getReservation_status() == null) {
 			dto.setResult("ERR");
-			dto.setReason("member_num Not Found");
+			dto.setReason("reservation_status Not Found");
 			return dto;
-		} 
+		}
 		
 		String token = req.getHeader("Authorization");
 		String email = null;
 		if (token == null) {
 			//비회원 삭제
 			System.out.println("비회원 삭제 스타트!!");
+			memberWithdrawVo.setReservation_status(2);
 		} else {
 			// 회원 삭제
-			email = info.tokenInfo(token);
-			email = reservationService.checkMemberInfo(email);
-			memberWithdrawVo.setEmail(email);
-		}
+			if(memberWithdrawVo.getReservation_status() == 2) {
+				email = info.tokenInfo(token);
+				email = reservationService.checkMemberInfo(email);
+				memberWithdrawVo.setEmail(email);
+			}else if(memberWithdrawVo.getReservation_status() == 3) {
+				Integer num = info.tokenBusinessInfo(token);
+				memberWithdrawVo.setBusiness_user_num(num);
+			}
+ 		}
 		return reservationService.MemberReservationWithdraw(memberWithdrawVo);
 	}
 

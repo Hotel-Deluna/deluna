@@ -14,6 +14,7 @@ import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListInfoResponseDt
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationResponseDto;
+import com.hotel.reservation.vo.MemberInfoVo.MemberWithdrawCheckDate;
 import com.hotel.reservation.vo.MemberInfoVo.MemberWithdrawRequest;
 import com.hotel.reservation.vo.MemberInfoVo.ReservationDeleteContentResponseDto;
 import com.hotel.reservation.vo.MemberInfoVo.ReservationDetailPaymentsRequest;
@@ -34,7 +35,10 @@ import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLDataException;
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -130,30 +134,40 @@ public class ReservationServiceImpl implements ReservationService {
 				// 비회원 예약 로직
 				// 비회원 기본 정보 저장
 				// 최초 1번만 가입
-				MemberVo.RegisterMemberRequest memberVo = new MemberVo.RegisterMemberRequest();
-				memberVo.setName(memberReservationRequest.get(i).getReservation_name());
-				memberVo.setPhone_num(aesUtil.encrypt(memberReservationRequest.get(i).getReservation_phone()));
-				memberVo.setRole(memberReservationRequest.get(i).getRole());
+				MemberVo.RegisterMemberUnMemberRequest unMemberVo = new MemberVo.RegisterMemberUnMemberRequest();
+				unMemberVo.setName(memberReservationRequest.get(i).getReservation_name());
+				unMemberVo.setPhone_num(aesUtil.encrypt(memberReservationRequest.get(i).getReservation_phone()));
+				unMemberVo.setRole(memberReservationRequest.get(i).getRole());
 				
 				//없는 회원이면 간편 가입 시킨다
-				String phoneData = reservationMapper.checkUnMemberInfo(memberVo.getPhone_num());
+				// 기존 회원이 비회원으로 등록하는지 확인
+				String phoneData = reservationMapper.checkUnMemberInfo(unMemberVo);
 				if (phoneData == null) {
-					int UnMemberInfo = memberMapper.registerUnMemberInfo(memberVo);
+					int UnMemberInfo = memberMapper.registerUnMemberInfo(unMemberVo);
 					if (UnMemberInfo == 0) {
 						// insert 실패 시 에러 처리
 						dto.setResult("ERR");
 						dto.setReason("unMember info insert fail");
 						return dto;
 					}
+				}else {
+					// 기존 회원이 비회원으로 등록
+					int memberUnmemberInfo = memberMapper.registerMemberUnMemberInfo(unMemberVo);
+					if(memberUnmemberInfo == 0) {
+						dto.setResult("ERR");
+						dto.setReason("unMember info insert fail");
+						return dto;
+					}
+					
 				}
-				unMemberMap = reservationMapper.selectUnUserInfo(memberVo.getPhone_num());
+				
+				unMemberMap = reservationMapper.selectUnUserInfo(unMemberVo);
 				
 				// 예약자 정보 입력
 				memberReservationRequest.get(i).setInsert_user(String.valueOf(unMemberMap.get("insert_user")));
 				memberReservationRequest.get(i).setMember_num((Integer) unMemberMap.get("member_num"));
 			}
 			
-			// 예약 인서트
 			System.out.println("data = " + memberReservationRequest.toString());
 			// 암호화 후 저장
 			memberReservationRequest.get(i)
@@ -180,7 +194,6 @@ public class ReservationServiceImpl implements ReservationService {
 			} else {
 
 				// 예약완료 일 떄
-
 				payment.setPayment_price(memberReservationRequest.get(x).getReservation_price());
 				payment.setInsert_user(memberReservationRequest.get(x).getInsert_user());
 
@@ -238,42 +251,85 @@ public class ReservationServiceImpl implements ReservationService {
 	}
 
 	@Override
-	public MemberReservationResponseDto MemberReservationWithdraw(MemberWithdrawRequest memberWithdrawVo) {
+	public MemberReservationResponseDto MemberReservationWithdraw(MemberWithdrawRequest memberWithdrawVo) throws ParseException {
 		MemberReservationResponseDto dto = new MemberReservationResponseDto();
 		String insert_user;
-
-		if (!(memberWithdrawVo.getEmail() == null)) {
-			//member_num 필요
-			int member_num = reservationMapper.checkMemberNum(memberWithdrawVo.getEmail());
-			if(member_num == 0) {
-				dto.setResult("ERR");
-				dto.setReason("member_num Not Found");
-				return dto;
+		
+		if(memberWithdrawVo.getReservation_status() == 2) {
+			if (!(memberWithdrawVo.getEmail() == null)) {
+				//member_num 필요
+				int member_num = reservationMapper.checkMemberNum(memberWithdrawVo.getEmail());
+				if(member_num == 0) {
+					dto.setResult("ERR");
+					dto.setReason("member_num Not Found");
+					return dto;
+				}
+				memberWithdrawVo.setMember_num(member_num);
+				insert_user = reservationMapper.selectInsertUser(memberWithdrawVo);
+				if(insert_user == null) {
+					dto.setResult("ERR");
+					dto.setReason("member Reservation Not Found");
+					return dto;
+				}
+				memberWithdrawVo.setUpdate_user(insert_user);
+			}else {
+				// 비회원 처리인데...
+				insert_user = reservationMapper.selectUnInsertUser(memberWithdrawVo);
+				memberWithdrawVo.setUpdate_user(insert_user);
 			}
-			memberWithdrawVo.setMember_num(member_num);
-			insert_user = reservationMapper.selectInsertUser(memberWithdrawVo);
+			
+		}else if(memberWithdrawVo.getReservation_status() == 3){
+			insert_user = reservationMapper.selectBusinessInsertUser(memberWithdrawVo.getBusiness_user_num());
 			if(insert_user == null) {
 				dto.setResult("ERR");
-				dto.setReason("member Reservation Not Found");
+				dto.setReason("business_user_num Reservation Not Found");
 				return dto;
 			}
 			memberWithdrawVo.setUpdate_user(insert_user);
-		}else {
-			insert_user = reservationMapper.selectUnInsertUser(memberWithdrawVo);
-			memberWithdrawVo.setUpdate_user(insert_user);
 		}
-
+		MemberWithdrawCheckDate checkDate = new MemberWithdrawCheckDate();
+		// status 값 및 날짜 필터링
+		checkDate = reservationMapper.reservationCheckTime(memberWithdrawVo.getReservation_num());
+		
+		if(checkDate.getSt_date() == null) {
+			dto.setResult("ERR");
+			dto.setReason("reservation data Not found");
+			return dto;
+		}
+		
+		System.out.println("checkDate = " + checkDate.toString());
+		
+		Date date = new Date();
+		//String st_date = (String) checkMap.get("st_date");
+		//String ed_date = (String) checkMap.get("ed_date");
+		String st_date = String.valueOf(checkDate.getSt_date());
+		//String ed_date = String.valueOf(checkMap.get("ed_date"));
+		System.out.println("st_date = " + st_date);
+		Date stDate = new Date();
+		//Date edDate = new Date();
+		SimpleDateFormat format = new  SimpleDateFormat("yy-MM-dd");
+		
+		String today = format.format(date);
+		date = format.parse(today);
+		stDate = format.parse(st_date);
+		//edDate = format.parse(ed_date);
+		
+		if(date.equals(stDate)) {
+			dto.setResult("ERR");
+			dto.setReason("today check st_date NOW ERR");
+			return dto;
+		}else if(date.after(stDate)) {
+			dto.setResult("ERR");
+			dto.setReason("today check st_date after ERR");
+			return dto;
+		}
+		
 		int reservation_cancel = reservationMapper.reservationCancelUpdate(memberWithdrawVo);
 		if (reservation_cancel == 0) {
 			dto.setResult("ERR");
 			dto.setReason("reservation_cancel update fail");
 			return dto;
 		} else {
-
-			String reservation_num = memberWithdrawVo.getUpdate_user();
-			
-			//결제내역 중 최신을 조회
-			//int payment_detail_num = reservationMapper.paymentNum(reservation_num);
 
 			int reservation_delete = reservationMapper.reservationDeleteUpdate(memberWithdrawVo);
 
@@ -375,7 +431,7 @@ public class ReservationServiceImpl implements ReservationService {
 	public String checkMemberInfo(String email) {
 
 		String id = reservationMapper.checkMemberInfo(email);
-		if (id.equals("")) {
+		if (id == null) {
 			return null;
 		}
 		return id;
