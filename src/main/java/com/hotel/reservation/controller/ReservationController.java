@@ -135,7 +135,7 @@ public class ReservationController {
 		if (memberReservationRequest.get(0).getRole() == 1 || memberReservationRequest.get(0).getRole() == 2) {
 			String token = req.getHeader("Authorization");
 			String email = null;
-			if (token.equals("")) {
+			if (token == null) {
 				// 삭제 예정
 				dto.setResult("ERR");
 				dto.setReason("tokenNotFound");
