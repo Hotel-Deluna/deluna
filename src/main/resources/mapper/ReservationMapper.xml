@@ -223,7 +223,7 @@
 		
 	</select>
 	
-	<select id="reservationCheckTime" resultType="map">
+	<select id="reservationCheckTime" resultType="com.hotel.reservation.vo.MemberInfoVo$MemberWithdrawCheckDate">
 		
 		select DATE_FORMAT(st_date, '%y-%m-%d') AS st_date, DATE_FORMAT(ed_date, '%y-%m-%d') AS ed_date from d_reservation where reservation_num = #{reservation_num}
 		

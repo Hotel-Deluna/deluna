@@ -14,6 +14,7 @@ import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListInfoResponseDt
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationListRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationRequest;
 import com.hotel.reservation.vo.MemberInfoVo.MemberReservationResponseDto;
+import com.hotel.reservation.vo.MemberInfoVo.MemberWithdrawCheckDate;
 import com.hotel.reservation.vo.MemberInfoVo.MemberWithdrawRequest;
 import com.hotel.reservation.vo.MemberInfoVo.ReservationDeleteContentResponseDto;
 import com.hotel.reservation.vo.MemberInfoVo.ReservationDetailPaymentsRequest;
@@ -276,22 +277,22 @@ public class ReservationServiceImpl implements ReservationService {
 			}
 			memberWithdrawVo.setUpdate_user(insert_user);
 		}
-		
+		MemberWithdrawCheckDate checkDate = new MemberWithdrawCheckDate();
 		// status 값 및 날짜 필터링
-		Map<String, Object> checkMap = reservationMapper.reservationCheckTime(memberWithdrawVo.getReservation_num());
+		checkDate = reservationMapper.reservationCheckTime(memberWithdrawVo.getReservation_num());
 		
-		if(checkMap == null) {
+		if(checkDate.getSt_date() == null) {
 			dto.setResult("ERR");
 			dto.setReason("reservation data Not found");
 			return dto;
 		}
 		
-		System.out.println("checkMap = " + checkMap.toString());
+		System.out.println("checkDate = " + checkDate.toString());
 		
 		Date date = new Date();
 		//String st_date = (String) checkMap.get("st_date");
 		//String ed_date = (String) checkMap.get("ed_date");
-		String st_date = String.valueOf(checkMap.get("st_date").toString());
+		String st_date = String.valueOf(checkDate.getSt_date());
 		//String ed_date = String.valueOf(checkMap.get("ed_date"));
 		System.out.println("st_date = " + st_date);
 		Date stDate = new Date();

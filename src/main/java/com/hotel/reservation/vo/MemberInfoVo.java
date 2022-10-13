@@ -241,6 +241,19 @@ public class MemberInfoVo {
 	@Data
 	@AllArgsConstructor
 	@NoArgsConstructor
+	@Schema(description = "회원 예약 날짜 조회")
+	public static class MemberWithdrawCheckDate {
+
+		String st_date;
+		
+		String ed_date;
+		
+
+	}
+	
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
 	@Schema(description = "공통 예약 API Response")
 	public static class MemberReservationResponseDto {
 
