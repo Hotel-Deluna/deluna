@@ -292,7 +292,7 @@ public class ReservationServiceImpl implements ReservationService {
 		//String ed_date = (String) checkMap.get("ed_date");
 		String st_date = String.valueOf(checkMap.get("st_date"));
 		//String ed_date = String.valueOf(checkMap.get("ed_date"));
-		
+		System.out.println("st_date = " + st_date);
 		Date stDate = new Date();
 		//Date edDate = new Date();
 		SimpleDateFormat format = new  SimpleDateFormat("yy-MM-dd");
