@@ -68,17 +68,6 @@
      <select id="selectBusinessMemberInfo" resultType="int">
         select business_user_num from d_business_member where email = #{email}
     </select>
-    
-    
-    
-
-     <select id="selectMemberInfo" resultType="string">
-        select email from d_member where email = #{email}
-    </select>
-
-     <select id="selectBusinessMemberInfo" resultType="int">
-        select business_user_num from d_business_member where email = #{email}
-    </select>
 
     <!-- 당일 삭제예정인 객실 정보 -->
     <select id="deleteRoomInfo" resultType="com.hotel.common.vo.CommonVo$deleteRoomInfo">
