@@ -195,11 +195,11 @@ public class ReservationController {
 			dto.setResult("ERR");
 			dto.setReason("getContent Not Found");
 			return dto;
-		} else if (memberWithdrawVo.getReservation_num().toString().equals("")){
+		} else if (memberWithdrawVo.getReservation_num() == null){
 			dto.setResult("ERR");
 			dto.setReason("member_num Not Found");
 			return dto;
-		} else if(memberWithdrawVo.getReservation_status().toString().equals("")) {
+		} else if(memberWithdrawVo.getReservation_status() == null) {
 			dto.setResult("ERR");
 			dto.setReason("reservation_status Not Found");
 			return dto;

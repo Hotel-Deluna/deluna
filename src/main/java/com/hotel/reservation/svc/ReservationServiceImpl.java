@@ -281,8 +281,11 @@ public class ReservationServiceImpl implements ReservationService {
 		Map<String, Object> checkMap = reservationMapper.reservationCheckTime(memberWithdrawVo.getReservation_num());
 		
 		Date date = new Date();
-		String st_date = (String) checkMap.get("st_date");
-		String ed_date = (String) checkMap.get("ed_date");
+		//String st_date = (String) checkMap.get("st_date");
+		//String ed_date = (String) checkMap.get("ed_date");
+		String st_date = String.valueOf(checkMap.get("st_date"));
+		String ed_date = String.valueOf(checkMap.get("ed_date"));
+		
 		Date stDate = new Date();
 		Date edDate = new Date();
 		System.out.println("edDate = " + edDate);
