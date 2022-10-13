@@ -146,8 +146,6 @@
 		
 			and a.ed_date LIKE CONCAT(#{ed_date},'%')
 			
-			and a.role = 1
-		
 		GROUP BY a.reservation_num
 		ORDER BY a.reservation_num DESC
 	    LIMIT 10 OFFSET 0;
