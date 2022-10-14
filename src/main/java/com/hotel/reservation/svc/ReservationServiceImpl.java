@@ -406,8 +406,7 @@ public class ReservationServiceImpl implements ReservationService {
 			map.put("result", "OK");
 			map.put("reason", "");
 			map.put("page", page);
-			map.put("list_size", list.size());
-			map.put("total_cnt", totalCnt);
+			map.put("total_cnt", list.size());
 			map.put("list", list);
 		}
 		return map;

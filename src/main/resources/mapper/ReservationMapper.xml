@@ -134,7 +134,7 @@
 			a.reservation_num, a.member_num, a.room_detail_num,
 			a.reservation_phone, a.reservation_name, a.reservation_people,
 			a.reservation_price, a.reservation_status, a.st_date, a.ed_date,
-			d.name, b.room_detail_name 	
+			d.name, b.room_detail_name, a.dt_insert	
 		from d_reservation a inner join d_room_detail b ON a.room_detail_num = b.room_detail_num
 		inner join d_room c ON c.room_num = b.room_num  inner join d_hotel d ON c.hotel_num = d.hotel_num  
 		where 
@@ -151,7 +151,7 @@
 			a.reservation_num, a.member_num, a.room_detail_num,
 			a.reservation_phone, a.reservation_name, a.reservation_people,
 			a.reservation_price, a.reservation_status, a.st_date, a.ed_date,
-			d.name, b.room_detail_name 	
+			d.name, b.room_detail_name, a.dt_insert	
 		from d_reservation a inner join d_room_detail b ON a.room_detail_num = b.room_detail_num
 		inner join d_room c ON c.room_num = b.room_num  inner join d_hotel d ON c.hotel_num = d.hotel_num
 		where 
