@@ -140,6 +140,9 @@ public class MemberInfoVo {
 
 		@Schema(description = "예약상태", required = true, example = "0")
 		String reservation_status;
+		
+		@Schema(description = "예약일", required = true, example = "0")
+		String dt_insert;
 
 	}
 
@@ -205,6 +208,17 @@ public class MemberInfoVo {
 		Integer payment_price;
 		
 		String insert_user;
+		
+	}
+	
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class UnMemberInfo {
+
+		String insert_user;
+		
+		Integer member_num;
 		
 	}
 	

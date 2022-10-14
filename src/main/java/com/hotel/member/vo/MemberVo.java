@@ -116,43 +116,19 @@ public class MemberVo {
 	@NoArgsConstructor
 	@AllArgsConstructor
 	@Schema(description = "고객 카카오 로그인 파라미터")
-	public static class LoginMemberRequestKokao {
+	public static class LoginMemberRequestSocial {
 
 		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
 		String email;
 		
 		@Schema(description = "고객 이름", required = true, example = "이름 or 닉네임")
 		String name;
-
-	}
-
-	@Data
-	@NoArgsConstructor
-	@AllArgsConstructor
-	@Schema(description = "고객 네이버 로그인 파라미터")
-	public static class LoginMemberRequestNaver {
-
-		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
-		String email;
 		
-		@Schema(description = "고객 이름", required = true, example = "이름 or 닉네임")
-		String name;
+		@Schema(description = "role", required = true, example = "백엔드에서 사용")
+		Integer role;
 
 	}
-	
-	@Data
-	@NoArgsConstructor
-	@AllArgsConstructor
-	@Schema(description = "고객 구글 로그인 파라미터")
-	public static class LoginMemberRequestGoogle {
 
-		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
-		String email;
-		
-		@Schema(description = "고객 이름", required = true, example = "이름 or 닉네임")
-		String name;
-
-	}
 
 	@Data
 	@NoArgsConstructor

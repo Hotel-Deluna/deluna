@@ -94,7 +94,9 @@
     <select id="checkDuplicationHotel" resultType="int">
         SELECT hotel_num
         FROM d_hotel
-        WHERE latitude = #{latitude} AND longitude = #{longitude}
+        WHERE latitude =
+
+              #{latitude} AND longitude = #{longitude}
         LIMIT 1
     </select>
 
@@ -457,23 +459,42 @@
                    'N', NOW(), NOW(), #{insert_user}, #{update_user})
     </insert>
 
+<!--    &lt;!&ndash; 객실번호로 호실 조회 &ndash;&gt;-->
+<!--    <select id="selectRoomDetailInfo" resultMap="selectRoomDetailInfoMap">-->
+<!--        SELECT A.* FROM-->
+<!--            (-->
+<!--                SELECT rd.*, rv.reservation_status, rv.room_detail_num AS rv_room, rv.st_date, rv.ed_date-->
+<!--                FROM d_room_detail rd-->
+<!--                         LEFT JOIN d_reservation rv on rd.room_detail_num = rv.room_detail_num-->
+<!--                WHERE rd.room_num = #{room_num}-->
+<!--                  AND rd.is_delete = 'N'-->
+<!--                ORDER BY rv.reservation_num DESC LIMIT 20000-->
+<!--                /*-->
+<!--                My-SQL의 서브쿼리의 데이터 구조와 정렬을 변화시키기 위해 리밋값을 줌 https://jaenjoy.tistory.com/39-->
+<!--                Limit을 걸어줄 경우 데이터의 순서 뿐만 아니라 데이터의 갯수까지도 제한되기 떄문에-->
+<!--                테이블 내 데이터의 본절적인 내용이 변경되어서 서브쿼리의 결과 즉, group by의 대상이 되는 결과를 원하는데로 설정가능-->
+<!--                */-->
+<!--            ) A-->
+<!--        GROUP BY rv_room-->
+<!--    </select>-->
+
     <!-- 객실번호로 호실 조회 -->
     <select id="selectRoomDetailInfo" resultMap="selectRoomDetailInfoMap">
-        SELECT A.* FROM
-            (
-                SELECT rd.*, rv.reservation_status, rv.room_detail_num AS rv_room, rv.st_date, rv.ed_date
-                FROM d_room_detail rd
-                         LEFT JOIN d_reservation rv on rd.room_detail_num = rv.room_detail_num
-                WHERE rd.room_num = 8
-                  AND rd.is_delete = 'N'
-                ORDER BY rv.reservation_num DESC LIMIT 20000
-                /*
-                My-SQL의 서브쿼리의 데이터 구조와 정렬을 변화시키기 위해 리밋값을 줌 https://jaenjoy.tistory.com/39
-                Limit을 걸어줄 경우 데이터의 순서 뿐만 아니라 데이터의 갯수까지도 제한되기 떄문에
-                테이블 내 데이터의 본절적인 내용이 변경되어서 서브쿼리의 결과 즉, group by의 대상이 되는 결과를 원하는데로 설정가능
-                */
-            ) A
-        GROUP BY rv_room
+        SELECT *
+        FROM d_room_detail
+        WHERE room_num = #{room_num}
+          AND is_delete = 'N'
+    </select>
+
+    <!-- 호실번호로 예약정보 조회 -->
+    <select id="selectRoomDetailReservationInfo" resultType="com.hotel.company.dto.HotelDto$HotelReservationList">
+        SELECT rv.*
+        FROM d_reservation rv
+                 LEFT JOIN d_room_detail rd on rd.room_detail_num = rv.room_detail_num
+        WHERE rd.room_detail_num = #{room_detail_num}
+          AND rd.is_delete = 'N'
+          AND rv.reservation_status = 1 -- 예약중인 것만 조회
+          AND (DATE(now()) BETWEEN rv.st_date  AND rv.ed_date) -- 오늘날짜가 예약일 사이에 있는지 조회
     </select>
 
     <!-- 호실번호로 호실 조회 -->
@@ -603,21 +624,73 @@
         </choose>
     </select>
 
-    <!-- 호텔 예약리스트 조회 - 검색 -->
-    <select id="selectHotelReservationListForSearch" resultType="int">
+    <!-- 해당 호텔의 예약중인 호실 리스트 조회 -->
+    <select id="selectHotelReservationListForSearch" resultType="com.hotel.company.dto.HotelDto$HotelReservationList">
         SELECT
-            re.reservation_num
+            re.reservation_num, re.st_date, re.ed_date, re.room_detail_num
         FROM d_reservation re
-        LEFT JOIN d_room_detail rd ON rd.room_detail_num = re.room_detail_num
-        left join d_room r on rd.room_detail_num = r.room_num
-        left join d_hotel h on r.hotel_num = h.hotel_num
+                 LEFT JOIN d_room_detail rd ON rd.room_detail_num = re.room_detail_num
+                 left join d_room r on rd.room_num  = r.room_num
+                 left join d_hotel h on h.hotel_num = r.hotel_num
         WHERE h.hotel_num = #{hotel_num}
-        AND re.reservation_status != 1
-        <![CDATA[
-        and (date_format(#{reservation_start_date}, '%Y-%m-%d') > date_format(re.ed_date,'%Y-%m-%d')
-        or date_format(#{reservation_end_date}, '%Y-%m-%d') < date_format(re.st_date, '%Y-%m-%d') )
-        ]]>
+          AND rd.is_delete = 'N'
+          AND re.reservation_status = 1 -- 예약중
+        -- AND date_format(re.ed_date, '%Y-%m-%d') > date_format(now(), '%Y-%m-%d') -- 이미 예약날짜 지난데이터 제외
     </select>
+
+    <!-- 전체 호실들중 예약중인데 요청기간이 겹쳐 예약불가능한 상태인 호실 리스트 조회 - 예약불가 판정은 reservation_reservation_status 존재하면 예약불가 -->
+    <select id="selectDatePeriodCheckRoomDetailInfo" resultMap="selectRoomDetailInfoMap">
+        SELECT rdd.*, A.reservation_status, A.st_date, A.ed_date
+        FROM
+            (
+            SELECT rd.room_detail_num, rv.st_date , rv.ed_date, rv.reservation_status
+            FROM d_room_detail rd
+                LEFT JOIN d_reservation rv ON rd.room_detail_num = rv.room_detail_num
+            WHERE rd.room_detail_num IN
+            <foreach collection="room_detail_num" item="room_detail_num" index="index" separator="," open="(" close=")">
+                #{room_detail_num}
+            </foreach>
+            <![CDATA[
+            AND (DATE(#{start_dt}) < rv.ed_date AND DATE(#{end_dt}) > rv.st_date ) -- 요청 기간과 예약기간이 중복되는 데이터 조회
+            AND rv.reservation_status = 1 -- 예약중인 데이터만 조회
+            ]]>
+            ) A
+                RIGHT OUTER JOIN d_room_detail rdd ON A.room_detail_num = rdd.room_detail_num
+        WHERE rdd.room_detail_num IN
+        <foreach collection="room_detail_num" item="room_detail_num" index="index" separator="," open="(" close=")">
+            #{room_detail_num}
+        </foreach>
+        AND rdd.is_delete = 'N'
+        GROUP BY rdd.room_detail_num -- 중복제거
+    </select>
+
+    <!-- 호텔 예약리스트 조회 - 검색 -->
+<!--    <select id="selectHotelReservationListForSearch" resultType="int">-->
+<!--        SELECT-->
+<!--            re.reservation_num-->
+<!--        FROM d_reservation re-->
+<!--        LEFT JOIN d_room_detail rd ON rd.room_detail_num = re.room_detail_num-->
+<!--        left join d_room r on rd.room_detail_num = r.room_num-->
+<!--        left join d_hotel h on r.hotel_num = h.hotel_num-->
+<!--        WHERE h.hotel_num = #{hotel_num}-->
+<!--        AND re.reservation_status != 1-->
+<!--        <![CDATA[-->
+<!--        and (date_format(#{reservation_start_date}, '%Y-%m-%d') > date_format(re.ed_date,'%Y-%m-%d')-->
+<!--        or date_format(#{reservation_end_date}, '%Y-%m-%d') < date_format(re.st_date, '%Y-%m-%d') )-->
+<!--        ]]>-->
+<!--    </select>-->
+
+<!--    &lt;!&ndash; 호텔 예약리스트 조회 - 검색 &ndash;&gt;-->
+<!--    <select id="selectHotelReservationListForSearch" resultType="com.hotel.company.dto.HotelDto$HotelReservationList">-->
+<!--        SELECT-->
+<!--            re.reservation_num, st_date, ed_date-->
+<!--        FROM d_reservation re-->
+<!--                 LEFT JOIN d_room_detail rd ON rd.room_detail_num = re.room_detail_num-->
+<!--                 left join d_room r on rd.room_detail_num = r.room_num-->
+<!--                 left join d_hotel h on r.hotel_num = h.hotel_num-->
+<!--        WHERE h.hotel_num = #{hotel_num}-->
+<!--          AND re.reservation_status != 1-->
+<!--    </select>-->
 
     <!-- 여행지 정보 -->
     <select id="selectTouristSpotList" resultType="com.hotel.company.vo.HotelSearchVo$TouristSpotInfo">

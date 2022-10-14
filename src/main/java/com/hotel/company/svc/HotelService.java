@@ -53,4 +53,5 @@ public interface HotelService {
 
     HotelInfoVo.HotelReservationListResponse OwnerReservationList(HotelInfoVo.OwnerReservationListRequest ownerReservationListRequest, String jwtToken);
 
+    HotelInfoVo.HotelDetailInfoResponse ReservationAvailableList(HotelInfoVo.ReservationAvailableListRequest reservationAvailableListRequest);
 }
