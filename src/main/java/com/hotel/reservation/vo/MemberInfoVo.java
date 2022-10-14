@@ -140,6 +140,9 @@ public class MemberInfoVo {
 
 		@Schema(description = "예약상태", required = true, example = "0")
 		String reservation_status;
+		
+		@Schema(description = "예약일", required = true, example = "0")
+		String dt_insert;
 
 	}
 
