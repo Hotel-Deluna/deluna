@@ -208,6 +208,17 @@ public class MemberInfoVo {
 		
 	}
 	
+	@Data
+	@AllArgsConstructor
+	@NoArgsConstructor
+	public static class UnMemberInfo {
+
+		String insert_user;
+		
+		Integer member_num;
+		
+	}
+	
 
 	@Data
 	@AllArgsConstructor

@@ -7,24 +7,17 @@ import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
 import com.hotel.member.dto.MemberRequestDto;
-import com.hotel.member.vo.Member;
 import com.hotel.member.vo.MemberVo;
 import com.hotel.member.vo.MemberVo.FindIdRequest;
-import com.hotel.member.vo.MemberVo.LoginMemberRequestGoogle;
-import com.hotel.member.vo.MemberVo.LoginMemberRequestKokao;
-import com.hotel.member.vo.MemberVo.LoginMemberRequestNaver;
 import com.hotel.member.vo.MemberVo.LoginMemberResponseDto;
 import com.hotel.member.vo.MemberVo.MemberChangePwdRequest;
-import com.hotel.member.vo.MemberVo.MemberDeleteRequest;
 import com.hotel.member.vo.MemberVo.MemberDeleteVo;
 import com.hotel.member.vo.MemberVo.MemberEmailAuthInfo;
 import com.hotel.member.vo.MemberVo.MemberFindPwdRequest;
 import com.hotel.member.vo.MemberVo.MemberInfo;
 import com.hotel.member.vo.MemberVo.MemberUpdateInfo;
 import com.hotel.member.vo.MemberVo.MemberUpdatePwdRequest;
-import com.hotel.member.vo.MemberVo.RegisterMemberRequest;
 import com.hotel.member.vo.MemberVo.RegisterMemberUnMemberRequest;
-import com.hotel.reservation.vo.MemberInfoVo.MemberReservationRequest;
 
 @Mapper
 @Repository
@@ -56,15 +49,15 @@ public interface MemberMapper {
 
 	int updatePwdInfo(MemberUpdatePwdRequest updatePwdRequest);
 
-	int registerKakaoInfo(LoginMemberRequestKokao memberVo);
+	int registerSocialInfo(MemberVo.LoginMemberRequestSocial memberVo);
 
 	LoginMemberResponseDto selectKakaoInfo(String string);
 
-	Integer registerNaverInfo(LoginMemberRequestNaver memberVo);
+	//Integer registerNaverInfo(LoginMemberRequestNaver memberVo);
 
 	LoginMemberResponseDto selectNaverInfo(String email);
 
-	Integer registerGoogleInfo(LoginMemberRequestGoogle memberVo);
+	//Integer registerGoogleInfo(LoginMemberRequestGoogle memberVo);
 
 	LoginMemberResponseDto selectGoogleInfo(String email);
 

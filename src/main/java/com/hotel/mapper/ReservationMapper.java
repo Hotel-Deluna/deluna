@@ -17,6 +17,7 @@ import com.hotel.reservation.vo.MemberInfoVo.MemberWithdrawCheckDate;
 import com.hotel.reservation.vo.MemberInfoVo.MemberWithdrawRequest;
 import com.hotel.reservation.vo.MemberInfoVo.ReservationDetailPaymentsRequest;
 import com.hotel.reservation.vo.MemberInfoVo.ReservationPaymentsRequest;
+import com.hotel.reservation.vo.MemberInfoVo.UnMemberInfo;
 import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberReservationInfoResponseDto;
 import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberReservationRequest;
 import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberWithdrawRequest;
@@ -66,11 +67,11 @@ public interface ReservationMapper {
 
 	String checkMemberInfo(String email);
 
-	int checkMemberNum(String email);
+	String checkMemberNum(String email);
 
 	Integer selectReservationCnt(MemberReservationListRequest memberInfo);
 
-	Map<String, Object> selectUnUserInfo(RegisterMemberUnMemberRequest unMemberVo);
+	UnMemberInfo selectUnUserInfo(RegisterMemberUnMemberRequest unMemberVo);
 
 	void reservationDeleteUnMember(String insert_user);
 
@@ -83,6 +84,8 @@ public interface ReservationMapper {
 	MemberWithdrawCheckDate reservationCheckTime(Integer integer);
 
 	String selectBusinessInsertUser(Integer business_user_num);
+
+	List<MemberReservationListInfoResponseDto> reservationAllList(MemberReservationListRequest memberInfo);
 
 
 }

@@ -1,6 +1,5 @@
 package com.hotel.member.svc;
 
-import com.hotel.common.CommonResponseVo;
 import com.hotel.common.vo.JwtTokenDto.TokenDto;
 import com.hotel.jwt.JwtTokenProvider;
 import com.hotel.mapper.MemberMapper;
@@ -9,10 +8,6 @@ import com.hotel.member.dto.MemberResponseDto;
 import com.hotel.member.repo.MemberRepository;
 import com.hotel.member.vo.Member;
 import com.hotel.member.vo.MemberVo;
-import com.hotel.member.vo.MemberVo.FindIdRequest;
-import com.hotel.member.vo.MemberVo.LoginMemberRequestGoogle;
-import com.hotel.member.vo.MemberVo.LoginMemberRequestKokao;
-import com.hotel.member.vo.MemberVo.LoginMemberRequestNaver;
 import com.hotel.member.vo.MemberVo.LoginMemberResponseDto;
 import com.hotel.member.vo.MemberVo.MemberChangePwdRequest;
 import com.hotel.member.vo.MemberVo.MemberDeleteVo;
@@ -206,66 +201,26 @@ public class MemberServiceImpl implements UserDetailsService {
 				.orElseThrow(() -> new RuntimeException("로그인 유저 정보가 없습니다."));
 	}
 
-	public LoginMemberResponseDto memberSignInKakao(LoginMemberRequestKokao memberVo) throws Exception {
+	public LoginMemberResponseDto memberSignInSocial(MemberVo.LoginMemberRequestSocial memberVo) throws Exception {
 		LoginMemberResponseDto dto = new LoginMemberResponseDto();
 		
-		Integer memberInfo = memberMapper.registerKakaoInfo(memberVo);
+		// 이메일 여부 확인
+		String email = memberMapper.checkByEmail(memberVo.getEmail());
 		
-		if(memberInfo.toString().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("member insert fail");
-			return dto;
+		if(email == null) {
+			
+			Integer memberInfo = memberMapper.registerSocialInfo(memberVo);
+			
+			if(memberInfo.toString().equals("")) {
+				dto.setResult("ERR");
+				dto.setReason("member insert fail");
+				return dto;
+			}
+			
 		}
+		
 		
 		dto = memberMapper.selectKakaoInfo(memberVo.getEmail());
-		
-		if(dto.getEmail().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("select kakao info fail");
-			return dto;
-		}
-		dto.setResult("OK");
-		dto.setReason("");
-		
-		return dto;
-	}
-
-	public LoginMemberResponseDto memberSignInNaver(LoginMemberRequestNaver memberVo) {
-		LoginMemberResponseDto dto = new LoginMemberResponseDto();
-		
-		Integer memberInfo = memberMapper.registerNaverInfo(memberVo);
-		
-		if(memberInfo.toString().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("member insert fail");
-			return dto;
-		}
-		
-		dto = memberMapper.selectNaverInfo(memberVo.getEmail());
-		
-		if(dto.getEmail().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("select kakao info fail");
-			return dto;
-		}
-		dto.setResult("OK");
-		dto.setReason("");
-		
-		return dto;
-	}
-
-	public LoginMemberResponseDto memberSignInGoogle(LoginMemberRequestGoogle memberVo) {
-		LoginMemberResponseDto dto = new LoginMemberResponseDto();
-			
-		Integer memberInfo = memberMapper.registerGoogleInfo(memberVo);
-		
-		if(memberInfo.toString().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("member insert fail");
-			return dto;
-		}
-		
-		dto = memberMapper.selectGoogleInfo(memberVo.getEmail());
 		
 		if(dto.getEmail().equals("")) {
 			dto.setResult("ERR");

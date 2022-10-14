@@ -40,7 +40,7 @@
 
 	</select>
 	
-	<select id="selectUnUserInfo" resultType="map">
+	<select id="selectUnUserInfo" resultType="com.hotel.reservation.vo.MemberInfoVo$UnMemberInfo">
 
 		select insert_user, MAX(member_num) AS member_num from d_member 
 		where name = #{name} and phone_num = #{phone_num} and role = #{role}
@@ -137,19 +137,28 @@
 			d.name, b.room_detail_name 	
 		from d_reservation a inner join d_room_detail b ON a.room_detail_num = b.room_detail_num
 		inner join d_room c ON c.room_num = b.room_num  inner join d_hotel d ON c.hotel_num = d.hotel_num  
-		
-		where a.member_num = #{member_num} 
-		
+		where 
+			a.member_num = #{member_num} 
 			and a.reservation_status = #{reservation_status}
-		
-			and a.st_date LIKE CONCAT(#{st_date},'%') 
-		
-			and a.ed_date LIKE CONCAT(#{ed_date},'%')
-			
+			and date_format(a.st_date,'%Y-%m-%d') <![CDATA[<]]> date_format(ed_date,'%Y-%m-%d') 
 		GROUP BY a.reservation_num
 		ORDER BY a.reservation_num DESC
-	    LIMIT 10 OFFSET 0;
-		
+	    LIMIT #{page}, #{page_cnt};
+	</select>
+	
+	<select id="reservationAllList" resultType="com.hotel.reservation.vo.MemberInfoVo$MemberReservationListInfoResponseDto">
+		select 
+			a.reservation_num, a.member_num, a.room_detail_num,
+			a.reservation_phone, a.reservation_name, a.reservation_people,
+			a.reservation_price, a.reservation_status, a.st_date, a.ed_date,
+			d.name, b.room_detail_name 	
+		from d_reservation a inner join d_room_detail b ON a.room_detail_num = b.room_detail_num
+		inner join d_room c ON c.room_num = b.room_num  inner join d_hotel d ON c.hotel_num = d.hotel_num
+		where 
+			a.member_num = #{member_num} 
+		GROUP BY a.reservation_num
+		ORDER BY a.reservation_num DESC
+	   LIMIT #{page}, #{page_cnt};
 	</select>
 	
 	<select id="selectReservationCancelContent" resultType="string">
@@ -202,7 +211,7 @@
 
 	</select>
 	
-	<select id="checkMemberNum" resultType="Integer">
+	<select id="checkMemberNum" resultType="string">
 
 		select member_num from d_member where email = #{email}
 

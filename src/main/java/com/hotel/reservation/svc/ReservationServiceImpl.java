@@ -19,6 +19,7 @@ import com.hotel.reservation.vo.MemberInfoVo.MemberWithdrawRequest;
 import com.hotel.reservation.vo.MemberInfoVo.ReservationDeleteContentResponseDto;
 import com.hotel.reservation.vo.MemberInfoVo.ReservationDetailPaymentsRequest;
 import com.hotel.reservation.vo.MemberInfoVo.ReservationPaymentsRequest;
+import com.hotel.reservation.vo.MemberInfoVo.UnMemberInfo;
 import com.hotel.reservation.vo.UnMemberInfoVo;
 import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberReservationInfoResponseDto;
 import com.hotel.reservation.vo.UnMemberInfoVo.UnMemberReservationRequest;
@@ -117,7 +118,7 @@ public class ReservationServiceImpl implements ReservationService {
 		// 결재정보 입력
 		// 예약자 insert_user 조회
 		String insert_user = null;
-		Map<String, Object> unMemberMap = new HashMap<>();
+		UnMemberInfo unMemberInfo = new UnMemberInfo();
 		ReservationDetailPaymentsRequest payment = new ReservationDetailPaymentsRequest();
 
 		for (int i = 0; i < memberReservationRequest.size(); i++) {
@@ -161,11 +162,11 @@ public class ReservationServiceImpl implements ReservationService {
 					
 				}
 				
-				unMemberMap = reservationMapper.selectUnUserInfo(unMemberVo);
+				unMemberInfo = reservationMapper.selectUnUserInfo(unMemberVo);
 				
 				// 예약자 정보 입력
-				memberReservationRequest.get(i).setInsert_user(String.valueOf(unMemberMap.get("insert_user")));
-				memberReservationRequest.get(i).setMember_num((Integer) unMemberMap.get("member_num"));
+				memberReservationRequest.get(i).setInsert_user(unMemberInfo.getInsert_user());
+				memberReservationRequest.get(i).setMember_num(unMemberInfo.getMember_num());
 			}
 			
 			System.out.println("data = " + memberReservationRequest.toString());
@@ -258,12 +259,14 @@ public class ReservationServiceImpl implements ReservationService {
 		if(memberWithdrawVo.getReservation_status() == 2) {
 			if (!(memberWithdrawVo.getEmail() == null)) {
 				//member_num 필요
-				int member_num = reservationMapper.checkMemberNum(memberWithdrawVo.getEmail());
-				if(member_num == 0) {
+				String memberNum = reservationMapper.checkMemberNum(memberWithdrawVo.getEmail());
+				if(memberNum == null) {
 					dto.setResult("ERR");
 					dto.setReason("member_num Not Found");
 					return dto;
 				}
+				
+				Integer member_num = Integer.valueOf(memberNum);				
 				memberWithdrawVo.setMember_num(member_num);
 				insert_user = reservationMapper.selectInsertUser(memberWithdrawVo);
 				if(insert_user == null) {
@@ -351,15 +354,17 @@ public class ReservationServiceImpl implements ReservationService {
 
 		Map<String, Object> map = new HashMap<>();
 		List<MemberReservationListInfoResponseDto> list = new ArrayList<>();
-		int memberNum = reservationMapper.checkMemberNum(memberInfo.getEmail());
-		Integer member_num = memberNum;
-		Integer totalCnt;
-		if (member_num.toString() == null) {
+		Integer member_num;
+		Integer totalCnt = 0;
+		String memberNum = reservationMapper.checkMemberNum(memberInfo.getEmail());
+		if (memberNum == null) {
 			map.put("result", "ERR");
 			map.put("reason", "tokenNotFound");
+			map.put("list", totalCnt);
 			map.put("list", list);
 			return map;
 		} else {
+			member_num = Integer.valueOf(memberNum) ;
 			memberInfo.setMember_num(member_num);
 			totalCnt = reservationMapper.selectReservationCnt(memberInfo);
 			if (totalCnt.toString().equals("")) {
@@ -375,14 +380,18 @@ public class ReservationServiceImpl implements ReservationService {
 		int page = memberInfo.getPage();
 		// 총 갯수 30개 일 때
 
-		if (1 == memberInfo.getPage()) {
+		if (1 == memberInfo.getPage() || 0 == memberInfo.getPage()) {
 			page = 0;
 		} else if (1 < memberInfo.getPage()) {
 			page = memberInfo.getPage_cnt() * memberInfo.getPage();
 			memberInfo.setPage(page);
 		}
-		list = reservationMapper.reservationList(memberInfo);
-
+		
+		if(memberInfo.getReservation_status() == 0) {
+			list = reservationMapper.reservationAllList(memberInfo);
+		}else {
+			list = reservationMapper.reservationList(memberInfo);
+		}
 		if (list.size() == 0) {
 			map.put("result", "OK");
 			map.put("reason", "");
@@ -397,6 +406,7 @@ public class ReservationServiceImpl implements ReservationService {
 			map.put("result", "OK");
 			map.put("reason", "");
 			map.put("page", page);
+			map.put("list_size", list.size());
 			map.put("total_cnt", totalCnt);
 			map.put("list", list);
 		}
@@ -439,7 +449,15 @@ public class ReservationServiceImpl implements ReservationService {
 
 	@Override
 	public int selectMemberNum(String email) {
-		return reservationMapper.checkMemberNum(email);
+			
+		String data = reservationMapper.checkMemberNum(email);
+		
+		if(data == null) {
+			return 0;
+		}
+		Integer num = Integer.valueOf(data);
+		
+		return  num;
 	}
 
 //    @Override

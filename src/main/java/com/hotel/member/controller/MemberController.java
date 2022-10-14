@@ -117,71 +117,25 @@ public class MemberController {
 		return dto;
 	}
 
-
-	@ApiOperation(value = "카카오 로그인")
+	@ApiOperation(value = "소셜 로그인")
 	@ApiImplicitParams({
 	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
-	@PostMapping("/sign-kakao")
-	public LoginMemberResponseDto MemberSignInKakao(@RequestBody MemberVo.LoginMemberRequestKokao loginMemberRequestKokao) throws Exception {
+	@PostMapping("/sign-in-social")
+	public LoginMemberResponseDto MemberSignInKakao(@RequestBody MemberVo.LoginMemberRequestSocial loginMemberRequestSocial) throws Exception {
 		
 		LoginMemberResponseDto dto = new LoginMemberResponseDto();
 		
-		if(loginMemberRequestKokao.getEmail().equals("")) {
+		if(loginMemberRequestSocial.getEmail().equals("")) {
 			dto.setResult("ERR");
 			dto.setReason("email Not Found");
 			return dto;
-		}else if(loginMemberRequestKokao.getName().equals("")) {
+		}else if(loginMemberRequestSocial.getName().equals("")) {
 			dto.setResult("ERR");
 			dto.setReason("name Not Found");
 			return dto;
 		}
-		return memberServiceImpl.memberSignInKakao(loginMemberRequestKokao);
-	}
-
-	@ApiOperation(value = "네이버 로그인")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
-	@ResponseBody
-	@PostMapping("/sign-naver")
-	public LoginMemberResponseDto MemberSignInNaver(@RequestBody MemberVo.LoginMemberRequestNaver loginMemberRequestNaver) {
-		
-		LoginMemberResponseDto dto = new LoginMemberResponseDto();
-		
-		if(loginMemberRequestNaver.getEmail().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("email Not Found");
-			return dto;
-		}else if(loginMemberRequestNaver.getName().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("name Not Found");
-			return dto;
-		}
-		
-		return memberServiceImpl.memberSignInNaver(loginMemberRequestNaver);
-	}
-
-	@ApiOperation(value = "구글 로그인")
-	@ApiImplicitParams({
-	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
-	@ResponseBody
-	@PostMapping("/sign-google")
-	public LoginMemberResponseDto MemberSignInGoogle(
-			@RequestBody MemberVo.LoginMemberRequestGoogle loginMemberRequestGoogle) {
-		
-		LoginMemberResponseDto dto = new LoginMemberResponseDto();
-		
-		if(loginMemberRequestGoogle.getEmail().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("email Not Found");
-			return dto;
-		}else if(loginMemberRequestGoogle.getName().equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("name Not Found");
-			return dto;
-		}
-		
-		return memberServiceImpl.memberSignInGoogle(loginMemberRequestGoogle);
+		return memberServiceImpl.memberSignInSocial(loginMemberRequestSocial);
 	}
 
 	@ApiOperation(value = "고객 정보조회")
