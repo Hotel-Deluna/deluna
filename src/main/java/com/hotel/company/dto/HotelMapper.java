@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Repository
@@ -103,6 +104,10 @@ public interface HotelMapper {
 
     List<Integer> selectRoomDetailNumForAll(int hotel_num) throws Exception;// 해당 호실 삭제여부와 상관없이 호텔번호로 해당 호텔의 모든 호실정보 가져옴 예약정보등 조회용.
 
+    List<HotelDto.HotelReservationList> selectRoomDetailReservationInfo(int room_detail_num) throws Exception;
+
+    List<HotelInfoVo.RoomDetailInfo> selectDatePeriodCheckRoomDetailInfo(HotelDto.selectDatePeriodCheckRoomDetailInfoParam param) throws Exception;
+
     // 공휴일
     String selectHoliday(Date today);
 
@@ -117,7 +122,9 @@ public interface HotelMapper {
 
     List<Integer> selectSearchList(HotelSearchVo.HotelSearchListRequest hotelSearchListRequest) throws Exception;
 
-    List<Integer> selectHotelReservationListForSearch(HotelDto.SelectHotelReservationListForSearch hotelReservationListForSearch) throws Exception;
+//    List<Integer> selectHotelReservationListForSearch(HotelDto.SelectHotelReservationListForSearch hotelReservationListForSearch) throws Exception;
+
+    List<HotelDto.HotelReservationList> selectHotelReservationListForSearch(Integer hotel_num) throws Exception;
 
     List<HotelSearchVo.TouristSpotInfo> selectTouristSpotList() throws Exception;
 

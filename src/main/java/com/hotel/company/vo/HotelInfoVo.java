@@ -399,7 +399,7 @@ public class HotelInfoVo {
         @ApiParam(value = "공휴일 가격 상태 - 공휴일을 성수기 가격취급할건지 결정. 1: 비성수기 주말가격, 2: 성수기 주말가격",  required = true, example = "1")
         Integer holiday_price_status;
 
-        @Schema(description = "모든 객실 예약불가시 가장 가장 빨리 종료되는 예약일 - 예약시작/종료일 문자형으로 제공", required = false, example = "2022/08/01 ~ 2022/08/03")
+        @Schema(description = "모든 호실 예약불가시 가장 가장 빨리 종료되는 예약일 - 예약시작/종료일 문자형으로 제공", required = false, example = "2022/08/01 ~ 2022/08/03")
         String earliest_available_date;
     }
 
@@ -1014,5 +1014,22 @@ public class HotelInfoVo {
 
         @Schema(description = "시작일과 종료일의 차이", required = false, example = "3")
         Integer diff;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Schema(description = "예약희망 범위에 해당 호텔에 예약가능한 객실정보 조회 파라미터")
+    public static class ReservationAvailableListRequest {
+        @Schema(description = "호텔 구분 번호", required = true, example = "3")
+        Integer hotel_num;
+
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd", timezone="Asia/Seoul")
+        @Schema(description = "예약 시작일", required = true, example = "2022/08/01")
+        Date start_dt;
+
+        @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy/MM/dd", timezone="Asia/Seoul")
+        @Schema(description = "예약 종료일", required = true, example = "2022/08/03")
+        Date end_dt;
     }
 }

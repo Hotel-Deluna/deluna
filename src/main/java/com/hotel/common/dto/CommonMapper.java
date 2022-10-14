@@ -29,9 +29,9 @@ public interface CommonMapper {
 
     void insertTouristSpot(String name)throws Exception;
 
-	  void updateReservationEndDate();
+    void updateReservationEndDate();
 
-	  String selectMemberInfo(String email);
+	String selectMemberInfo(String email);
 
     Integer selectBusinessMemberInfo(String email);
 
@@ -40,5 +40,9 @@ public interface CommonMapper {
     List<CommonVo.deleteRoomInfo> deleteRoomInfo() throws Exception;
 
     List<CommonVo.deleteRoomDetailInfo> deleteRoomDetailInfo() throws Exception;
+
+    Integer checkDuplicateMemberEmail(String email) throws Exception;
+
+    Integer checkDuplicateOwnerEmail(String email) throws Exception;
 
 }

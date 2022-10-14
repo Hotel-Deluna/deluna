@@ -83,4 +83,18 @@
           AND is_delete = 'N'
     </select>
 
+    <!-- 회원 이메일 중복체크 -->
+    <select id="checkDuplicateMemberEmail" resultType="int">
+        SELECT member_num FROM d_member
+        WHERE email = #{email}
+          AND is_delete = 'N'
+    </select>
+
+    <!-- 사업지 이메일 중복체크 -->
+    <select id="checkDuplicateOwnerEmail" resultType="int">
+        SELECT business_user_num FROM d_business_member
+        WHERE email = #{email}
+          AND is_delete = 'N'
+    </select>
+
 </mapper>

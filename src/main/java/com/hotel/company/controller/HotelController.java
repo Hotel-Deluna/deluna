@@ -195,4 +195,11 @@ public class HotelController {
         return hotelService.OwnerReservationList(ownerReservationListRequest, jwtToken);
     }
 
+    @ApiOperation(value="예약희망 범위에 해당 호텔에 예약가능한 객실정보만 제공 ")
+    @ResponseBody
+    @PostMapping("/info/available-list")
+    public HotelInfoVo.HotelDetailInfoResponse ReservationAvailableList(@RequestBody HotelInfoVo.ReservationAvailableListRequest reservationAvailableListRequest){
+        return hotelService.ReservationAvailableList(reservationAvailableListRequest);
+    }
+
 }

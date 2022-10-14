@@ -14,6 +14,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -394,7 +395,7 @@ public class HotelServiceImpl implements HotelService {
                     List<HotelInfoVo.RoomDetailInfo> roomDetailInfoList = roomInfo.getRoom_detail_info();
                     for(HotelInfoVo.RoomDetailInfo roomDetailInfo : roomDetailInfoList){
                         // 사용가능한 호실수 체크
-                        if(roomDetailInfo.getAvailable_yn()){
+                        if(roomDetailInfo.getAvailable_yn() && roomDetailInfo.getStatus() == 1){
                             roomDetailAvailableCnt += 1;
                         }
                     }
@@ -427,14 +428,17 @@ public class HotelServiceImpl implements HotelService {
                 // 예약범위 조건이 있는데 이에 해당하는 객실이 없으면 해당호텔 패스
                 if(searchBarVoSearchBarRequest.getReservation_start_date() != null &&
                         searchBarVoSearchBarRequest.getReservation_end_date() != null){
-                    HotelDto.SelectHotelReservationListForSearch param = new HotelDto.SelectHotelReservationListForSearch();
-                    param.setHotel_num(hotel_num);
-                    param.setReservation_start_date(searchBarVoSearchBarRequest.getReservation_start_date());
-                    param.setReservation_start_date(searchBarVoSearchBarRequest.getReservation_end_date());
-                    List<Integer> hotelReservationAvailableList =
-                            hotelMapper.selectHotelReservationListForSearch(param);
-                    if(hotelReservationAvailableList == null){
-                        continue;
+
+                    HotelInfoVo.HotelDetailInfo temp = getAvailableReservationHotelInfo
+                            (hotelDetailInfo.getHotel_num(),
+                                    searchBarVoSearchBarRequest.getReservation_start_date(),
+                                    searchBarVoSearchBarRequest.getReservation_end_date());
+
+                    if(temp != null){
+                        // 예약희망날짜 범위에 예약가능한 객실이 존재하지 않으면 해당 호텔 패스
+                        if(CollectionUtils.isEmpty(temp.getRoom_list())){
+                           continue;
+                        }
                     }
                 }
 
@@ -1566,6 +1570,27 @@ public class HotelServiceImpl implements HotelService {
         return result;
     }
 
+    @Override
+    public HotelInfoVo.HotelDetailInfoResponse ReservationAvailableList(HotelInfoVo.ReservationAvailableListRequest reservationAvailableListRequest) {
+        HotelInfoVo.HotelDetailInfoResponse result = new HotelInfoVo.HotelDetailInfoResponse();
+        try{
+            HotelInfoVo.HotelDetailInfo hotelDetailInfo
+                    = getAvailableReservationHotelInfo(
+                            reservationAvailableListRequest.getHotel_num(),
+                            reservationAvailableListRequest.getStart_dt(),
+                            reservationAvailableListRequest.getEnd_dt());
+            result.setData(hotelDetailInfo);
+            result.setMessage("호텔 예약범위에 예약가능한 객실정보만 조회 완료");
+
+        }catch (Exception e){
+            e.printStackTrace();
+            ErrorResult(result);
+            return result;
+        }
+
+        return result;
+    }
+
     /**
      * 해당 리스트에 중복이 있으면 키값을 기준으로 중복제거
      * @return list
@@ -1748,33 +1773,36 @@ public class HotelServiceImpl implements HotelService {
                 }
                 roomDetailInfo.setAvailable_yn(true);
 
-                // 예약테이블의 예약상태가 1(예약중) 이 아니면 예약가능한 상태
-                if(roomDetailInfo.getReservation_status() == null){ // 예약정보가 존재하지않으면 예약가능
-                    roomDetailInfo.setStatus(CommonEnum.RoomDetailStatus.AVAILABLE.getCode());
-                    reservable_room_count += 1;
-                }else {
-                    if(roomDetailInfo.getReservation_status() != 1){
-                        // 사용금지가 아니고 호실상세정보 삭제예정일이 없다면 예약가능
-                        if(roomDetailInfo.getAvailable_yn() && roomDetailInfo.getDelete_date() == null){
-                            roomDetailInfo.setStatus(CommonEnum.RoomDetailStatus.AVAILABLE.getCode());
-                            reservable_room_count += 1;
-                        }
-                        else {
-                            roomDetailInfo.setStatus(CommonEnum.RoomDetailStatus.UNAVAILABLE.getCode());
-                        }
-                    }else{
-                        // 예약상태가 1(예약중)인 경우
+                // 해당 호실로 예약된 예약데이터 중 오늘날짜에 겹치는 예약정보 조회
+                List<HotelDto.HotelReservationList> roomDetailReservationList
+                        = hotelMapper.selectRoomDetailReservationInfo(roomDetailInfo.getRoom_detail_num());
+
+                if(roomDetailInfo.getAvailable_yn() && roomDetailInfo.getDelete_date() == null){
+                    // 사용금지가 아니면서 삭제대기중이 아니고, 예약중인 데이터가 없으면 예약가능한 상태
+                    if(CollectionUtils.isEmpty(roomDetailReservationList)){
+                        roomDetailInfo.setStatus(CommonEnum.RoomDetailStatus.AVAILABLE.getCode());
+                        reservable_room_count += 1;
+                    }
+                    else{
+                        // 예약중인 날짜가 현재날짜랑 겹칠경우
                         roomDetailInfo.setStatus(CommonEnum.RoomDetailStatus.UNAVAILABLE.getCode());
-                        HotelInfoVo.doNotResDateList dt = new HotelInfoVo.doNotResDateList();
-                        dt.setStart_dt(roomDetailInfo.getSt_date());
-                        dt.setEnd_dt(roomDetailInfo.getEd_date());
-                        dt.setDiff(DateUtil.dateDiff(roomDetailInfo.getSt_date(), roomDetailInfo.getEd_date()));
-                        dateList.add(dt);
+                        // 예약불가 데이터들 저장
+                        for(HotelDto.HotelReservationList roomDetailReservation : roomDetailReservationList){
+                            HotelInfoVo.doNotResDateList dt = new HotelInfoVo.doNotResDateList();
+                            dt.setStart_dt(roomDetailReservation.getSt_date());
+                            dt.setEnd_dt(roomDetailReservation.getEd_date());
+                            dt.setDiff(DateUtil.dateDiff(roomDetailReservation.getSt_date(), roomDetailReservation.getEd_date()));
+                            dateList.add(dt);
+                        }
                     }
                 }
+                else{
+                    // 사용금지면 예약 불가능
+                    roomDetailInfo.setStatus(CommonEnum.RoomDetailStatus.UNAVAILABLE.getCode());
+                }
+
                 roomDetailInfoListResult.add(roomDetailInfo);
             }
-
 
             // 예약가능방갯수
             roomInfo.setReservable_room_count(reservable_room_count);
@@ -1925,6 +1953,93 @@ public class HotelServiceImpl implements HotelService {
         result.setMessage("호텔 상세정보 조회 완료");
 
         return result;
+    }
+
+    /**
+     *
+     * 호텔정보와 예약 희망날짜를 받아 해당 호텔의 객실들이 해당 희망날짜에 가능한 객실이 있는지 체크.
+     * 호실의 예약정보와 사용불가능 날짜가 희망날짜와 겹치는지 체크하여 겹치면 해당 호실을 제외해서 리턴
+     * @param hotel_num
+     * @param start_dt
+     * @param end_dt
+     * @return
+     * @throws Exception
+     */
+    private HotelInfoVo.HotelDetailInfo getAvailableReservationHotelInfo(int hotel_num, Date start_dt, Date end_dt) throws Exception{
+
+        HotelInfoVo.HotelDetailInfoResponse hotelDetailInfoResponse = getHotelInfo(hotel_num);
+        HotelInfoVo.HotelDetailInfo hotelDetailInfo = hotelDetailInfoResponse.getData();
+        if(hotelDetailInfo == null){
+            return null;
+        }
+        List<HotelInfoVo.RoomInfo> roomInfoList = hotelDetailInfo.getRoom_list();
+        List<HotelInfoVo.RoomInfo> roomDelList = new ArrayList<>();
+        for(HotelInfoVo.RoomInfo roomInfo : roomInfoList){
+
+            List<Integer> room_detail_num_list = roomInfo.getRoom_detail_info()
+                    .stream()
+                    .map(HotelInfoVo.RoomDetailInfo::getRoom_detail_num)
+                    .toList();
+
+//            Map<String, Object> param = new HashMap<>();
+//            param.put("room_detail_num", room_detail_num_list);
+//            param.put("start_dt", start_dt);
+//            param.put("end_dt", end_dt);
+
+            HotelDto.selectDatePeriodCheckRoomDetailInfoParam param = new HotelDto.selectDatePeriodCheckRoomDetailInfoParam();
+            param.setRoom_detail_num(room_detail_num_list);
+            param.setStart_dt(start_dt);
+            param.setEnd_dt(end_dt);
+
+            if(!CollectionUtils.isEmpty(room_detail_num_list)){
+                List<HotelInfoVo.RoomDetailInfo> roomDetailInfoList
+                        = hotelMapper.selectDatePeriodCheckRoomDetailInfo(param);
+
+                List<HotelInfoVo.RoomDetailInfo> temp = new ArrayList<>();
+
+                // 예약관련 정보가 있으면 해당 날짜는 예약 불가능한 호실이므로 제거
+                roomDetailInfoList.removeIf(roomDetailInfo -> roomDetailInfo.getReservation_status() != null);
+
+                // 삭제 예정일이 존재하는 호실 제거
+                roomDetailInfoList.removeIf(roomDetailInfo -> roomDetailInfo.getDelete_date() != null);
+
+                // 해당 호실의 사용금지 날짜가 예약일과 겹치는지 체크해서 제거
+                for(HotelInfoVo.RoomDetailInfo roomDetailInfo : roomDetailInfoList){
+                    if(roomDetailInfo.getRoom_closed_start() != null && roomDetailInfo.getRoom_closed_end() != null){
+                        // 예약일과 겹치면 제거
+                        if(DateUtil.checkDatePeriodsDuplication(
+                                start_dt,
+                                end_dt,
+                                roomDetailInfo.getRoom_closed_start(),
+                                roomDetailInfo.getRoom_closed_end()
+                        )){
+                            roomDetailInfo.setReservation_status(1);
+                        }
+                    }
+                    // 필요한 정보 재 저장
+                    roomDetailInfo.setAvailable_yn(true);
+                    roomDetailInfo.setStatus(1);
+                }
+
+                // 사용금지 날짜가 예약일과 겹치는 호실 제거 (setReservation_status 한 녀석들 제거) for문안에선 remove를 못해서 이렇게 짬
+                roomDetailInfoList.removeIf(roomDetailInfo -> roomDetailInfo.getReservation_status() != null);
+
+                // 필요한 정보 재 저장
+                roomInfo.setRoom_detail_info(roomDetailInfoList);
+                roomInfo.setReservable_room_count(roomDetailInfoList.size());
+
+                // 호실이 없거나 예약가능한 호실이 존재하지 않으면 해당 객실 제거
+                if(room_detail_num_list.size() <= 0 || roomDetailInfoList.size() <= 0){
+                    roomDelList.add(roomInfo);
+                }
+            }
+        }
+        roomInfoList.removeAll(roomDelList);
+
+        // 객실 정보 재 저장
+        hotelDetailInfo.setRoom_list(roomInfoList);
+
+        return hotelDetailInfo;
     }
 
 }

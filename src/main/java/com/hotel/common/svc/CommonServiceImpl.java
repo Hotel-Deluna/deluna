@@ -154,9 +154,38 @@ public class CommonServiceImpl implements CommonService {
     @Override
     public CommonVo.EmailDuplicateCheckResponse EmailDuplicateCheck(CommonVo.EmailDuplicateCheckRequest emailDuplicateCheckRequest) {
         CommonVo.EmailDuplicateCheckResponse result = new CommonVo.EmailDuplicateCheckResponse();
+        boolean isduplication = true;
+        Integer check = 0;
+
+        try{
+            // 회원 이메일 중복체크
+            if(emailDuplicateCheckRequest.getRole() == 1){
+                check = commonMapper.checkDuplicateMemberEmail(emailDuplicateCheckRequest.getEmail());
+            }
+            // 사업자 이메일 중복체크
+            else if(emailDuplicateCheckRequest.getRole() == 2){
+                check = commonMapper.checkDuplicateOwnerEmail(emailDuplicateCheckRequest.getEmail());
+            }else {
+                log.info("Role 값이 잘못되었습니다.");
+                result.setResult("ERROR");
+                result.setMessage("VAL-0001");
+                return result;
+            }
+
+            // 중복된 사용자 없으면 false
+            if(check == null){
+                isduplication = false;
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+            result.setResult("ERROR");
+            result.setMessage("BACK-0001");
+            return result;
+        }
 
         result.setMessage("이메일 중복 확인 완료");
-        result.setData(false);
+        result.setData(isduplication);
 
         return result;
     }
@@ -507,6 +536,7 @@ public class CommonServiceImpl implements CommonService {
             List<CommonVo.deleteRoomDetailInfo> deleteRoomDetailInfoList = commonMapper.deleteRoomDetailInfo();
 
             if(!CollectionUtils.isEmpty(deleteRoomInfoList)){
+                log.info("삭제할 객실 수 : " + deleteRoomInfoList.size());
                 List<Integer> room_num_list = deleteRoomInfoList
                         .stream()
                         .map(CommonVo.deleteRoomInfo::getRoom_num)
@@ -525,6 +555,7 @@ public class CommonServiceImpl implements CommonService {
             }
 
             if(!CollectionUtils.isEmpty(deleteRoomDetailInfoList)){
+                log.info("삭제할 호실 수 : " + deleteRoomDetailInfoList.size());
                 List<Integer> room_detail_num_list = deleteRoomDetailInfoList
                         .stream()
                         .map(CommonVo.deleteRoomDetailInfo::getRoom_detail_num)
@@ -539,7 +570,6 @@ public class CommonServiceImpl implements CommonService {
                     insertRoomDetailDelete.setInsert_user(deleteRoomDetailInfo.getInsert_user());
                     hotelMapper.insertRoomDetailDelete(insertRoomDetailDelete);
                 }
-
 
             }
 

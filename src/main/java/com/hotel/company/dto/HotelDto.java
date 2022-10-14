@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 public class HotelDto {
 
@@ -172,6 +173,9 @@ public class HotelDto {
 
         @ApiParam(value = "퇴실일", required = true)
         Date ed_date;
+
+        @ApiParam(value = "호실번호", required = false)
+        Integer room_detail_num;
     }
 
     @Data
@@ -205,6 +209,22 @@ public class HotelDto {
 
         @ApiParam(value = "예약범위 - 종료일", required = true)
         Date reservation_end_date;
+
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(description = "예약희망 범위에 해당 호텔에 예약가능한 호실 조회")
+    public static class selectDatePeriodCheckRoomDetailInfoParam {
+        @ApiParam(value = "호실 번호", required = true)
+        List<Integer> room_detail_num;
+
+        @ApiParam(value = "예약범위 - 시작일", required = true)
+        Date start_dt;
+
+        @ApiParam(value = "예약범위 - 종료일", required = true)
+        Date end_dt;
 
     }
 
