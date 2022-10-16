@@ -91,7 +91,6 @@ public class ReservationServiceImpl implements ReservationService {
 			map.put("result", "OK");
 			map.put("reason", "");
 			map.put("list", list);
-
 		}
 		return map;
 	}

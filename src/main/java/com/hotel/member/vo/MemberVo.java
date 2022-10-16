@@ -10,6 +10,7 @@ import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.security.core.GrantedAuthority;
 
 import com.hotel.common.CommonResponseVo;
+import com.hotel.owner.vo.OwnerVo;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,23 +22,22 @@ import nonapi.io.github.classgraph.json.Id;
 
 @Getter
 @NoArgsConstructor
-@Table(name="member")
+@Table(name = "member")
 public class MemberVo {
-	
+
 	@Id
 	@Column(value = "member_num")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer member_num;
-	
+
 	private String email;
-	
+
 	private String password;
-	
+
 	private String phone_num;
-	
-	private Collection<GrantedAuthority> authorities ;
-	
-	
+
+	private Collection<GrantedAuthority> authorities;
+
 	@Data
 	@AllArgsConstructor
 	@NoArgsConstructor
@@ -61,21 +61,21 @@ public class MemberVo {
 		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
 		String email;
 
-		//@Schema(description = "휴대폰 인증번호", required = true, example = "123456")
-		//String phone_auth_num;
+		// @Schema(description = "휴대폰 인증번호", required = true, example = "123456")
+		// String phone_auth_num;
 
 		@Schema(description = "비밀번호", required = true, example = "비밀번호 입력")
 		String password;
-		
+
 		@Schema(description = "member_num", required = true, example = "백엔드 사용")
 		Integer member_num;
 
 	}
-	
+
 	@Data
 	@AllArgsConstructor
 	@NoArgsConstructor
-	@Schema(description = "고객 회원가입 파라미터")
+	@Schema(description = "비회원 회원가입 파라미터")
 	public static class RegisterMemberUnMemberRequest {
 		@Schema(description = "한글 이름", required = true, example = "홍길동")
 		String name;
@@ -85,13 +85,13 @@ public class MemberVo {
 
 		@Schema(description = "role", required = true, example = "백엔드 사용")
 		Integer role;
-		
+
 		@Schema(description = "member_num", required = true, example = "백엔드 사용")
 		Integer member_num;
-		
+
 		@Schema(description = "reservation_num", required = true, example = "백엔드 사용")
 		Integer reservation_num;
-		
+
 	}
 
 //	@Data
@@ -110,25 +110,23 @@ public class MemberVo {
 //		String role;
 //
 //	}
-	
 
 	@Data
 	@NoArgsConstructor
 	@AllArgsConstructor
-	@Schema(description = "고객 카카오 로그인 파라미터")
+	@Schema(description = "고객 소셜 로그인 파라미터")
 	public static class LoginMemberRequestSocial {
 
 		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
 		String email;
-		
+
 		@Schema(description = "고객 이름", required = true, example = "이름 or 닉네임")
 		String name;
-		
+
 		@Schema(description = "role", required = true, example = "백엔드에서 사용")
 		Integer role;
 
 	}
-
 
 	@Data
 	@NoArgsConstructor
@@ -144,10 +142,10 @@ public class MemberVo {
 
 		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
 		String email;
-		
+
 		@Schema(description = "role", required = true, example = "고객:1, 사업자:2, 비회원:3")
 		Integer role;
-		
+
 		@Schema(description = "insert_user", required = true, example = "role + PK")
 		String insert_user;
 
@@ -161,14 +159,12 @@ public class MemberVo {
 
 		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
 		String email;
-		
+
 		@Schema(description = "한글 이름", required = true, example = "홍길동수정")
 		String name;
 
 		@Schema(description = "휴대폰 번호", required = true, example = "0212345678")
 		String phone_num;
-
-		
 
 	}
 
@@ -185,20 +181,18 @@ public class MemberVo {
 		String password;
 
 	}
-	
+
 	@Data
 	@AllArgsConstructor
 	@Schema(description = "고객 탈퇴 사유")
 	public static class MemberDeleteRequest {
 		public MemberDeleteRequest() {
-			
+
 		}
+
 		@Schema(description = "고객 탈퇴 사유", required = true, example = "value=1 (타 사이트 이용)")
 		int reason;
 	}
-	
-	
-	
 
 	@Data
 	@AllArgsConstructor
@@ -206,15 +200,15 @@ public class MemberVo {
 	public static class MemberDeleteVo {
 
 		Integer member_num;
-		
+
 		String email;
-		
+
 		int content;
-		
+
 		String update_user;
-		
+
 	}
-	
+
 	@Data
 	@AllArgsConstructor
 	@NoArgsConstructor
@@ -242,14 +236,14 @@ public class MemberVo {
 
 		@Schema(description = "이메일 인증번호", required = true, example = "123456")
 		String email_auth_num;
-		
+
 		@Schema(description = "이메일", required = true, example = "백엔드사용")
 		String email;
-		
+
 		@Schema(description = "insert_user", required = true, example = "백엔드사용")
 		Integer user_num;
 	}
-	
+
 	@Data
 	@AllArgsConstructor
 	@NoArgsConstructor
@@ -261,17 +255,17 @@ public class MemberVo {
 
 		@Schema(description = "변경할 비밀번호", required = true, example = "a1234")
 		String update_password;
-		
+
 		@Schema(description = "이메일", required = true, example = "백엔드사용")
 		String email;
-		
-		@Schema(description = "일반회원, 사업자 구분값 - 1: 일반회원 2: 사업자",  required = true, example = "1")
+
+		@Schema(description = "일반회원, 사업자 구분값 - 1: 일반회원 2: 사업자", required = true, example = "1")
 		Integer role;
-		
+
 		@Schema(description = "update_user", required = true, example = "백엔드사용")
 		Integer update_user;
 	}
-	
+
 	@Data
 	@AllArgsConstructor
 	@NoArgsConstructor
@@ -296,17 +290,16 @@ public class MemberVo {
 	@NoArgsConstructor
 	@Schema(description = "아이디찾기 파라미터")
 	public static class FindIdRequest {
-	//	@Schema(description = "일반회원, 사업자 구분값 - 1: 일반회원 2: 사업자",  required = true, example = "1")
-	//	Integer role;
+		// @Schema(description = "일반회원, 사업자 구분값 - 1: 일반회원 2: 사업자", required = true,
+		// example = "1")
+		// Integer role;
 
-		@Schema(description = "이름",  required = true, example = "홍길동")
+		@Schema(description = "이름", required = true, example = "홍길동")
 		String name;
 
-		@Schema(description = "핸드폰 번호",  required = true, example = "01012345678")
+		@Schema(description = "핸드폰 번호", required = true, example = "01012345678")
 		String phone_num;
 	}
-	
-	
 
 //	@Data
 //	@AllArgsConstructor
@@ -316,20 +309,18 @@ public class MemberVo {
 //		@Schema(description = "이메일", required = true, example = "abc@hotel.com")
 //		String email;
 //	}
-	
-	
+
 	@Data
 	@NoArgsConstructor
 	@AllArgsConstructor
 	@Schema(description = "공통 로그인 response")
 	public static class LoginMemberResponseDto {
-		
+
 		@Schema(description = "result", required = true, example = "결과값 OK or ERR")
 		String result;
 
 		@Schema(description = "reason", required = true, example = "내용")
 		String reason;
-
 
 		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
 		String email;
@@ -338,36 +329,30 @@ public class MemberVo {
 		Integer role;
 
 	}
-	
+
 	@Data
 	@NoArgsConstructor
 	@AllArgsConstructor
 	@Schema(description = "고객정보 조회 response")
 	public static class ViewMemberInfoResponseDto {
-		
-		@Schema(description = "result", required = true, example = "결과값 OK or ERR")
-		String result;
-
-		@Schema(description = "reason", required = true, example = "내용")
-		String reason;
 
 		@Schema(description = "고객 아이디(이메일)", required = true, example = "example@naver.com")
 		String email;
-		
+
 		@Schema(description = "고객 이름", required = true, example = "example@naver.com")
 		String name;
-		
+
 		@Schema(description = "고객 핸드폰번호", required = true, example = "01012345678")
 		String phone_num;
 
 		@Schema(description = "role", required = true, example = "고객:1, 사업자:2, 비회원:3")
 		Integer role;
-		
+
 		@Schema(description = "insert_user", required = true, example = "role + PK")
 		String insert_user;
 
 	}
-	
+
 	@Data
 	@NoArgsConstructor
 	@AllArgsConstructor
@@ -379,8 +364,6 @@ public class MemberVo {
 
 		@Schema(description = "reason", required = true, example = "내용")
 		String reason;
-
-		
 
 	}
 

@@ -10,6 +10,7 @@ import com.hotel.member.svc.MemberServiceImpl;
 import com.hotel.member.vo.MemberVo;
 import com.hotel.member.vo.MemberVo.LoginMemberResponseDto;
 import com.hotel.member.vo.MemberVo.MemberDeleteVo;
+import com.hotel.member.vo.MemberVo.MemberInfoResponse;
 import com.hotel.member.vo.MemberVo.MemberResponseDto;
 import com.hotel.member.vo.MemberVo.ViewMemberInfoResponseDto;
 import com.hotel.util.SHA512Util;
@@ -117,6 +118,7 @@ public class MemberController {
 		return dto;
 	}
 
+
 	@ApiOperation(value = "소셜 로그인")
 	@ApiImplicitParams({
 	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
@@ -143,17 +145,15 @@ public class MemberController {
 	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, dataType = "string", paramType = "header") })
 	@ResponseBody
 	@PostMapping("/view-info")
-	public ViewMemberInfoResponseDto ViewMemberInfo(HttpServletRequest req)
+	public MemberInfoResponse ViewMemberInfo(HttpServletRequest req)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
-		ViewMemberInfoResponseDto dto = new ViewMemberInfoResponseDto();
+		MemberInfoResponse dto = new MemberInfoResponse();
 		String token = req.getHeader("Authorization");
 		String email = info.tokenInfo(token);
 
-		System.out.println("email = " + email);
-
 		if (email.equals("") || email.equals(null)) {
 			dto.setResult("ERR");
-			dto.setReason("token Fail");
+			dto.setMessage("email not Found");
 			return dto;
 		}
 

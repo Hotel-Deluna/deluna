@@ -13,6 +13,7 @@ import com.hotel.member.vo.MemberVo.MemberChangePwdRequest;
 import com.hotel.member.vo.MemberVo.MemberDeleteVo;
 import com.hotel.member.vo.MemberVo.MemberEmailAuthInfo;
 import com.hotel.member.vo.MemberVo.MemberFindPwdRequest;
+import com.hotel.member.vo.MemberVo.MemberInfoResponse;
 import com.hotel.member.vo.MemberVo.MemberUpdatePwdRequest;
 import com.hotel.member.vo.MemberVo.ViewMemberInfoResponseDto;
 import com.hotel.util.AES256Util;
@@ -204,6 +205,7 @@ public class MemberServiceImpl implements UserDetailsService {
 	public LoginMemberResponseDto memberSignInSocial(MemberVo.LoginMemberRequestSocial memberVo) throws Exception {
 		LoginMemberResponseDto dto = new LoginMemberResponseDto();
 		
+		
 		// 이메일 여부 확인
 		String email = memberMapper.checkByEmail(memberVo.getEmail());
 		
@@ -255,26 +257,23 @@ public class MemberServiceImpl implements UserDetailsService {
 		return dto;
 	}
 
-	public ViewMemberInfoResponseDto ViewMemberInfo(String email)
+	public MemberInfoResponse ViewMemberInfo(String email)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
 //        ApiResponseVo result = new ApiResponseVo();
-		ViewMemberInfoResponseDto result = new ViewMemberInfoResponseDto();
 		MemberVo.MemberInfo memberInfoVo = new MemberVo.MemberInfo();
-
+		MemberVo.MemberInfoResponse data = new MemberVo.MemberInfoResponse(); 
+		
+		
 		memberInfoVo = memberMapper.viewMemberInfo(email);
 
 		// 핸드폰 복호화
 		memberInfoVo.setPhone_num(aesUtil.decrypt(String.valueOf(memberInfoVo.getPhone_num())));
 
-		result.setResult("OK");
-		result.setReason("");
-		result.setEmail(memberInfoVo.getEmail());
-		result.setName(memberInfoVo.getName());
-		result.setPhone_num(memberInfoVo.getPhone_num());
-		result.setRole(memberInfoVo.getRole());
-		result.setInsert_user(memberInfoVo.getInsert_user());
+		data.setResult("OK");
+		data.setMessage("");
+		data.setData(memberInfoVo);
 		
-		return result;
+		return data;
 	}
 
 	public MemberVo.MemberResponseDto MemberWithdraw(MemberDeleteVo deleteVo) {
