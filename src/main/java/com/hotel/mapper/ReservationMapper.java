@@ -87,5 +87,7 @@ public interface ReservationMapper {
 
 	List<MemberReservationListInfoResponseDto> reservationAllList(MemberReservationListRequest memberInfo);
 
+	String selectUnReservationCancelContent(MemberReservationDeleteRequest memberInfoRequest);
+
 
 }

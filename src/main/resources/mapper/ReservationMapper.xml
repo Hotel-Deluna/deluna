@@ -163,7 +163,13 @@
 	
 	<select id="selectReservationCancelContent" resultType="string">
 
-		select content from d_reservation_delete where reservation_num=#{reservation_num}
+		select content from d_reservation_delete where reservation_num=#{reservation_num} and insert_user=#{insert_user};
+
+	</select>
+	
+	<select id="selectUnReservationCancelContent" resultType="string">
+
+		select content from d_reservation_delete where reservation_num=#{reservation_num} 
 
 	</select>
 	

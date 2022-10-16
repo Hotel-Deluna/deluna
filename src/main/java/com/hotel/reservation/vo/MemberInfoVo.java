@@ -45,11 +45,18 @@ public class MemberInfoVo {
 	@AllArgsConstructor
 	@Schema(description = "회원 예약삭제 사유 파라미터")
 	public static class MemberReservationDeleteRequest {
-		public MemberReservationDeleteRequest() {
-			
-		}
 		@Schema(description = "예약번호", required = true, example = "3")
 		Integer reservation_num;
+		
+		@Schema(description = "email", required = true, example = "백엔드사용")
+		String email;
+		
+		@Schema(description = "구분값", required = true, example = "백엔드사용")
+		Integer role;
+		
+		@Schema(description = "insert_user", required = true, example = "백엔드사용")
+		String insert_user;
+		
 	}
 
 //	@Data

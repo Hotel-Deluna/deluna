@@ -264,36 +264,33 @@ public class ReservationController {
 		return map;
 	}
 
-	@ApiOperation(value = "고객 예약취소 사유 조회")
+	@ApiOperation(value = "공통 예약취소 사유 조회")
 	@ApiImplicitParams({
-			@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, paramType = "header", example = "0") })
+	@ApiImplicitParam(name = "Authorization", value = "JWT access_token", required = true, paramType = "header", example = "0") })
 	@ResponseBody
 	@PostMapping(value = "/memberDeleteContent", produces = "application/json")
 	public ReservationDeleteContentResponseDto MemberReservationDeleteContent(
 			@RequestBody MemberInfoVo.MemberReservationDeleteRequest memberInfoRequest, HttpServletRequest req) {
 		ReservationDeleteContentResponseDto dto = new ReservationDeleteContentResponseDto();
 
-		String token = req.getHeader("Authorization");
-		String email;
-		if (token == null) {
-
-			dto.setResult("ERR");
-			dto.setReason("token member info fail");
-			return dto;
-		} else {
-			email = info.tokenInfo(token);
-		}
 		if (memberInfoRequest.getReservation_num().toString().equals("")) {
 			dto.setResult("ERR");
 			dto.setReason("reservation_num Not Found");
 			dto.setContent("");
 			return dto;
-		} else if (email.equals("")) {
-			dto.setResult("ERR");
-			dto.setReason("token find email fail");
-			dto.setContent("");
-			return dto;
+		} 
+		
+		String token = req.getHeader("Authorization");
+		String email = null;
+		if (token == null) {
+			// 비회원 조회
+			memberInfoRequest.setRole(3);
+		} else {
+			email = info.tokenInfo(token);
+			memberInfoRequest.setRole(2);
+			memberInfoRequest.setEmail(email);
 		}
+		
 
 		return reservationService.MemberReservationDeleteContent(memberInfoRequest);
 	}

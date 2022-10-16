@@ -415,12 +415,15 @@ public class ReservationServiceImpl implements ReservationService {
 	public ReservationDeleteContentResponseDto MemberReservationDeleteContent(
 			MemberReservationDeleteRequest memberInfoRequest) {
 		ReservationDeleteContentResponseDto dto = new ReservationDeleteContentResponseDto();
-
-		System.out.println("test = " + memberInfoRequest.toString());
-
-		String data = reservationMapper.selectReservationCancelContent(memberInfoRequest);
-
-		System.out.println("data = " + data);
+		String data = null;
+		//비회원 조회
+		if(memberInfoRequest.getRole() == 3) {
+			data = reservationMapper.selectUnReservationCancelContent(memberInfoRequest);
+		}else {
+			String insert_user = reservationMapper.selectInsertUser(memberInfoRequest.getEmail());
+			memberInfoRequest.setInsert_user(insert_user);
+			data = reservationMapper.selectReservationCancelContent(memberInfoRequest);
+		}
 
 		if (data == null) {
 			dto.setResult("ERR");
