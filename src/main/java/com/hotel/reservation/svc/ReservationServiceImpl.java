@@ -299,7 +299,6 @@ public class ReservationServiceImpl implements ReservationService {
 			return dto;
 		}
 		
-		System.out.println("checkDate = " + checkDate.toString());
 		
 		Date date = new Date();
 		//String st_date = (String) checkMap.get("st_date");

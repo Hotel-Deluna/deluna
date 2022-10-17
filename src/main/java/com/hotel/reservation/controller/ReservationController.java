@@ -15,7 +15,10 @@ import lombok.RequiredArgsConstructor;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +84,7 @@ public class ReservationController {
 	@PostMapping("/memberReservation")
 	public MemberReservationResponseDto MemberReservation(
 			@RequestBody List<MemberInfoVo.MemberReservationRequest> memberReservationRequest, HttpServletRequest req)
-			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException {
+			throws NoSuchAlgorithmException, UnsupportedEncodingException, GeneralSecurityException, ParseException {
 
 		MemberReservationResponseDto dto = new MemberReservationResponseDto();
 
@@ -129,8 +132,25 @@ public class ReservationController {
 					dto.setReason("start_date Not Found");
 					return dto;
 				}
+				Date sDate = new Date();
+				Date eDate = new Date();
+				
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+				sDate= format.parse(memberReservationRequest.get(i).getSt_date());
+				eDate = format.parse(memberReservationRequest.get(i).getEd_date());
+				
+				if(sDate.after(eDate)) {
+					dto.setResult("ERR");
+					dto.setReason("end_date fast to start_date");
+					return dto;
+					
+				}
 			}
 		}
+		
+		
+		
+		
 
 		if (memberReservationRequest.get(0).getRole() == 1 || memberReservationRequest.get(0).getRole() == 2) {
 			String token = req.getHeader("Authorization");
