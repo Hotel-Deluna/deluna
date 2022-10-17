@@ -381,10 +381,12 @@ public class ReservationServiceImpl implements ReservationService {
 
 		if (1 == memberInfo.getPage() || 0 == memberInfo.getPage()) {
 			page = 0;
+			memberInfo.setPage(page);
 		} else if (1 < memberInfo.getPage()) {
 			page = memberInfo.getPage_cnt() * memberInfo.getPage();
 			memberInfo.setPage(page);
 		}
+		System.out.println("data = "+ memberInfo.toString());
 		
 		if(memberInfo.getReservation_status() == 0) {
 			list = reservationMapper.reservationAllList(memberInfo);
@@ -394,7 +396,7 @@ public class ReservationServiceImpl implements ReservationService {
 		if (list.size() == 0) {
 			map.put("result", "OK");
 			map.put("reason", "");
-			map.put("total_cnt", totalCnt);
+			map.put("total_cnt", list.size());
 			map.put("list", list);
 			return map;
 		} else {
