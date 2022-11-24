@@ -2,6 +2,7 @@
  1. 프로젝트 소개
  2. 사용한 기술 스택
  3. 각 도메인별 요구사항
+ 4. 만든이
  
 <hr />
 
@@ -63,3 +64,24 @@
 
 *DB* </br>
 <img src="https://img.shields.io/badge/MariaDB-6DB33F?style=for-the-badge&logo=MariaDB&logoColor=white">
+
+### 만든이
+<table>
+    <tr>
+        <td align="center">
+            <a href="https://github.com/"><img  width="100px" src="https://user-images.githubusercontent.com/48265181/197496797-901764c5-8a41-4467-b7e3-139e68051e6d.png" /></a>
+        </td>
+        <td align="center">
+            <a href="https://github.com/"><img  width="100px" src="https://avatars.githubusercontent.com/u/53042885?v=4" /></a>
+        </td>  
+        </td>  
+    </tr>
+    <tr>
+        <td align="center">한동희</td>
+        <td align="center">김영수</td>
+    </tr>
+    <tr>
+        <td align="center">Member, Reservation Domain</td>
+        <td align="center">Hotel, Owner Domain, Common util</td>
+    </tr>
+</table>
