@@ -13,7 +13,7 @@
  
  호텔델루나는 사업자의 경우 호텔 정보를 업로드 및 요청된 예약을 관리하고, 고객은 호텔 정보 조회 및 예약 요청을 할 수 있는 플랫폼입니다.
 
- 연동 API 문서 : <a href="http://43.200.222.222:8080/swagger-ui/#/member-controller/MemberSignInUsingPOST">Swagger</a>
+ 연동 API 문서 : <a href="http://43.200.222.222:8080/swagger-ui/">Swagger</a>
 <hr />
 
 
