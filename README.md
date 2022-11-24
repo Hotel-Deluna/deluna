@@ -1,8 +1,6 @@
 ### 목차
  1. 프로젝트 소개
  2. 사용한 기술 스택
- 3. 스웨거 소개
- 4. UI 화면
  
 <hr />
 
@@ -47,5 +45,7 @@
 
 <hr />
 
-## Swagger
-http://43.200.222.222:8080/swagger-ui/
+### 사용한 기술 스택
+<img src="https://img.shields.io/badge/java-007396?style=for-the-badge&logo=Java&logoColor=white">
+<img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=for-the-badge&logo=Spring Boot&logoColor=white">
+<img src="https://img.shields.io/badge/Spring Gateway-6DB33F?style=for-the-badge&logo=Spring&logoColor=white">  
