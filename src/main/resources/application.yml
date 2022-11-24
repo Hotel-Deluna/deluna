@@ -36,7 +36,7 @@ spring:
 aes:
   256:
     key: ENC(OxYzCFD5ylp2steDZ/UgZBxDo4UmkYY/07qKw9le6vAy1OJoR9eMI4poOmKoyhEQ)
-# 설정 파일 암호화.
+# 설정 파일 암호화
 jasypt:
   encryptor:
     password: ${JASYPT_PASSWORD}
