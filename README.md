@@ -46,9 +46,12 @@
 <hr />
 
 ### 사용한 기술 스택
+
+Rest Api
 <img src="https://img.shields.io/badge/java-007396?style=for-the-badge&logo=Java&logoColor=white"> <img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=for-the-badge&logo=Spring Boot&logoColor=white"> <img src="https://img.shields.io/badge/Spring Security-6DB33F?style=for-the-badge&logo=Spring&logoColor=white">  
 
-클라우드
+Cloud
 <img src="https://img.shields.io/badge/Amazon S3-6DB33F?style=for-the-badge&logo=Amazon S3&logoColor=white">
 
 DB
+<img src="https://img.shields.io/badge/MariaDB-6DB33F?style=for-the-badge&logo=MariaDB&logoColor=white">
