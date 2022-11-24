@@ -1,6 +1,7 @@
 ### 목차
  1. 프로젝트 소개
  2. 사용한 기술 스택
+ 3. 각 도메인별 요구사항
  
 <hr />
 
@@ -45,6 +46,12 @@
 
 <hr />
 
+### 도메인별 요구사항
+1. 사용자
+2. 사업자
+3. 호텔
+4. 예약
+
 ### 사용한 기술 스택
 
 Rest Api
@@ -52,6 +59,7 @@ Rest Api
 
 Cloud
 <img src="https://img.shields.io/badge/Amazon S3-6DB33F?style=for-the-badge&logo=Amazon S3&logoColor=white">
+<img src="https://img.shields.io/badge/Amazon-231F20?style=for-the-badge&logo=Amazon&logoColor=white">
 
 DB
 <img src="https://img.shields.io/badge/MariaDB-6DB33F?style=for-the-badge&logo=MariaDB&logoColor=white">
