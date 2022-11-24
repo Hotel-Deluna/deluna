@@ -59,7 +59,7 @@ Rest Api
 
 Cloud
 <img src="https://img.shields.io/badge/Amazon S3-6DB33F?style=for-the-badge&logo=Amazon S3&logoColor=white">
-<img src="https://img.shields.io/badge/Amazon-231F20?style=for-the-badge&logo=Amazon Web Servicen&logoColor=white">
+<img src="https://img.shields.io/badge/Amazon-231F20?style=for-the-badge&logo=Amazon AWS&logoColor=white">
 
 DB
 <img src="https://img.shields.io/badge/MariaDB-6DB33F?style=for-the-badge&logo=MariaDB&logoColor=white">
