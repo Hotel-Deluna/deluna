@@ -7,7 +7,7 @@ spring:
   # DB
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://monsu1016.cafe24.com:3306/monsu1016
+    url: ENC(9AFuyydYEhHIiQkL3xMDnCT1d39ZNefbWYy)
     username: ENC(eAdrBOt3oVrDRFHPDxMDnCTqHzLnVKbG)
     password: ENC(xZG6QLvv40VdE6bY02CZDtHb4nzCRGaz)
     schema-name: monsu1016
